@@ -1,5 +1,10 @@
 {
   "name": "bearuang",
   "private": true,
-  "workspaces": ["packages/*"]
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:backend": "bun run ./packages/backend/src/index.ts"
+  }
 }
