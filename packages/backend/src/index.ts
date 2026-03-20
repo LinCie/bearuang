@@ -26,7 +26,13 @@ const app = new Elysia()
           version: "1.0.0",
           description: "API documentation for BearUang",
         },
-        tags: [{ name: "Health", description: "Health check endpoints" }],
+        tags: [
+          { name: "Health", description: "Health check endpoints" },
+          { name: "Products", description: "Product management endpoints" },
+          { name: "Variants", description: "Product variant management endpoints" },
+          { name: "Warehouses", description: "Warehouse management endpoints" },
+          { name: "Stock Movement", description: "Stock movement tracking endpoints" },
+        ],
       },
       mapJsonSchema: { zod: z.toJSONSchema },
       exclude: {
