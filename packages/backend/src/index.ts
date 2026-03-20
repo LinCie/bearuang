@@ -1,7 +1,43 @@
 import { Elysia } from "elysia";
+import { openapi } from "@elysiajs/openapi";
+import { auth } from "./integrations/auth";
+import { z } from "zod";
+import { logger } from "./libraries/utilities";
 
-const app = new Elysia().get("/", () => "Hello Elysia").listen(3000);
+const app = new Elysia()
+  .onError(({ error }) => {
+    logger.error(error);
+  })
+  .onAfterResponse(({ path, request, set }) => {
+    const { method } = request;
+    logger.info(
+      `[${new Date().toDateString()}] ${path} ${method} → ${set.status}`,
+    );
+  })
+  .use(
+    openapi({
+      documentation: {
+        info: {
+          title: "BearUang API",
+          version: "1.0.0",
+          description: "API documentation for BearUang",
+        },
+        tags: [{ name: "Health", description: "Health check endpoints" }],
+      },
+      mapJsonSchema: { zod: z.toJSONSchema },
+      exclude: {
+        methods: ["OPTIONS"],
+      },
+      path: "/openapi",
+      specPath: "/openapi/json",
+    }),
+  )
+  .mount(auth.handler)
+  .get("/health", () => "ok")
+  .listen(3000);
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
+logger.info(
+  `🦊 BearUang API is running at ${app.server?.hostname}:${app.server?.port}`,
 );
+
+export type App = typeof app;

@@ -5,6 +5,6 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:backend": "bun run ./packages/backend/src/index.ts"
+    "dev:backend": "bun run --watch ./packages/backend/src/index.ts"
   }
 }
