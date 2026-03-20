@@ -5,6 +5,7 @@ import { z } from "zod";
 import { logger } from "./libraries/utilities";
 import { productsRoute } from "@/modules/products/products.route";
 import { variantsRoute } from "@/modules/variants/variants.route";
+import { warehousesRoute } from "@/modules/warehouses/warehouses.route";
 
 const app = new Elysia()
   .onError(({ error }) => {
@@ -37,6 +38,7 @@ const app = new Elysia()
   .mount(auth.handler)
   .use(productsRoute)
   .use(variantsRoute)
+  .use(warehousesRoute)
   .get("/health", () => "ok")
   .listen(3000);
 
