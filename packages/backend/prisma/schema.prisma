@@ -151,3 +151,42 @@ model Apikey {
   @@index([key])
   @@map("apikey")
 }
+
+model Product {
+  id             String           @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  organizationId String
+  name           String
+  description    String?
+  isActive       Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+
+  variants ProductVariant[]
+
+  @@index([organizationId])
+  @@map("product")
+}
+
+model ProductVariant {
+  id             String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  productId      String    @db.Uuid
+  product        Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  organizationId String
+  sku            String
+  name           String
+  price          Decimal   @db.Decimal(12, 2)
+  /// Denormalized cache — managed exclusively by StockMovement service. Never write directly.
+  stock          Int       @default(0)
+  unit           String    @default("pcs")
+  attributes     Json      @default("{}")
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  @@unique([organizationId, sku])
+  @@index([productId])
+  @@index([organizationId])
+  @@map("product_variant")
+}

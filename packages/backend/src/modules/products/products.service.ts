@@ -1,0 +1,59 @@
+import { prisma } from "@/integrations/prisma";
+
+export const productsService = {
+  async listProducts(
+    organizationId: string,
+    params?: { skip?: number; take?: number },
+  ) {
+    return prisma.product.findMany({
+      where: { organizationId, deletedAt: null },
+      include: { variants: { where: { deletedAt: null } } },
+      skip: params?.skip,
+      take: params?.take ?? 50,
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
+  async getProduct(organizationId: string, id: string) {
+    return prisma.product.findFirst({
+      where: { id, organizationId, deletedAt: null },
+      include: { variants: { where: { deletedAt: null } } },
+    });
+  },
+
+  async createProduct(
+    organizationId: string,
+    data: { name: string; description?: string; isActive?: boolean },
+  ) {
+    return prisma.product.create({
+      data: { ...data, organizationId },
+      include: { variants: true },
+    });
+  },
+
+  async updateProduct(
+    organizationId: string,
+    id: string,
+    data: { name?: string; description?: string; isActive?: boolean },
+  ) {
+    return prisma.product.updateMany({
+      where: { id, organizationId, deletedAt: null },
+      data,
+    });
+  },
+
+  async deleteProduct(organizationId: string, id: string) {
+    const now = new Date();
+
+    await prisma.$transaction([
+      prisma.productVariant.updateMany({
+        where: { productId: id, organizationId, deletedAt: null },
+        data: { deletedAt: now },
+      }),
+      prisma.product.updateMany({
+        where: { id, organizationId, deletedAt: null },
+        data: { deletedAt: now },
+      }),
+    ]);
+  },
+};
