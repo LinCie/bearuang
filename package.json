@@ -1,0 +1,5 @@
+{
+  "name": "bearuang",
+  "private": true,
+  "workspaces": ["packages/*"]
+}
