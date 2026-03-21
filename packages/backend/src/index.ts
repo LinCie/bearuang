@@ -8,6 +8,7 @@ import { variantsRoute } from "@/modules/variants/variants.route";
 import { warehousesRoute } from "@/modules/warehouses/warehouses.route";
 import { stockMovementRoute } from "@/modules/stock-movements/stock-movements.route";
 import { suppliersRoute } from "@/modules/suppliers/suppliers.route";
+import { customersRoute } from "@/modules/customers/customers.route";
 import { purchaseOrdersRoute } from "@/modules/purchase-orders/purchase-orders.route";
 
 const app = new Elysia()
@@ -40,6 +41,7 @@ const app = new Elysia()
             description: "Stock movement tracking endpoints",
           },
           { name: "Suppliers", description: "Supplier management endpoints" },
+          { name: "Customers", description: "Customer management endpoints" },
           { name: "Purchase Orders", description: "Purchase order management endpoints" },
         ],
       },
@@ -57,6 +59,7 @@ const app = new Elysia()
   .use(warehousesRoute)
   .use(stockMovementRoute)
   .use(suppliersRoute)
+  .use(customersRoute)
   .use(purchaseOrdersRoute)
   .get("/health", () => "ok")
   .listen(3000);
