@@ -6,7 +6,7 @@ import { logger } from "./libraries/utilities";
 import { productsRoute } from "@/modules/products/products.route";
 import { variantsRoute } from "@/modules/variants/variants.route";
 import { warehousesRoute } from "@/modules/warehouses/warehouses.route";
-import { stockMovementRoute } from "@/modules/stock-movement/stock-movement.route";
+import { stockMovementRoute } from "@/modules/stock-movements/stock-movements.route";
 import { suppliersRoute } from "@/modules/suppliers/suppliers.route";
 
 const app = new Elysia()

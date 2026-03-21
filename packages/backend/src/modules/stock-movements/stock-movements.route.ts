@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { z } from "zod";
 import { authPlugin } from "@/plugins/auth.plugin";
-import { stockMovementService } from "./stock-movement.service";
+import { stockMovementService } from "./stock-movements.service";
 import { StockMovementType } from "@/generated/prisma/client";
 import { errorResponse } from "@/common/error.response";
 import {
@@ -84,7 +84,15 @@ export const stockMovementRoute = new Elysia({
   .get(
     "/",
     async ({ organization, query }) => {
-      const { page, pageSize, variantId, warehouseId, type, sortBy, sortOrder } = query;
+      const {
+        page,
+        pageSize,
+        variantId,
+        warehouseId,
+        type,
+        sortBy,
+        sortOrder,
+      } = query;
       const { skip, take } = paginationToSkipTake(page, pageSize);
       const { data, total } = await stockMovementService.listMovements(
         organization.id,
@@ -94,7 +102,9 @@ export const stockMovementRoute = new Elysia({
           variantId,
           warehouseId,
           type,
-          orderBy: sortBy ? { field: sortBy, order: sortOrder ?? "desc" } : undefined,
+          orderBy: sortBy
+            ? { field: sortBy, order: sortOrder ?? "desc" }
+            : undefined,
         },
       );
       return {
