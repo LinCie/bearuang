@@ -1,23 +1,48 @@
-import { Elysia } from "elysia"
-import { z } from "zod"
-import { authPlugin } from "@/plugins/auth.plugin"
-import { warehousesService } from "./warehouses.service"
+import { Elysia } from "elysia";
+import { z } from "zod";
+import { authPlugin } from "@/plugins/auth.plugin";
+import { warehousesService } from "./warehouses.service";
+import { errorResponse } from "@/common/error.response";
+
+const warehouseSchema = z.object({
+  id: z.string(),
+  organizationId: z.string(),
+  name: z.string(),
+  address: z.string().nullable(),
+  isActive: z.boolean(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+});
 
 const createWarehouseDto = z.object({
   name: z.string().min(1),
   address: z.string().optional(),
   isActive: z.boolean().optional(),
-})
+});
 
 const updateWarehouseDto = z.object({
   name: z.string().min(1).optional(),
   address: z.string().optional(),
   isActive: z.boolean().optional(),
-})
+});
 
 const warehouseIdParam = z.object({
   id: z.string().uuid(),
-})
+});
+
+const serializeWarehouse = (w: {
+  id: string;
+  organizationId: string;
+  name: string;
+  address: string | null;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}) => ({
+  ...w,
+  createdAt: w.createdAt.toISOString(),
+  updatedAt: w.updatedAt.toISOString(),
+});
 
 export const warehousesRoute = new Elysia({
   prefix: "/warehouses",
@@ -27,13 +52,20 @@ export const warehousesRoute = new Elysia({
   .get(
     "/",
     async ({ organization }) => {
-      return warehousesService.listWarehouses(organization.id)
+      const warehouses = await warehousesService.listWarehouses(
+        organization.id,
+      );
+      return warehouses.map(serializeWarehouse);
     },
     {
       requireOrg: true,
+      response: {
+        200: z.array(warehouseSchema),
+      },
       detail: {
         summary: "List warehouses",
-        description: "Retrieves a list of all warehouses belonging to the authenticated organization.",
+        description:
+          "Retrieves a list of all warehouses belonging to the authenticated organization.",
       },
     },
   )
@@ -43,15 +75,19 @@ export const warehousesRoute = new Elysia({
       const warehouse = await warehousesService.createWarehouse(
         organization.id,
         body,
-      )
-      return status(201, warehouse)
+      );
+      return status(201, serializeWarehouse(warehouse));
     },
     {
       requireOrg: true,
       body: createWarehouseDto,
+      response: {
+        201: warehouseSchema,
+      },
       detail: {
         summary: "Create a warehouse",
-        description: "Creates a new warehouse for the authenticated organization.",
+        description:
+          "Creates a new warehouse for the authenticated organization.",
       },
     },
   )
@@ -61,13 +97,17 @@ export const warehousesRoute = new Elysia({
       const warehouse = await warehousesService.getWarehouse(
         organization.id,
         params.id,
-      )
-      if (!warehouse) return status(404)
-      return warehouse
+      );
+      if (!warehouse) return status(404, { message: "Warehouse not found" });
+      return serializeWarehouse(warehouse);
     },
     {
       requireOrg: true,
       params: warehouseIdParam,
+      response: {
+        200: warehouseSchema,
+        404: errorResponse,
+      },
       detail: {
         summary: "Get a warehouse",
         description: "Retrieves the details of a specific warehouse by its ID.",
@@ -81,14 +121,19 @@ export const warehousesRoute = new Elysia({
         organization.id,
         params.id,
         body,
-      )
-      if (count.count === 0) return status(404)
-      return status(200)
+      );
+      if (count.count === 0)
+        return status(404, { message: "Warehouse not found" });
+      return status(200, { message: "Warehouse updated" });
     },
     {
       requireOrg: true,
       params: warehouseIdParam,
       body: updateWarehouseDto,
+      response: {
+        200: errorResponse,
+        404: errorResponse,
+      },
       detail: {
         summary: "Update a warehouse",
         description: "Updates the details of an existing warehouse.",
@@ -101,16 +146,21 @@ export const warehousesRoute = new Elysia({
       const count = await warehousesService.deleteWarehouse(
         organization.id,
         params.id,
-      )
-      if (count.count === 0) return status(404)
-      return status(200)
+      );
+      if (count.count === 0)
+        return status(404, { message: "Warehouse not found" });
+      return status(200, { message: "Warehouse deleted" });
     },
     {
       requireOrg: true,
       params: warehouseIdParam,
+      response: {
+        200: errorResponse,
+        404: errorResponse,
+      },
       detail: {
         summary: "Delete a warehouse",
         description: "Permanently deletes a warehouse by its ID.",
       },
     },
-  )
+  );

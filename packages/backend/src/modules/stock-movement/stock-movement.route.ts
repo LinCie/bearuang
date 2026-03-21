@@ -1,14 +1,33 @@
-import { Elysia } from "elysia"
-import { z } from "zod"
-import { authPlugin } from "@/plugins/auth.plugin"
-import { stockMovementService } from "./stock-movement.service"
-import { StockMovementType } from "@/generated/prisma/client"
+import { Elysia } from "elysia";
+import { z } from "zod";
+import { authPlugin } from "@/plugins/auth.plugin";
+import { stockMovementService } from "./stock-movement.service";
+import { StockMovementType } from "@/generated/prisma/client";
+import { errorResponse } from "@/common/error.response";
 
 const movementTypeEnum = z.enum([
   StockMovementType.IN,
   StockMovementType.OUT,
   StockMovementType.ADJUSTMENT,
-])
+]);
+
+const stockMovementSchema = z.object({
+  id: z.string(),
+  organizationId: z.string(),
+  warehouseId: z.string(),
+  variantId: z.string(),
+  type: movementTypeEnum,
+  quantity: z.number(),
+  referenceId: z.string().nullable(),
+  referenceType: z.string().nullable(),
+  note: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+});
+
+const stockMovementWithRelationsSchema = stockMovementSchema.extend({
+  variant: z.object({ id: z.string(), sku: z.string(), name: z.string() }),
+  warehouse: z.object({ id: z.string(), name: z.string() }),
+});
 
 const createMovementDto = z.object({
   warehouseId: z.string().uuid(),
@@ -18,7 +37,7 @@ const createMovementDto = z.object({
   referenceId: z.string().optional(),
   referenceType: z.string().optional(),
   note: z.string().optional(),
-})
+});
 
 const listMovementsQuery = z.object({
   skip: z.coerce.number().int().nonnegative().optional(),
@@ -26,11 +45,29 @@ const listMovementsQuery = z.object({
   variantId: z.string().uuid().optional(),
   warehouseId: z.string().uuid().optional(),
   type: movementTypeEnum.optional(),
-})
+});
 
 const movementIdParam = z.object({
   id: z.string().uuid(),
-})
+});
+
+const serializeMovement = (m: {
+  id: string;
+  organizationId: string;
+  warehouseId: string;
+  variantId: string;
+  type: StockMovementType;
+  quantity: number;
+  referenceId: string | null;
+  referenceType: string | null;
+  note: string | null;
+  createdAt: Date;
+  variant: { id: string; sku: string; name: string };
+  warehouse: { id: string; name: string };
+}) => ({
+  ...m,
+  createdAt: m.createdAt.toISOString(),
+});
 
 export const stockMovementRoute = new Elysia({
   prefix: "/stock-movements",
@@ -40,11 +77,18 @@ export const stockMovementRoute = new Elysia({
   .get(
     "/",
     async ({ organization, query }) => {
-      return stockMovementService.listMovements(organization.id, query)
+      const movements = await stockMovementService.listMovements(
+        organization.id,
+        query,
+      );
+      return movements.map(serializeMovement);
     },
     {
       requireOrg: true,
       query: listMovementsQuery,
+      response: {
+        200: z.array(stockMovementWithRelationsSchema),
+      },
       detail: {
         summary: "List stock movements",
         description:
@@ -58,12 +102,15 @@ export const stockMovementRoute = new Elysia({
       const movement = await stockMovementService.createMovement(
         organization.id,
         body,
-      )
-      return status(201, movement)
+      );
+      return status(201, serializeMovement(movement));
     },
     {
       requireOrg: true,
       body: createMovementDto,
+      response: {
+        201: stockMovementWithRelationsSchema,
+      },
       detail: {
         summary: "Create a stock movement",
         description:
@@ -77,16 +124,22 @@ export const stockMovementRoute = new Elysia({
       const movement = await stockMovementService.getMovement(
         organization.id,
         params.id,
-      )
-      if (!movement) return status(404)
-      return movement
+      );
+      if (!movement)
+        return status(404, { message: "Stock movement not found" });
+      return serializeMovement(movement);
     },
     {
       requireOrg: true,
       params: movementIdParam,
+      response: {
+        200: stockMovementWithRelationsSchema,
+        404: errorResponse,
+      },
       detail: {
         summary: "Get a stock movement",
-        description: "Retrieves the details of a specific stock movement by its ID.",
+        description:
+          "Retrieves the details of a specific stock movement by its ID.",
       },
     },
   )
@@ -96,17 +149,21 @@ export const stockMovementRoute = new Elysia({
       const deleted = await stockMovementService.deleteMovement(
         organization.id,
         params.id,
-      )
-      if (!deleted) return status(404)
-      return status(200)
+      );
+      if (!deleted) return status(404, { message: "Stock movement not found" });
+      return status(200, { message: "Stock movement deleted" });
     },
     {
       requireOrg: true,
       params: movementIdParam,
+      response: {
+        200: errorResponse,
+        404: errorResponse,
+      },
       detail: {
         summary: "Delete a stock movement",
         description:
           "Deletes a stock movement and reverses its effect on the variant stock cache atomically.",
       },
     },
-  )
+  );
