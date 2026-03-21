@@ -1,0 +1,202 @@
+import { Elysia } from "elysia";
+import { z } from "zod";
+import { authPlugin } from "@/plugins/auth.plugin";
+import { suppliersService } from "./suppliers.service";
+import { errorResponse } from "@/common/error.response";
+import {
+  paginationQuery,
+  paginatedResponse,
+  buildPaginationMeta,
+  paginationToSkipTake,
+  sortQuery,
+} from "@/common/pagination";
+
+const supplierSchema = z.object({
+  id: z.string(),
+  organizationId: z.string(),
+  name: z.string(),
+  email: z.string().nullable(),
+  phone: z.string().nullable(),
+  address: z.string().nullable(),
+  isActive: z.boolean(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+});
+
+const createSupplierDto = z.object({
+  name: z.string().min(1),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+});
+
+const updateSupplierDto = z.object({
+  name: z.string().min(1).optional(),
+  email: z.string().email().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  address: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
+});
+
+const listSuppliersQuery = paginationQuery
+  .extend(sortQuery(["name", "createdAt", "updatedAt"]).shape)
+  .extend({
+    isActive: z
+      .string()
+      .transform((v) => v === "true")
+      .pipe(z.boolean())
+      .optional(),
+  });
+
+const supplierIdParam = z.object({
+  id: z.string().uuid(),
+});
+
+const serializeSupplier = (s: {
+  id: string;
+  organizationId: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}) => ({
+  ...s,
+  createdAt: s.createdAt.toISOString(),
+  updatedAt: s.updatedAt.toISOString(),
+});
+
+export const suppliersRoute = new Elysia({
+  prefix: "/suppliers",
+  tags: ["Suppliers"],
+})
+  .use(authPlugin)
+  .get(
+    "/",
+    async ({ organization, query }) => {
+      const { page, pageSize, isActive, sortBy, sortOrder } = query;
+      const { skip, take } = paginationToSkipTake(page, pageSize);
+      const { data, total } = await suppliersService.listSuppliers(
+        organization.id,
+        {
+          skip,
+          take,
+          isActive,
+          orderBy: sortBy
+            ? { field: sortBy, order: sortOrder ?? "desc" }
+            : undefined,
+        },
+      );
+      return {
+        data: data.map(serializeSupplier),
+        meta: buildPaginationMeta(total, page, pageSize),
+      };
+    },
+    {
+      requireOrg: true,
+      query: listSuppliersQuery,
+      response: {
+        200: paginatedResponse(supplierSchema),
+      },
+      detail: {
+        summary: "List suppliers",
+        description:
+          "Retrieves a paginated list of suppliers for the authenticated organization. Supports filtering by active status and sorting.",
+      },
+    },
+  )
+  .post(
+    "/",
+    async ({ organization, body, status }) => {
+      const supplier = await suppliersService.createSupplier(
+        organization.id,
+        body,
+      );
+      return status(201, serializeSupplier(supplier));
+    },
+    {
+      requireOrg: true,
+      body: createSupplierDto,
+      response: {
+        201: supplierSchema,
+      },
+      detail: {
+        summary: "Create a supplier",
+        description:
+          "Creates a new supplier for the authenticated organization.",
+      },
+    },
+  )
+  .get(
+    "/:id",
+    async ({ organization, params, status }) => {
+      const supplier = await suppliersService.getSupplier(
+        organization.id,
+        params.id,
+      );
+      if (!supplier) return status(404, { message: "Supplier not found" });
+      return serializeSupplier(supplier);
+    },
+    {
+      requireOrg: true,
+      params: supplierIdParam,
+      response: {
+        200: supplierSchema,
+        404: errorResponse,
+      },
+      detail: {
+        summary: "Get a supplier",
+        description: "Retrieves the details of a specific supplier by its ID.",
+      },
+    },
+  )
+  .patch(
+    "/:id",
+    async ({ organization, params, body, status }) => {
+      const supplier = await suppliersService.updateSupplier(
+        organization.id,
+        params.id,
+        body,
+      );
+      if (!supplier) return status(404, { message: "Supplier not found" });
+      return serializeSupplier(supplier);
+    },
+    {
+      requireOrg: true,
+      params: supplierIdParam,
+      body: updateSupplierDto,
+      response: {
+        200: supplierSchema,
+        404: errorResponse,
+      },
+      detail: {
+        summary: "Update a supplier",
+        description: "Updates an existing supplier's details.",
+      },
+    },
+  )
+  .delete(
+    "/:id",
+    async ({ organization, params, status }) => {
+      const deleted = await suppliersService.deleteSupplier(
+        organization.id,
+        params.id,
+      );
+      if (!deleted) return status(404, { message: "Supplier not found" });
+      return status(200, { message: "Supplier deleted" });
+    },
+    {
+      requireOrg: true,
+      params: supplierIdParam,
+      response: {
+        200: errorResponse,
+        404: errorResponse,
+      },
+      detail: {
+        summary: "Delete a supplier",
+        description: "Permanently deletes a supplier by its ID.",
+      },
+    },
+  );
