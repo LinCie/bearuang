@@ -10,6 +10,7 @@ import { stockMovementRoute } from "@/modules/stock-movements/stock-movements.ro
 import { suppliersRoute } from "@/modules/suppliers/suppliers.route";
 import { customersRoute } from "@/modules/customers/customers.route";
 import { purchaseOrdersRoute } from "@/modules/purchase-orders/purchase-orders.route";
+import { salesOrdersRoute } from "@/modules/sales-orders/sales-orders.route";
 
 const app = new Elysia()
   .onError(({ error }) => {
@@ -43,6 +44,7 @@ const app = new Elysia()
           { name: "Suppliers", description: "Supplier management endpoints" },
           { name: "Customers", description: "Customer management endpoints" },
           { name: "Purchase Orders", description: "Purchase order management endpoints" },
+          { name: "Sales Orders", description: "Sales order management endpoints" },
         ],
       },
       mapJsonSchema: { zod: z.toJSONSchema },
@@ -61,6 +63,7 @@ const app = new Elysia()
   .use(suppliersRoute)
   .use(customersRoute)
   .use(purchaseOrdersRoute)
+  .use(salesOrdersRoute)
   .get("/health", () => "ok")
   .listen(3000);
 
