@@ -23,7 +23,7 @@ const mockMovement = {
 };
 
 const mockService = {
-  listMovements: mock(() => Promise.resolve([mockMovement])),
+  listMovements: mock(() => Promise.resolve({ data: [mockMovement], total: 1 })),
   getMovement: mock((orgId: string, id: string) =>
     Promise.resolve(id === MOCK_MOVEMENT_ID ? mockMovement : null),
   ),
@@ -49,7 +49,7 @@ mock.module("@/plugins/auth.plugin", () => ({
   }),
 }));
 
-mock.module("./stock-movement.service", () => ({
+mock.module("./stock-movements.service", () => ({
   stockMovementService: mockService,
 }));
 
@@ -68,9 +68,9 @@ describe("Stock Movements", () => {
       );
 
       expect(res.status).toBe(200);
-      const data = await res.json();
-      expect(Array.isArray(data)).toBe(true);
-      expect(data[0].id).toBe(MOCK_MOVEMENT_ID);
+      const body = await res.json();
+      expect(Array.isArray(body.data)).toBe(true);
+      expect(body.data[0].id).toBe(MOCK_MOVEMENT_ID);
     });
 
     it("accepts valid query filters", async () => {

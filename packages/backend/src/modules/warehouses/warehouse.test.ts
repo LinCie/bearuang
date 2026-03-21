@@ -15,7 +15,7 @@ const mockWarehouse = {
 }
 
 const mockService = {
-  listWarehouses: mock(() => Promise.resolve([mockWarehouse])),
+  listWarehouses: mock(() => Promise.resolve({ data: [mockWarehouse], total: 1 })),
   getWarehouse: mock((orgId: string, id: string) =>
     Promise.resolve(id === MOCK_WAREHOUSE_ID ? mockWarehouse : null),
   ),
@@ -59,9 +59,9 @@ describe("Warehouses", () => {
       const res = await app.handle(new Request("http://localhost/warehouses"))
 
       expect(res.status).toBe(200)
-      const data = await res.json()
-      expect(Array.isArray(data)).toBe(true)
-      expect(data[0].id).toBe(MOCK_WAREHOUSE_ID)
+      const body = await res.json()
+      expect(Array.isArray(body.data)).toBe(true)
+      expect(body.data[0].id).toBe(MOCK_WAREHOUSE_ID)
     })
   })
 

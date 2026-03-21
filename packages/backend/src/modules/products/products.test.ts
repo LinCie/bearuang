@@ -17,7 +17,7 @@ const mockProduct = {
 };
 
 const mockService = {
-  listProducts: mock(() => Promise.resolve([mockProduct])),
+  listProducts: mock(() => Promise.resolve({ data: [mockProduct], total: 1 })),
   getProduct: mock((orgId: string, id: string) =>
     Promise.resolve(id === MOCK_PRODUCT_ID ? mockProduct : null),
   ),
@@ -59,9 +59,9 @@ describe("Products", () => {
       const res = await app.handle(new Request("http://localhost/products"));
 
       expect(res.status).toBe(200);
-      const data = await res.json();
-      expect(Array.isArray(data)).toBe(true);
-      expect(data[0].id).toBe(MOCK_PRODUCT_ID);
+      const body = await res.json();
+      expect(Array.isArray(body.data)).toBe(true);
+      expect(body.data[0].id).toBe(MOCK_PRODUCT_ID);
     });
   });
 

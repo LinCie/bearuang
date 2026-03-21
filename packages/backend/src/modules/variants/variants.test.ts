@@ -12,7 +12,8 @@ const mockVariant = {
   productId: MOCK_PRODUCT_ID,
   sku: "SKU-001",
   name: "Test Variant",
-  price: 9.99,
+  price: { toNumber: () => 9.99 },
+  stock: 0,
   unit: "pcs",
   attributes: {},
   isActive: true,
@@ -24,7 +25,7 @@ const mockVariant = {
 
 const mockService = {
   listVariantsByProduct: mock(() => Promise.resolve([mockVariant])),
-  listVariants: mock(() => Promise.resolve([mockVariant])),
+  listVariants: mock(() => Promise.resolve({ data: [mockVariant], total: 1 })),
   getVariant: mock((orgId: string, id: string) =>
     Promise.resolve(id === MOCK_VARIANT_ID ? mockVariant : null),
   ),
@@ -70,9 +71,9 @@ describe("Variants", () => {
       );
 
       expect(res.status).toBe(200);
-      const data = await res.json();
-      expect(Array.isArray(data)).toBe(true);
-      expect(data[0].id).toBe(MOCK_VARIANT_ID);
+      const body = await res.json();
+      expect(Array.isArray(body)).toBe(true);
+      expect(body[0].id).toBe(MOCK_VARIANT_ID);
     });
 
     it("returns 422 for invalid product UUID", async () => {
@@ -122,9 +123,9 @@ describe("Variants", () => {
       const res = await app.handle(new Request("http://localhost/variants"));
 
       expect(res.status).toBe(200);
-      const data = await res.json();
-      expect(Array.isArray(data)).toBe(true);
-      expect(data[0].id).toBe(MOCK_VARIANT_ID);
+      const body = await res.json();
+      expect(Array.isArray(body.data)).toBe(true);
+      expect(body.data[0].id).toBe(MOCK_VARIANT_ID);
     });
 
     it("accepts search query parameter", async () => {
