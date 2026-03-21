@@ -3,6 +3,13 @@ import { z } from "zod";
 import { authPlugin } from "@/plugins/auth.plugin";
 import { warehousesService } from "./warehouses.service";
 import { errorResponse } from "@/common/error.response";
+import {
+  paginationQuery,
+  paginatedResponse,
+  buildPaginationMeta,
+  paginationToSkipTake,
+  sortQuery,
+} from "@/common/pagination";
 
 const warehouseSchema = z.object({
   id: z.string(),
@@ -30,6 +37,10 @@ const warehouseIdParam = z.object({
   id: z.string().uuid(),
 });
 
+const listWarehousesQuery = paginationQuery.merge(
+  sortQuery(["name", "createdAt", "updatedAt"]),
+);
+
 const serializeWarehouse = (w: {
   id: string;
   organizationId: string;
@@ -51,21 +62,32 @@ export const warehousesRoute = new Elysia({
   .use(authPlugin)
   .get(
     "/",
-    async ({ organization }) => {
-      const warehouses = await warehousesService.listWarehouses(
+    async ({ organization, query }) => {
+      const { page, pageSize, sortBy, sortOrder } = query;
+      const { skip, take } = paginationToSkipTake(page, pageSize);
+      const { data, total } = await warehousesService.listWarehouses(
         organization.id,
+        {
+          skip,
+          take,
+          orderBy: sortBy ? { field: sortBy, order: sortOrder ?? "desc" } : undefined,
+        },
       );
-      return warehouses.map(serializeWarehouse);
+      return {
+        data: data.map(serializeWarehouse),
+        meta: buildPaginationMeta(total, page, pageSize),
+      };
     },
     {
       requireOrg: true,
+      query: listWarehousesQuery,
       response: {
-        200: z.array(warehouseSchema),
+        200: paginatedResponse(warehouseSchema),
       },
       detail: {
         summary: "List warehouses",
         description:
-          "Retrieves a list of all warehouses belonging to the authenticated organization.",
+          "Retrieves a paginated list of all warehouses belonging to the authenticated organization.",
       },
     },
   )

@@ -3,14 +3,25 @@ import { prisma } from "@/integrations/prisma"
 export const warehousesService = {
   async listWarehouses(
     organizationId: string,
-    params?: { skip?: number; take?: number },
+    params?: {
+      skip?: number
+      take?: number
+      orderBy?: { field: "name" | "createdAt" | "updatedAt"; order: "asc" | "desc" }
+    },
   ) {
-    return prisma.warehouse.findMany({
-      where: { organizationId },
-      skip: params?.skip,
-      take: params?.take ?? 50,
-      orderBy: { createdAt: "desc" },
-    })
+    const where = { organizationId }
+    const [data, total] = await prisma.$transaction([
+      prisma.warehouse.findMany({
+        where,
+        skip: params?.skip,
+        take: params?.take ?? 50,
+        orderBy: params?.orderBy
+          ? { [params.orderBy.field]: params.orderBy.order }
+          : { createdAt: "desc" },
+      }),
+      prisma.warehouse.count({ where }),
+    ])
+    return { data, total }
   },
 
   async getWarehouse(organizationId: string, id: string) {

@@ -11,26 +11,38 @@ export const variantsService = {
 
   async listVariants(
     organizationId: string,
-    params?: { search?: string; skip?: number; take?: number },
+    params?: {
+      search?: string
+      skip?: number
+      take?: number
+      orderBy?: { field: "name" | "sku" | "price" | "stock" | "createdAt"; order: "asc" | "desc" }
+    },
   ) {
-    return prisma.productVariant.findMany({
-      where: {
-        organizationId,
-        deletedAt: null,
-        ...(params?.search
-          ? {
-              OR: [
-                { name: { contains: params.search, mode: "insensitive" } },
-                { sku: { contains: params.search, mode: "insensitive" } },
-              ],
-            }
-          : {}),
-      },
-      include: { product: { select: { name: true } } },
-      skip: params?.skip ? Number(params.skip) : undefined,
-      take: params?.take ? Number(params.take) : 50,
-      orderBy: { createdAt: "desc" },
-    });
+    const where = {
+      organizationId,
+      deletedAt: null,
+      ...(params?.search
+        ? {
+            OR: [
+              { name: { contains: params.search, mode: "insensitive" as const } },
+              { sku: { contains: params.search, mode: "insensitive" as const } },
+            ],
+          }
+        : {}),
+    }
+    const [data, total] = await prisma.$transaction([
+      prisma.productVariant.findMany({
+        where,
+        include: { product: { select: { name: true } } },
+        skip: params?.skip ? Number(params.skip) : undefined,
+        take: params?.take ? Number(params.take) : 50,
+        orderBy: params?.orderBy
+          ? { [params.orderBy.field]: params.orderBy.order }
+          : { createdAt: "desc" },
+      }),
+      prisma.productVariant.count({ where }),
+    ])
+    return { data, total }
   },
 
   async getVariant(organizationId: string, id: string) {

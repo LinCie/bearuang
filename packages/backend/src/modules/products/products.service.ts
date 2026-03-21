@@ -3,15 +3,26 @@ import { prisma } from "@/integrations/prisma";
 export const productsService = {
   async listProducts(
     organizationId: string,
-    params?: { skip?: number; take?: number },
+    params?: {
+      skip?: number
+      take?: number
+      orderBy?: { field: "name" | "createdAt" | "updatedAt"; order: "asc" | "desc" }
+    },
   ) {
-    return prisma.product.findMany({
-      where: { organizationId, deletedAt: null },
-      include: { variants: { where: { deletedAt: null } } },
-      skip: params?.skip,
-      take: params?.take ?? 50,
-      orderBy: { createdAt: "desc" },
-    });
+    const where = { organizationId, deletedAt: null }
+    const [data, total] = await prisma.$transaction([
+      prisma.product.findMany({
+        where,
+        include: { variants: { where: { deletedAt: null } } },
+        skip: params?.skip,
+        take: params?.take ?? 50,
+        orderBy: params?.orderBy
+          ? { [params.orderBy.field]: params.orderBy.order }
+          : { createdAt: "desc" },
+      }),
+      prisma.product.count({ where }),
+    ])
+    return { data, total }
   },
 
   async getProduct(organizationId: string, id: string) {

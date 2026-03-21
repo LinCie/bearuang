@@ -10,34 +10,42 @@ export const stockMovementService = {
       variantId?: string
       warehouseId?: string
       type?: StockMovementType
+      orderBy?: { field: "createdAt" | "quantity" | "type"; order: "asc" | "desc" }
     },
   ) {
-    return prisma.stockMovement.findMany({
-      where: {
-        organizationId,
-        ...(params?.variantId && { variantId: params.variantId }),
-        ...(params?.warehouseId && { warehouseId: params.warehouseId }),
-        ...(params?.type && { type: params.type }),
-      },
-      include: {
-        variant: {
-          select: {
-            id: true,
-            sku: true,
-            name: true,
+    const where = {
+      organizationId,
+      ...(params?.variantId && { variantId: params.variantId }),
+      ...(params?.warehouseId && { warehouseId: params.warehouseId }),
+      ...(params?.type && { type: params.type }),
+    }
+    const [data, total] = await prisma.$transaction([
+      prisma.stockMovement.findMany({
+        where,
+        include: {
+          variant: {
+            select: {
+              id: true,
+              sku: true,
+              name: true,
+            },
+          },
+          warehouse: {
+            select: {
+              id: true,
+              name: true,
+            },
           },
         },
-        warehouse: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      skip: params?.skip,
-      take: params?.take ?? 50,
-      orderBy: { createdAt: "desc" },
-    })
+        skip: params?.skip,
+        take: params?.take ?? 50,
+        orderBy: params?.orderBy
+          ? { [params.orderBy.field]: params.orderBy.order }
+          : { createdAt: "desc" },
+      }),
+      prisma.stockMovement.count({ where }),
+    ])
+    return { data, total }
   },
 
   async getMovement(organizationId: string, id: string) {

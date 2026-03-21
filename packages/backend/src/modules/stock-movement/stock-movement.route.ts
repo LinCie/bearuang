@@ -4,6 +4,13 @@ import { authPlugin } from "@/plugins/auth.plugin";
 import { stockMovementService } from "./stock-movement.service";
 import { StockMovementType } from "@/generated/prisma/client";
 import { errorResponse } from "@/common/error.response";
+import {
+  paginationQuery,
+  paginatedResponse,
+  buildPaginationMeta,
+  paginationToSkipTake,
+  sortQuery,
+} from "@/common/pagination";
 
 const movementTypeEnum = z.enum([
   StockMovementType.IN,
@@ -39,13 +46,13 @@ const createMovementDto = z.object({
   note: z.string().optional(),
 });
 
-const listMovementsQuery = z.object({
-  skip: z.coerce.number().int().nonnegative().optional(),
-  take: z.coerce.number().int().positive().max(200).optional(),
-  variantId: z.string().uuid().optional(),
-  warehouseId: z.string().uuid().optional(),
-  type: movementTypeEnum.optional(),
-});
+const listMovementsQuery = paginationQuery
+  .merge(sortQuery(["createdAt", "quantity", "type"]))
+  .extend({
+    variantId: z.string().uuid().optional(),
+    warehouseId: z.string().uuid().optional(),
+    type: movementTypeEnum.optional(),
+  });
 
 const movementIdParam = z.object({
   id: z.string().uuid(),
@@ -77,17 +84,29 @@ export const stockMovementRoute = new Elysia({
   .get(
     "/",
     async ({ organization, query }) => {
-      const movements = await stockMovementService.listMovements(
+      const { page, pageSize, variantId, warehouseId, type, sortBy, sortOrder } = query;
+      const { skip, take } = paginationToSkipTake(page, pageSize);
+      const { data, total } = await stockMovementService.listMovements(
         organization.id,
-        query,
+        {
+          skip,
+          take,
+          variantId,
+          warehouseId,
+          type,
+          orderBy: sortBy ? { field: sortBy, order: sortOrder ?? "desc" } : undefined,
+        },
       );
-      return movements.map(serializeMovement);
+      return {
+        data: data.map(serializeMovement),
+        meta: buildPaginationMeta(total, page, pageSize),
+      };
     },
     {
       requireOrg: true,
       query: listMovementsQuery,
       response: {
-        200: z.array(stockMovementWithRelationsSchema),
+        200: paginatedResponse(stockMovementWithRelationsSchema),
       },
       detail: {
         summary: "List stock movements",

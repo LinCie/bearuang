@@ -3,6 +3,13 @@ import { z } from "zod";
 import { authPlugin } from "@/plugins/auth.plugin";
 import { productsService } from "./products.service";
 import { errorResponse } from "@/common/error.response";
+import {
+  paginationQuery,
+  paginatedResponse,
+  buildPaginationMeta,
+  paginationToSkipTake,
+  sortQuery,
+} from "@/common/pagination";
 
 const variantSchema = z.object({
   id: z.string(),
@@ -48,6 +55,10 @@ const productIdParam = z.object({
   id: z.string().uuid(),
 });
 
+const listProductsQuery = paginationQuery.merge(
+  sortQuery(["name", "createdAt", "updatedAt"]),
+);
+
 export const productsRoute = new Elysia({
   prefix: "/products",
   tags: ["Products"],
@@ -55,31 +66,44 @@ export const productsRoute = new Elysia({
   .use(authPlugin)
   .get(
     "/",
-    async ({ organization }) => {
-      const products = await productsService.listProducts(organization.id);
-      return products.map((p) => ({
-        ...p,
-        createdAt: p.createdAt.toISOString(),
-        updatedAt: p.updatedAt.toISOString(),
-        deletedAt: p.deletedAt?.toISOString() ?? null,
-        variants: p.variants.map((v) => ({
-          ...v,
-          price: v.price.toNumber(),
-          createdAt: v.createdAt.toISOString(),
-          updatedAt: v.updatedAt.toISOString(),
-          deletedAt: v.deletedAt?.toISOString() ?? null,
+    async ({ organization, query }) => {
+      const { page, pageSize, sortBy, sortOrder } = query;
+      const { skip, take } = paginationToSkipTake(page, pageSize);
+      const { data, total } = await productsService.listProducts(
+        organization.id,
+        {
+          skip,
+          take,
+          orderBy: sortBy ? { field: sortBy, order: sortOrder ?? "desc" } : undefined,
+        },
+      );
+      return {
+        data: data.map((p) => ({
+          ...p,
+          createdAt: p.createdAt.toISOString(),
+          updatedAt: p.updatedAt.toISOString(),
+          deletedAt: p.deletedAt?.toISOString() ?? null,
+          variants: p.variants.map((v) => ({
+            ...v,
+            price: v.price.toNumber(),
+            createdAt: v.createdAt.toISOString(),
+            updatedAt: v.updatedAt.toISOString(),
+            deletedAt: v.deletedAt?.toISOString() ?? null,
+          })),
         })),
-      }));
+        meta: buildPaginationMeta(total, page, pageSize),
+      };
     },
     {
       requireOrg: true,
+      query: listProductsQuery,
       response: {
-        200: z.array(productSchema),
+        200: paginatedResponse(productSchema),
       },
       detail: {
         summary: "List products",
         description:
-          "Retrieves a list of all products belonging to the authenticated organization.",
+          "Retrieves a paginated list of all products belonging to the authenticated organization.",
       },
     },
   )

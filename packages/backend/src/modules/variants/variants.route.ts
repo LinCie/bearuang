@@ -4,6 +4,13 @@ import { authPlugin } from "@/plugins/auth.plugin";
 import { variantsService } from "./variants.service";
 import { ProductVariant } from "@/generated/prisma/client";
 import { errorResponse } from "@/common/error.response";
+import {
+  paginationQuery,
+  paginatedResponse,
+  buildPaginationMeta,
+  paginationToSkipTake,
+  sortQuery,
+} from "@/common/pagination";
 
 const variantSchema = z.object({
   id: z.string(),
@@ -51,11 +58,11 @@ const productIdParam = z.object({
   id: z.string().uuid(),
 });
 
-const searchVariantQuery = z.object({
-  search: z.string().optional(),
-  skip: z.coerce.number().optional(),
-  take: z.coerce.number().optional(),
-});
+const searchVariantQuery = paginationQuery
+  .merge(sortQuery(["name", "sku", "price", "stock", "createdAt"]))
+  .extend({
+    search: z.string().optional(),
+  });
 
 const serializeVariant = (v: ProductVariant) => ({
   ...v,
@@ -141,17 +148,27 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
       .get(
         "/",
         async ({ organization, query }) => {
-          const variants = await variantsService.listVariants(
+          const { page, pageSize, search, sortBy, sortOrder } = query;
+          const { skip, take } = paginationToSkipTake(page, pageSize);
+          const { data, total } = await variantsService.listVariants(
             organization.id,
-            query,
+            {
+              search,
+              skip,
+              take,
+              orderBy: sortBy ? { field: sortBy, order: sortOrder ?? "desc" } : undefined,
+            },
           );
-          return variants.map(serializeVariantWithProduct);
+          return {
+            data: data.map(serializeVariantWithProduct),
+            meta: buildPaginationMeta(total, page, pageSize),
+          };
         },
         {
           requireOrg: true,
           query: searchVariantQuery,
           response: {
-            200: z.array(variantWithProductSchema),
+            200: paginatedResponse(variantWithProductSchema),
           },
           detail: {
             summary: "Search all variants",
