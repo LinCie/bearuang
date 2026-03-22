@@ -1,6 +1,8 @@
 import { auth } from "@/integrations/auth";
 import { Elysia } from "elysia";
 
+type Permission = Record<string, string[]>;
+
 export const authPlugin = new Elysia({ name: "auth" }).macro({
   requireAuth: {
     async resolve({ status, request: { headers } }) {
@@ -23,5 +25,16 @@ export const authPlugin = new Elysia({ name: "auth" }).macro({
         organization,
       };
     },
+  },
+  requirePermission(permissions: Permission) {
+    return {
+      async beforeHandle({ request: { headers }, status }) {
+        const result = await auth.api.hasPermission({
+          headers,
+          body: { permissions },
+        });
+        if (!result) return status(403, "Forbidden");
+      },
+    };
   },
 });

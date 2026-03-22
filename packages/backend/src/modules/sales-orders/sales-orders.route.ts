@@ -181,6 +181,7 @@ export const salesOrdersRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { salesOrder: ["create"] },
       body: createSalesOrderDto,
       response: {
         201: salesOrderSchema,
@@ -229,6 +230,7 @@ export const salesOrdersRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { salesOrder: ["update"] },
       params: salesOrderIdParam,
       body: updateSalesOrderDto,
       response: {
@@ -254,6 +256,7 @@ export const salesOrdersRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { salesOrder: ["delete"] },
       params: salesOrderIdParam,
       response: {
         200: errorResponse,

@@ -120,6 +120,7 @@ export const customersRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { customer: ["create"] },
       body: createCustomerDto,
       response: {
         201: customerSchema,
@@ -167,6 +168,7 @@ export const customersRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { customer: ["update"] },
       params: customerIdParam,
       body: updateCustomerDto,
       response: {
@@ -191,6 +193,7 @@ export const customersRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { customer: ["delete"] },
       params: customerIdParam,
       response: {
         200: errorResponse,

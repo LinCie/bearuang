@@ -130,6 +130,7 @@ export const productsRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { product: ["create"] },
       body: createProductDto,
       response: {
         201: productSchema,
@@ -190,6 +191,7 @@ export const productsRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { product: ["update"] },
       params: productIdParam,
       body: updateProductDto,
       response: {
@@ -210,6 +212,7 @@ export const productsRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { product: ["delete"] },
       params: productIdParam,
       response: {
         200: errorResponse,

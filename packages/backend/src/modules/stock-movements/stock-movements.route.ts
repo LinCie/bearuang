@@ -136,6 +136,7 @@ export const stockMovementRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { stock: ["adjust"] },
       body: createMovementDto,
       response: {
         201: stockMovementWithRelationsSchema,
@@ -184,6 +185,7 @@ export const stockMovementRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { stock: ["adjust"] },
       params: movementIdParam,
       response: {
         200: errorResponse,

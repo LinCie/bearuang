@@ -181,6 +181,7 @@ export const purchaseOrdersRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { purchaseOrder: ["create"] },
       body: createPurchaseOrderDto,
       response: {
         201: purchaseOrderSchema,
@@ -231,6 +232,7 @@ export const purchaseOrdersRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { purchaseOrder: ["update"] },
       params: purchaseOrderIdParam,
       body: updatePurchaseOrderDto,
       response: {
@@ -262,6 +264,7 @@ export const purchaseOrdersRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { purchaseOrder: ["receive"] },
       params: purchaseOrderIdParam,
       body: receivePurchaseOrderDto,
       response: {
@@ -288,6 +291,7 @@ export const purchaseOrdersRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { purchaseOrder: ["delete"] },
       params: purchaseOrderIdParam,
       response: {
         200: errorResponse,

@@ -128,6 +128,7 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
         },
         {
           requireOrg: true,
+          requirePermission: { productVariant: ["create"] },
           params: productIdParam,
           body: createVariantDto,
           response: {
@@ -224,6 +225,7 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
         },
         {
           requireOrg: true,
+          requirePermission: { productVariant: ["update"] },
           params: variantIdParam,
           body: updateVariantDto,
           response: {
@@ -250,6 +252,7 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
         },
         {
           requireOrg: true,
+          requirePermission: { productVariant: ["delete"] },
           params: variantIdParam,
           response: {
             200: errorResponse,

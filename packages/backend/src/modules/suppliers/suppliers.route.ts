@@ -118,6 +118,7 @@ export const suppliersRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { supplier: ["create"] },
       body: createSupplierDto,
       response: {
         201: supplierSchema,
@@ -165,6 +166,7 @@ export const suppliersRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { supplier: ["update"] },
       params: supplierIdParam,
       body: updateSupplierDto,
       response: {
@@ -189,6 +191,7 @@ export const suppliersRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { supplier: ["delete"] },
       params: supplierIdParam,
       response: {
         200: errorResponse,

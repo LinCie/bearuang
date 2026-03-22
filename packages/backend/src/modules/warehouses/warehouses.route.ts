@@ -102,6 +102,7 @@ export const warehousesRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { warehouse: ["create"] },
       body: createWarehouseDto,
       response: {
         201: warehouseSchema,
@@ -150,6 +151,7 @@ export const warehousesRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { warehouse: ["update"] },
       params: warehouseIdParam,
       body: updateWarehouseDto,
       response: {
@@ -175,6 +177,7 @@ export const warehousesRoute = new Elysia({
     },
     {
       requireOrg: true,
+      requirePermission: { warehouse: ["delete"] },
       params: warehouseIdParam,
       response: {
         200: errorResponse,
