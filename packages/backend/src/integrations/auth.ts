@@ -4,9 +4,17 @@ import { apiKey } from "@better-auth/api-key";
 
 import { prisma } from "./prisma";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { ac, owner, admin, member } from "@/libraries/permissions";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   emailAndPassword: { enabled: true },
-  plugins: [organization(), apiKey()],
+  plugins: [
+    organization({
+      ac,
+      roles: { owner, admin, member },
+      dynamicAccessControl: { enabled: true },
+    }),
+    apiKey(),
+  ],
 });

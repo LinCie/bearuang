@@ -87,6 +87,8 @@ model Organization {
   members     Member[]
   invitations Invitation[]
 
+  organizationroles OrganizationRole[]
+
   @@unique([slug])
   @@map("organization")
 }
@@ -352,22 +354,22 @@ model PurchaseOrderItem {
 }
 
 model SalesOrder {
-  id              String                    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  id              String                  @id @default(dbgenerated("uuidv7()")) @db.Uuid
   organizationId  String
-  customerId      String?                   @db.Uuid
-  customer        Customer?                 @relation(fields: [customerId], references: [id])
-  warehouseId     String                    @db.Uuid
-  warehouse       Warehouse                 @relation(fields: [warehouseId], references: [id])
+  customerId      String?                 @db.Uuid
+  customer        Customer?               @relation(fields: [customerId], references: [id])
+  warehouseId     String                  @db.Uuid
+  warehouse       Warehouse               @relation(fields: [warehouseId], references: [id])
   guestName       String?
   guestEmail      String?
-  shippingAddress Json                      @default("{}")
-  status          SalesOrderStatus          @default(PENDING)
-  paymentStatus   SalesOrderPaymentStatus   @default(UNPAID)
+  shippingAddress Json                    @default("{}")
+  status          SalesOrderStatus        @default(PENDING)
+  paymentStatus   SalesOrderPaymentStatus @default(UNPAID)
   orderedAt       DateTime?
   shippedAt       DateTime?
   note            String?
-  createdAt       DateTime                  @default(now())
-  updatedAt       DateTime                  @updatedAt
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
 
   items SalesOrderItem[]
 
@@ -390,4 +392,18 @@ model SalesOrderItem {
   @@index([salesOrderId])
   @@index([variantId])
   @@map("sales_order_item")
+}
+
+model OrganizationRole {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role           String
+  permission     String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime?    @updatedAt
+
+  @@index([organizationId])
+  @@index([role])
+  @@map("organizationRole")
 }
