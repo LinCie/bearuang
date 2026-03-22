@@ -68,7 +68,7 @@ const app = new Elysia()
   .use(salesOrdersRoute)
   .use(apiKeysRoute)
   .get("/health", () => "ok")
-  .listen(3000);
+  .listen(Number(process.env.PORT) || 8000);
 
 logger.info(
   `🦊 BearUang API is running at ${app.server?.hostname}:${app.server?.port}`,
