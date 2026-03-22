@@ -18,6 +18,7 @@ const statement = {
   salesOrder: ["create", "update", "delete", "fulfill"],
   salesOrderItem: ["create", "update", "delete"],
   stock: ["adjust", "view"],
+  apiKey: ["create", "read", "update", "delete"],
 } as const;
 
 export const ac = createAccessControl(statement);
@@ -34,6 +35,7 @@ export const owner = ac.newRole({
   salesOrder: ["create", "update", "delete", "fulfill"],
   salesOrderItem: ["create", "update", "delete"],
   stock: ["adjust", "view"],
+  apiKey: ["create", "read", "update", "delete"],
 });
 
 export const admin = ac.newRole({
@@ -48,6 +50,7 @@ export const admin = ac.newRole({
   salesOrder: ["create", "update", "delete", "fulfill"],
   salesOrderItem: ["create", "update", "delete"],
   stock: ["adjust", "view"],
+  apiKey: ["create", "read", "update", "delete"],
 });
 
 export const member = ac.newRole({
@@ -62,6 +65,7 @@ export const member = ac.newRole({
   salesOrder: ["create"],
   salesOrderItem: [],
   stock: [],
+  apiKey: ["read"],
 });
 
 export type PermissionStatement = typeof statement;

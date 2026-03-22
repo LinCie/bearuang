@@ -15,6 +15,15 @@ export const auth = betterAuth({
       roles: { owner, admin, member },
       dynamicAccessControl: { enabled: true },
     }),
-    apiKey(),
+    apiKey({
+      references: "organization",
+      enableSessionForAPIKeys: true,
+      defaultPrefix: "bk_",
+      rateLimit: {
+        enabled: true,
+        timeWindow: 1000 * 60 * 60,
+        maxRequests: 1000,
+      },
+    }),
   ],
 });
