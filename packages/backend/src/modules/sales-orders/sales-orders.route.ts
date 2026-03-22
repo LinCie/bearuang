@@ -157,6 +157,7 @@ export const salesOrdersRoute = new Elysia({
       }
     },
     {
+      requireAuth: true,
       requireOrg: true,
       query: listSalesOrdersQuery,
       response: {
@@ -180,6 +181,7 @@ export const salesOrdersRoute = new Elysia({
       return status(201, serializeSalesOrder(result as Parameters<typeof serializeSalesOrder>[0]))
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { salesOrder: ["create"] },
       body: createSalesOrderDto,
@@ -202,6 +204,7 @@ export const salesOrdersRoute = new Elysia({
       return serializeSalesOrder(order)
     },
     {
+      requireAuth: true,
       requireOrg: true,
       params: salesOrderIdParam,
       response: {
@@ -229,6 +232,7 @@ export const salesOrdersRoute = new Elysia({
       return serializeSalesOrder(result as Parameters<typeof serializeSalesOrder>[0])
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { salesOrder: ["update"] },
       params: salesOrderIdParam,
@@ -255,6 +259,7 @@ export const salesOrdersRoute = new Elysia({
       return status(200, { message: "Sales order deleted" })
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { salesOrder: ["delete"] },
       params: salesOrderIdParam,

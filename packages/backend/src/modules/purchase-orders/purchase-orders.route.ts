@@ -158,6 +158,7 @@ export const purchaseOrdersRoute = new Elysia({
       }
     },
     {
+      requireAuth: true,
       requireOrg: true,
       query: listPurchaseOrdersQuery,
       response: {
@@ -180,6 +181,7 @@ export const purchaseOrdersRoute = new Elysia({
       return status(201, serializePurchaseOrder(order))
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { purchaseOrder: ["create"] },
       body: createPurchaseOrderDto,
@@ -201,6 +203,7 @@ export const purchaseOrdersRoute = new Elysia({
       return serializePurchaseOrder(order)
     },
     {
+      requireAuth: true,
       requireOrg: true,
       params: purchaseOrderIdParam,
       response: {
@@ -231,6 +234,7 @@ export const purchaseOrdersRoute = new Elysia({
       return serializePurchaseOrder(result)
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { purchaseOrder: ["update"] },
       params: purchaseOrderIdParam,
@@ -263,6 +267,7 @@ export const purchaseOrdersRoute = new Elysia({
       return serializePurchaseOrder(result)
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { purchaseOrder: ["receive"] },
       params: purchaseOrderIdParam,
@@ -290,6 +295,7 @@ export const purchaseOrdersRoute = new Elysia({
       return status(200, { message: "Purchase order deleted" })
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { purchaseOrder: ["delete"] },
       params: purchaseOrderIdParam,

@@ -95,6 +95,7 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
           return variants.map(serializeVariant);
         },
         {
+          requireAuth: true,
           requireOrg: true,
           params: productIdParam,
           response: {
@@ -127,6 +128,7 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
           }
         },
         {
+          requireAuth: true,
           requireOrg: true,
           requirePermission: { productVariant: ["create"] },
           params: productIdParam,
@@ -166,6 +168,7 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
           };
         },
         {
+          requireAuth: true,
           requireOrg: true,
           query: searchVariantQuery,
           response: {
@@ -189,6 +192,7 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
           return serializeVariantWithProduct(variant);
         },
         {
+          requireAuth: true,
           requireOrg: true,
           params: variantIdParam,
           response: {
@@ -224,6 +228,7 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
           }
         },
         {
+          requireAuth: true,
           requireOrg: true,
           requirePermission: { productVariant: ["update"] },
           params: variantIdParam,
@@ -251,6 +256,7 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
           return status(200, { message: "Variant deleted" });
         },
         {
+          requireAuth: true,
           requireOrg: true,
           requirePermission: { productVariant: ["delete"] },
           params: variantIdParam,

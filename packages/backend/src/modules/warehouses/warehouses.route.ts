@@ -79,6 +79,7 @@ export const warehousesRoute = new Elysia({
       };
     },
     {
+      requireAuth: true,
       requireOrg: true,
       query: listWarehousesQuery,
       response: {
@@ -101,6 +102,7 @@ export const warehousesRoute = new Elysia({
       return status(201, serializeWarehouse(warehouse));
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { warehouse: ["create"] },
       body: createWarehouseDto,
@@ -125,6 +127,7 @@ export const warehousesRoute = new Elysia({
       return serializeWarehouse(warehouse);
     },
     {
+      requireAuth: true,
       requireOrg: true,
       params: warehouseIdParam,
       response: {
@@ -150,6 +153,7 @@ export const warehousesRoute = new Elysia({
       return status(200, { message: "Warehouse updated" });
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { warehouse: ["update"] },
       params: warehouseIdParam,
@@ -176,6 +180,7 @@ export const warehousesRoute = new Elysia({
       return status(200, { message: "Warehouse deleted" });
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { warehouse: ["delete"] },
       params: warehouseIdParam,

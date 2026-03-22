@@ -97,6 +97,7 @@ export const customersRoute = new Elysia({
       };
     },
     {
+      requireAuth: true,
       requireOrg: true,
       query: listCustomersQuery,
       response: {
@@ -119,6 +120,7 @@ export const customersRoute = new Elysia({
       return status(201, serializeCustomer(customer));
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { customer: ["create"] },
       body: createCustomerDto,
@@ -143,6 +145,7 @@ export const customersRoute = new Elysia({
       return serializeCustomer(customer);
     },
     {
+      requireAuth: true,
       requireOrg: true,
       params: customerIdParam,
       response: {
@@ -167,6 +170,7 @@ export const customersRoute = new Elysia({
       return serializeCustomer(customer);
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { customer: ["update"] },
       params: customerIdParam,
@@ -192,6 +196,7 @@ export const customersRoute = new Elysia({
       return status(200, { message: "Customer deleted" });
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { customer: ["delete"] },
       params: customerIdParam,

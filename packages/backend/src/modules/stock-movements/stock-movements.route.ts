@@ -113,6 +113,7 @@ export const stockMovementRoute = new Elysia({
       };
     },
     {
+      requireAuth: true,
       requireOrg: true,
       query: listMovementsQuery,
       response: {
@@ -135,6 +136,7 @@ export const stockMovementRoute = new Elysia({
       return status(201, serializeMovement(movement));
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { stock: ["adjust"] },
       body: createMovementDto,
@@ -160,6 +162,7 @@ export const stockMovementRoute = new Elysia({
       return serializeMovement(movement);
     },
     {
+      requireAuth: true,
       requireOrg: true,
       params: movementIdParam,
       response: {
@@ -184,6 +187,7 @@ export const stockMovementRoute = new Elysia({
       return status(200, { message: "Stock movement deleted" });
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { stock: ["adjust"] },
       params: movementIdParam,

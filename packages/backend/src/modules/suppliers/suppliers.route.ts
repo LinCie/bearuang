@@ -95,6 +95,7 @@ export const suppliersRoute = new Elysia({
       };
     },
     {
+      requireAuth: true,
       requireOrg: true,
       query: listSuppliersQuery,
       response: {
@@ -117,6 +118,7 @@ export const suppliersRoute = new Elysia({
       return status(201, serializeSupplier(supplier));
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { supplier: ["create"] },
       body: createSupplierDto,
@@ -141,6 +143,7 @@ export const suppliersRoute = new Elysia({
       return serializeSupplier(supplier);
     },
     {
+      requireAuth: true,
       requireOrg: true,
       params: supplierIdParam,
       response: {
@@ -165,6 +168,7 @@ export const suppliersRoute = new Elysia({
       return serializeSupplier(supplier);
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { supplier: ["update"] },
       params: supplierIdParam,
@@ -190,6 +194,7 @@ export const suppliersRoute = new Elysia({
       return status(200, { message: "Supplier deleted" });
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { supplier: ["delete"] },
       params: supplierIdParam,

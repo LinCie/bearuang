@@ -95,6 +95,7 @@ export const productsRoute = new Elysia({
       };
     },
     {
+      requireAuth: true,
       requireOrg: true,
       query: listProductsQuery,
       response: {
@@ -129,6 +130,7 @@ export const productsRoute = new Elysia({
       });
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { product: ["create"] },
       body: createProductDto,
@@ -165,6 +167,7 @@ export const productsRoute = new Elysia({
       };
     },
     {
+      requireAuth: true,
       requireOrg: true,
       params: productIdParam,
       response: {
@@ -190,6 +193,7 @@ export const productsRoute = new Elysia({
       return status(200, { message: "Product updated" });
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { product: ["update"] },
       params: productIdParam,
@@ -211,6 +215,7 @@ export const productsRoute = new Elysia({
       return status(200, { message: "Product deleted" });
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { product: ["delete"] },
       params: productIdParam,

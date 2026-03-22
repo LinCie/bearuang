@@ -87,6 +87,7 @@ export const apiKeysRoute = new Elysia({
       return serializeWithSecret(key as unknown as ApiKey);
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { apiKey: ["create"] },
       body: createApiKeyDto,
@@ -107,6 +108,7 @@ export const apiKeysRoute = new Elysia({
       return (keys as unknown as ApiKey[]).map(serialize);
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { apiKey: ["read"] },
       response: {
@@ -127,6 +129,7 @@ export const apiKeysRoute = new Elysia({
       return serialize(key as unknown as ApiKey);
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { apiKey: ["read"] },
       params: apiKeyIdParam,
@@ -152,6 +155,7 @@ export const apiKeysRoute = new Elysia({
       return serialize(updated as unknown as ApiKey);
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { apiKey: ["update"] },
       params: apiKeyIdParam,
@@ -179,6 +183,7 @@ export const apiKeysRoute = new Elysia({
       return status(200, { message: "API key deleted" });
     },
     {
+      requireAuth: true,
       requireOrg: true,
       requirePermission: { apiKey: ["delete"] },
       params: apiKeyIdParam,
