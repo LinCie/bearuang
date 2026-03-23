@@ -3,9 +3,9 @@ import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { AuthLayout } from '@/components/layouts/auth-layout'
 import { signIn } from '@/lib/auth-client'
 import { useState } from 'react'
@@ -14,12 +14,15 @@ export const Route = createFileRoute('/signin')({
   component: SigninPage,
 })
 
-const emailSchema = z.string().min(1, 'Email wajib diisi').email('Format email tidak valid')
+const emailSchema = z
+  .string()
+  .min(1, 'Email wajib diisi')
+  .email('Format email tidak valid')
 const passwordSchema = z.string().min(1, 'Kata sandi wajib diisi')
 
 function SigninPage() {
   const router = useRouter()
-  const [showPassword, setShowPassword] = useState(false)
+
   const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm({
@@ -45,20 +48,24 @@ function SigninPage() {
 
   return (
     <AuthLayout>
-      <div className="mb-10 text-center lg:text-left">
-        <h2 className="text-3xl font-bold text-foreground mb-2">Selamat Datang</h2>
-        <p className="text-muted-foreground">Silakan masuk ke akun BearUang Anda</p>
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-foreground mb-1.5 tracking-tight">
+          Selamat datang kembali
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Masuk ke akun Anda untuk melanjutkan.
+        </p>
       </div>
 
       <form
-        className="space-y-6"
+        className="space-y-5"
         onSubmit={(e) => {
           e.preventDefault()
           form.handleSubmit()
         }}
       >
         {serverError && (
-          <p className="text-sm text-destructive bg-destructive/10 rounded-xl px-4 py-3 text-center">
+          <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-4 py-3 text-center font-medium">
             {serverError}
           </p>
         )}
@@ -69,27 +76,26 @@ function SigninPage() {
           validators={{ onBlur: emailSchema, onSubmit: emailSchema }}
         >
           {(field) => (
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label
                 htmlFor={field.name}
-                className="block text-sm font-bold text-muted-foreground uppercase tracking-wider ml-4"
+                className="block font-medium text-foreground"
               >
                 Email
               </Label>
-              <div className="relative group">
-                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors" />
-                <Input
-                  id={field.name}
-                  type="email"
-                  placeholder="nama@perusahaan.com"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="w-full bg-muted border-none rounded-full py-6 pl-14 pr-6 focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-background transition-all placeholder:text-muted-foreground/60"
-                />
-              </div>
+              <Input
+                id={field.name}
+                type="email"
+                placeholder="nama@perusahaan.com"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                className="h-12 px-4 bg-transparent border-input rounded-lg focus-visible:ring-1"
+              />
               {field.state.meta.errors[0] && (
-                <p className="text-xs text-destructive ml-4">{field.state.meta.errors[0].message}</p>
+                <p className="text-xs text-destructive mt-1 font-medium">
+                  {field.state.meta.errors[0].message}
+                </p>
               )}
             </div>
           )}
@@ -101,39 +107,34 @@ function SigninPage() {
           validators={{ onBlur: passwordSchema, onSubmit: passwordSchema }}
         >
           {(field) => (
-            <div className="space-y-2">
-              <div className="flex justify-between items-center px-4">
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center">
                 <Label
                   htmlFor={field.name}
-                  className="block text-sm font-bold text-muted-foreground uppercase tracking-wider"
+                  className="block font-medium text-foreground"
                 >
                   Kata Sandi
                 </Label>
-                <a href="#" className="text-xs font-bold text-primary hover:underline">
-                  Lupa kata sandi?
-                </a>
-              </div>
-              <div className="relative group">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors" />
-                <Input
-                  id={field.name}
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="w-full bg-muted border-none rounded-full py-6 pl-14 pr-14 focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-background transition-all placeholder:text-muted-foreground/60"
-                />
+
                 <button
                   type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors group-focus-within:text-primary"
+                  onClick={(e) => e.preventDefault()}
+                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  Lupa?
                 </button>
               </div>
+              <PasswordInput
+                id={field.name}
+                placeholder="••••••••"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+              />
               {field.state.meta.errors[0] && (
-                <p className="text-xs text-destructive ml-4">{field.state.meta.errors[0].message}</p>
+                <p className="text-xs text-destructive mt-1 font-medium">
+                  {field.state.meta.errors[0].message}
+                </p>
               )}
             </div>
           )}
@@ -142,16 +143,18 @@ function SigninPage() {
         {/* Remember Me */}
         <form.Field name="rememberMe">
           {(field) => (
-            <div className="flex items-center gap-3 px-4">
+            <div className="flex items-center gap-2 pt-1 pb-2">
               <Checkbox
                 id={field.name}
                 checked={field.state.value}
-                onCheckedChange={(checked) => field.handleChange(Boolean(checked))}
-                className="w-5 h-5 rounded border-muted-foreground text-primary focus:ring-primary"
+                onCheckedChange={(checked) =>
+                  field.handleChange(Boolean(checked))
+                }
+                className="w-4 h-4 rounded border-input text-primary focus-visible:ring-1 focus-visible:ring-primary"
               />
               <Label
                 htmlFor={field.name}
-                className="text-sm font-normal text-muted-foreground leading-tight cursor-pointer"
+                className="text-sm font-medium text-muted-foreground cursor-pointer select-none"
               >
                 Ingat saya di perangkat ini
               </Label>
@@ -166,20 +169,20 @@ function SigninPage() {
               type="submit"
               size="lg"
               disabled={isSubmitting}
-              className="w-full py-6 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+              className="w-full h-12 rounded-lg font-semibold text-base transition-colors duration-300"
             >
-              {isSubmitting ? 'Memproses...' : 'Masuk ke Dashboard'}
+              {isSubmitting ? 'Memproses...' : 'Masuk'}
             </Button>
           )}
         </form.Subscribe>
 
-        <p className="text-center text-muted-foreground pt-4">
+        <p className="text-center text-sm text-muted-foreground pt-4">
           Belum memiliki akun?{' '}
           <Link
             to="/signup"
-            className="text-primary font-bold hover:underline decoration-2 underline-offset-4"
+            className="text-foreground font-semibold hover:underline decoration-2 underline-offset-4 transition-all"
           >
-            Daftar di sini
+            Daftar
           </Link>
         </p>
       </form>

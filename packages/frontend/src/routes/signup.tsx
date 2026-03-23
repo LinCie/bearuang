@@ -3,9 +3,9 @@ import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { User, Mail, Lock, Shield } from 'lucide-react'
 import { AuthLayout } from '@/components/layouts/auth-layout'
 import { signUp } from '@/lib/auth-client'
 import { useState } from 'react'
@@ -64,24 +64,24 @@ function SignupPage() {
 
   return (
     <AuthLayout>
-      <div className="mb-10 text-center lg:text-left">
-        <h2 className="text-3xl font-bold text-foreground mb-2">
-          Buat Akun Baru
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-foreground mb-1.5 tracking-tight">
+          Buat akun baru
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Isi detail di bawah untuk mendaftarkan bisnis Anda.
         </p>
       </div>
 
       <form
-        className="space-y-6"
+        className="space-y-5"
         onSubmit={(e) => {
           e.preventDefault()
           form.handleSubmit()
         }}
       >
         {serverError && (
-          <p className="text-sm text-destructive bg-destructive/10 rounded-xl px-4 py-3 text-center">
+          <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-4 py-3 text-center font-medium">
             {serverError}
           </p>
         )}
@@ -92,27 +92,24 @@ function SignupPage() {
           validators={{ onBlur: nameSchema, onSubmit: nameSchema }}
         >
           {(field) => (
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label
                 htmlFor={field.name}
-                className="block text-sm font-bold text-muted-foreground uppercase tracking-wider ml-4"
+                className="block font-medium text-foreground"
               >
                 Nama Lengkap
               </Label>
-              <div className="relative group">
-                <User className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors" />
-                <Input
-                  id={field.name}
-                  type="text"
-                  placeholder="Budi Santoso"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="w-full bg-muted border-none rounded-full py-6 pl-14 pr-6 focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-background transition-all placeholder:text-muted-foreground/60"
-                />
-              </div>
+              <Input
+                id={field.name}
+                type="text"
+                placeholder="Budi Santoso"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                className="h-12 px-4 bg-transparent border-input rounded-lg focus-visible:ring-1"
+              />
               {field.state.meta.errors[0] && (
-                <p className="text-xs text-destructive ml-4">
+                <p className="text-xs text-destructive mt-1 font-medium">
                   {field.state.meta.errors[0].message}
                 </p>
               )}
@@ -126,27 +123,24 @@ function SignupPage() {
           validators={{ onBlur: emailSchema, onSubmit: emailSchema }}
         >
           {(field) => (
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label
                 htmlFor={field.name}
-                className="block text-sm font-bold text-muted-foreground uppercase tracking-wider ml-4"
+                className="block font-medium text-foreground"
               >
                 Email Bisnis
               </Label>
-              <div className="relative group">
-                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors" />
-                <Input
-                  id={field.name}
-                  type="email"
-                  placeholder="budi@bisnisanda.com"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="w-full bg-muted border-none rounded-full py-6 pl-14 pr-6 focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-background transition-all placeholder:text-muted-foreground/60"
-                />
-              </div>
+              <Input
+                id={field.name}
+                type="email"
+                placeholder="budi@bisnisanda.com"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                className="h-12 px-4 bg-transparent border-input rounded-lg focus-visible:ring-1"
+              />
               {field.state.meta.errors[0] && (
-                <p className="text-xs text-destructive ml-4">
+                <p className="text-xs text-destructive mt-1 font-medium">
                   {field.state.meta.errors[0].message}
                 </p>
               )}
@@ -161,27 +155,22 @@ function SignupPage() {
             validators={{ onBlur: passwordSchema, onSubmit: passwordSchema }}
           >
             {(field) => (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label
                   htmlFor={field.name}
-                  className="block text-sm font-bold text-muted-foreground uppercase tracking-wider ml-4"
+                  className="block font-medium text-foreground"
                 >
                   Kata Sandi
                 </Label>
-                <div className="relative group">
-                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors" />
-                  <Input
-                    id={field.name}
-                    type="password"
-                    placeholder="••••••••"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    className="w-full bg-muted border-none rounded-full py-6 pl-14 pr-6 focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-background transition-all placeholder:text-muted-foreground/60"
-                  />
-                </div>
+                <PasswordInput
+                  id={field.name}
+                  placeholder="••••••••"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
                 {field.state.meta.errors[0] && (
-                  <p className="text-xs text-destructive ml-4">
+                  <p className="text-xs text-destructive mt-1 font-medium">
                     {field.state.meta.errors[0].message}
                   </p>
                 )}
@@ -197,27 +186,22 @@ function SignupPage() {
             }}
           >
             {(field) => (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label
                   htmlFor={field.name}
-                  className="block text-sm font-bold text-muted-foreground uppercase tracking-wider ml-4"
+                  className="block font-medium text-foreground"
                 >
                   Konfirmasi
                 </Label>
-                <div className="relative group">
-                  <Shield className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5 group-focus-within:text-primary transition-colors" />
-                  <Input
-                    id={field.name}
-                    type="password"
-                    placeholder="••••••••"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    className="w-full bg-muted border-none rounded-full py-6 pl-14 pr-6 focus-visible:ring-2 focus-visible:ring-primary focus-visible:bg-background transition-all placeholder:text-muted-foreground/60"
-                  />
-                </div>
+                <PasswordInput
+                  id={field.name}
+                  placeholder="••••••••"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
                 {field.state.meta.errors[0] && (
-                  <p className="text-xs text-destructive ml-4">
+                  <p className="text-xs text-destructive mt-1 font-medium">
                     {field.state.meta.errors[0].message}
                   </p>
                 )}
@@ -229,32 +213,32 @@ function SignupPage() {
         {/* Terms */}
         <form.Field name="acceptedTerms" validators={{ onSubmit: termsSchema }}>
           {(field) => (
-            <div className="space-y-1">
-              <div className="flex items-center gap-3 px-4">
+            <div className="space-y-1 pt-1 pb-2">
+              <div className="flex items-start gap-2">
                 <Checkbox
                   id={field.name}
                   checked={field.state.value}
                   onCheckedChange={(checked) =>
                     field.handleChange(Boolean(checked))
                   }
-                  className="w-5 h-5 rounded border-muted-foreground text-primary focus:ring-primary"
+                  className="w-4 h-4 mt-0.5 rounded border-input text-primary focus-visible:ring-1 focus-visible:ring-primary"
                 />
                 <Label
                   htmlFor={field.name}
-                  className="text-sm font-normal text-muted-foreground leading-tight cursor-pointer"
+                  className="text-sm font-medium text-muted-foreground leading-snug cursor-pointer select-none"
                 >
                   Saya menyetujui{' '}
-                  <a
-                    href="#"
-                    className="text-primary font-bold hover:underline"
+                  <button
+                    type="button"
+                    onClick={(e) => e.preventDefault()}
+                    className="text-foreground font-semibold hover:underline decoration-1 underline-offset-2"
                   >
                     Syarat &amp; Ketentuan
-                  </a>{' '}
-                  yang berlaku.
+                  </button>
                 </Label>
               </div>
               {field.state.meta.errors[0] && (
-                <p className="text-xs text-destructive ml-4">
+                <p className="text-xs text-destructive mt-1 font-medium ml-6">
                   {field.state.meta.errors[0].message}
                 </p>
               )}
@@ -269,20 +253,20 @@ function SignupPage() {
               type="submit"
               size="lg"
               disabled={isSubmitting}
-              className="w-full py-6 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+              className="w-full h-12 rounded-lg font-semibold text-base transition-colors duration-300"
             >
               {isSubmitting ? 'Memproses...' : 'Daftar Sekarang'}
             </Button>
           )}
         </form.Subscribe>
 
-        <p className="text-center text-muted-foreground pt-4">
+        <p className="text-center text-sm text-muted-foreground pt-4">
           Sudah punya akun?{' '}
           <Link
             to="/signin"
-            className="text-primary font-bold hover:underline decoration-2 underline-offset-4"
+            className="text-foreground font-semibold hover:underline decoration-2 underline-offset-4 transition-all"
           >
-            Masuk di sini
+            Masuk
           </Link>
         </p>
       </form>

@@ -1,52 +1,52 @@
-import { ShieldCheck, Zap } from 'lucide-react'
+import { PawPrint } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 
 export function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-background text-foreground antialiased min-h-screen flex flex-col">
-      <main className="grow flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left Side: Editorial Content */}
-          <div className="hidden lg:block space-y-8">
-            <div className="space-y-4">
-              <span className="inline-block px-4 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-bold tracking-widest uppercase">
-                Mulai Petualanganmu
-              </span>
-              <h1 className="text-6xl font-extrabold text-primary tracking-tight leading-tight">
-                Kelola Keuangan dengan Hangat.
-              </h1>
-              <p className="text-muted-foreground text-lg max-w-md leading-relaxed">
-                Bergabunglah dengan ribuan pengusaha yang telah menyederhanakan
-                operasional bisnis mereka dengan BearUang OMS.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-muted p-6 rounded-lg space-y-2">
-                <ShieldCheck className="text-primary w-8 h-8" />
-                <h3 className="font-bold text-foreground">Keamanan Terjamin</h3>
-                <p className="text-sm text-muted-foreground">
-                  Data bisnis Anda aman dalam enkripsi berlapis.
-                </p>
-              </div>
-              <div className="bg-muted p-6 rounded-lg space-y-2">
-                <Zap className="text-primary w-8 h-8" />
-                <h3 className="font-bold text-foreground">Proses Cepat</h3>
-                <p className="text-sm text-muted-foreground">
-                  Sistem yang ringan dan responsif untuk Anda.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side: Form Card */}
-          <div className="bg-card rounded-xl p-8 md:p-12 shadow-lg border border-border">
-            {children}
-          </div>
+    <div className="bg-background text-foreground antialiased min-h-screen flex flex-col lg:flex-row">
+      <div className="hidden lg:flex lg:w-1/2 p-12 flex-col justify-between bg-muted/60 dark:bg-muted/10 border-r border-border/40 min-h-screen">
+        <div>
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-primary font-bold text-2xl tracking-tight hover:opacity-80 transition-opacity w-fit"
+          >
+            <PawPrint className="w-8 h-8" />
+            <span>BearUang</span>
+          </Link>
         </div>
-      </main>
 
-      {/* Visual Background Elements */}
-      <div className="fixed bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-secondary/30 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
-      <div className="fixed top-[10%] right-[-5%] w-[300px] h-[300px] bg-primary/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+        <div className="max-w-lg mb-12">
+          <h1 className="text-[3.5rem] font-black text-foreground tracking-tight leading-[1.1] mb-6">
+            Kelola bisnismu
+            <br />
+            <span className="text-primary font-medium opacity-90">
+              dengan tenang.
+            </span>
+          </h1>
+          <p className="text-muted-foreground text-xl leading-relaxed max-w-md">
+            Sistem operasional bersih yang mengurangi kognitif bebanmu, bukan
+            sebaliknya.
+          </p>
+        </div>
+
+        <div className="text-sm font-medium text-muted-foreground/60">
+          &copy; {new Date().getFullYear()} BearUang OMS.
+        </div>
+      </div>
+
+      <main className="flex-1 flex items-center justify-center p-6 sm:p-12 lg:p-24 bg-background relative z-10 w-full min-h-screen">
+        <div className="absolute top-6 left-6 lg:hidden">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-primary font-bold text-xl tracking-tight"
+          >
+            <PawPrint className="w-6 h-6" />
+            <span>BearUang</span>
+          </Link>
+        </div>
+
+        <div className="w-full max-w-[420px] mt-12 lg:mt-0">{children}</div>
+      </main>
     </div>
   )
 }
