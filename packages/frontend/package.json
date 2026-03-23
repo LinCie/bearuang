@@ -2,9 +2,6 @@
   "name": "frontend",
   "private": true,
   "type": "module",
-  "imports": {
-    "#/*": "./src/*"
-  },
   "scripts": {
     "dev": "vite dev --port ${PORT:-3000}",
     "build": "vite build",
