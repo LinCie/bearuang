@@ -4,7 +4,10 @@ This document provides essential information for agentic coding agents working i
 
 ## Project Overview
 
-BearUang is a monorepo containing a backend API built with:
+BearUang is a monorepo containing a backend API and a frontend SPA:
+
+### Backend (`packages/backend/`)
+
 - **Runtime**: Bun (v1.3.10+)
 - **Framework**: Elysia.js
 - **Language**: TypeScript (strict mode)
@@ -13,50 +16,96 @@ BearUang is a monorepo containing a backend API built with:
 - **Validation**: Zod
 - **Logging**: Pino
 
+### Frontend (`packages/frontend/`)
+
+- **Framework**: React 19 + TanStack Start (SSR) + TanStack Router
+- **Build**: Vite 7
+- **Language**: TypeScript (strict mode)
+- **Styling**: Tailwind CSS 4 + shadcn/ui (radix-vega style) + Lucide icons
+- **Forms**: TanStack Form + Zod v4 validation
+- **Tables**: TanStack Table
+- **Auth client**: better-auth/react + @elysiajs/eden (type-safe API client)
+- **Linting**: ESLint (@tanstack/eslint-config) + Prettier
+- **Testing**: Vitest + @testing-library/react + jsdom
+
 ## Project Structure
 
 ```
 bearuang/
 ├── packages/
-│   └── backend/           # Backend API service
+│   ├── backend/
+│   │   ├── src/
+│   │   │   ├── generated/     # Prisma generated client (git-ignored)
+│   │   │   ├── integrations/  # External service integrations (auth, prisma)
+│   │   │   ├── libraries/     # Shared utilities and helpers
+│   │   │   ├── plugins/       # Elysia plugins and middleware
+│   │   │   └── index.ts       # Application entry point
+│   │   ├── prisma/
+│   │   │   ├── schema.prisma  # Database schema
+│   │   │   └── migrations/
+│   │   └── prisma.config.ts
+│   └── frontend/
 │       ├── src/
-│       │   ├── generated/     # Prisma generated client (git-ignored)
-│       │   ├── integrations/  # External service integrations (auth, prisma)
-│       │   ├── libraries/     # Shared utilities and helpers
-│       │   ├── plugins/       # Elysia plugins and middleware
-│       │   └── index.ts       # Application entry point
-│       ├── prisma/
-│       │   ├── schema.prisma  # Database schema
-│       │   └── migrations/    # Database migrations
-│       └── prisma.config.ts   # Prisma configuration
-├── docker-compose.yml     # PostgreSQL development database
-└── package.json           # Root workspace configuration
+│       │   ├── components/    # React components
+│       │   │   ├── ui/        # shadcn/ui primitives (button, input, label, checkbox)
+│       │   │   └── layouts/   # Page layout components (auth-layout)
+│       │   ├── routes/        # TanStack file-based routes
+│       │   │   ├── __root.tsx # Root layout
+│       │   │   ├── index.tsx  # Home page
+│       │   │   ├── signin.tsx # Sign in page
+│       │   │   └── signup.tsx # Sign up page
+│       │   ├── lib/           # Shared libraries
+│       │   │   ├── api.ts     # Eden API client (type-safe backend connection)
+│       │   │   ├── auth-client.ts  # better-auth client with org + API key plugins
+│       │   │   └── utils.ts   # cn() utility (clsx + tailwind-merge)
+│       │   ├── router.tsx     # TanStack router configuration
+│       │   ├── routeTree.gen.ts  # Auto-generated route tree (do not edit)
+│       │   └── styles.css     # Global styles + Tailwind + shadcn theme
+│       └── dist/
+├── docker-compose.yml
+└── package.json
 ```
 
 ## Development Commands
 
 ### Root Commands
+
 ```bash
 bun install                  # Install all dependencies
 bun run dev:backend          # Run backend with watch mode
 ```
 
 ### Backend Commands (run from packages/backend/)
+
 ```bash
 bun run dev                  # Start development server with hot reload and pino-pretty
 bun run db:generate          # Generate Prisma client
 bun run db:migrate           # Create and apply migration (dev)
 bun run db:migrate:deploy    # Apply migrations (production)
 bun run db:push              # Push schema changes without migration
-bun run db:pull              # Pull schema from database
 bun run db:studio            # Open Prisma Studio GUI
 bun run db:seed              # Seed database
 bun run db:reset             # Reset database (migrations + seed)
 bun run db:validate          # Validate Prisma schema
-bun test                     # Run tests (not yet configured)
+```
+
+### Frontend Commands (run from packages/frontend/)
+
+```bash
+bun run dev                 # Start dev server (port 3000 by default, or $PORT)
+bun run build               # Production build
+bun run preview             # Preview production build
+bun run lint                # Run ESLint
+bun run format              # Run Prettier (check only)
+bun run check               # Run Prettier (fix) + ESLint (fix)
+bun run test                # Run all tests (vitest run, single run)
+bun vitest                  # Run tests in watch mode
+bun vitest run src/path/to/file.test.ts   # Run a single test file
+bun vitest run -t "test name pattern"     # Run tests matching name pattern
 ```
 
 ### Database Setup
+
 ```bash
 docker-compose up -d         # Start PostgreSQL container
 bun run db:migrate           # Apply migrations
@@ -65,136 +114,139 @@ bun run db:generate          # Generate Prisma client
 
 ## Environment Variables
 
-Required environment variables in `packages/backend/.env.local`:
+### Backend (`packages/backend/.env.local`)
+
 - `DATABASE_URL` - PostgreSQL connection string
 - Additional better-auth configuration as needed
+
+### Frontend (`packages/frontend/.env.local`)
+
+- `PUBLIC_BACKEND_URL` - Backend API URL (defaults to `http://localhost:8000`)
 
 ## Code Style Guidelines
 
 ### Imports
-- **Use path alias**: Always use `@/*` for imports from src directory
+
+- **Path aliases**: Use `@/*` or `#/*` for imports from `src/`
   ```typescript
-  import { auth } from "@/integrations/auth";
-  import { logger } from "./libraries/utilities";
+  import { Button } from "@/components/ui/button"; // route files
+  import { cn } from "#/lib/utils"; // ui components
+  import { authClient } from "@/lib/auth-client";
+  import type { App } from "backend/src/index"; // workspace imports
   ```
-- **Order**: External packages first, then internal modules
-- **Quotes**: Use double quotes for imports
-- **File extensions**: Omit `.ts` extensions in imports
+- **Order**: External packages first, then internal modules, then relative imports
+- **Quotes**: Single quotes for strings (Prettier enforced)
+- **File extensions**: Omit `.ts`/`.tsx` extensions in imports (except URLs like `?url`)
+- **Import sorting**: Not enforced by ESLint (sort-imports and import/order are off)
 
 ### TypeScript
-- **Strict mode**: Enabled - all strict type checking options are on
-- **Target**: ES2021
-- **Module**: ES2022 with Node module resolution
-- **Path aliases**: Use `@/*` mapping for `./src/*`
-- **Type exports**: Export types explicitly using `export type`
+
+- **Strict mode**: Enabled for both backend and frontend
+- **noUnusedLocals / noUnusedParameters**: Enabled on frontend
+- **verbatimModuleSyntax**: Enabled on frontend (use `import type` for type-only imports)
+- **Type exports**: Use `export type` for type-only exports
   ```typescript
   export type App = typeof app;
   ```
 
-### Naming Conventions
-- **Files**: camelCase with `.ts` extension
-  - `auth.plugin.ts` - plugins
-  - `utilities.ts` - libraries
-  - `auth.ts` - integrations
-- **Variables**: camelCase
-- **Constants**: camelCase for regular constants
-- **Types/Interfaces**: PascalCase
-- **Prisma models**: PascalCase (e.g., `User`, `Session`, `Organization`)
-- **Database tables**: lowercase with snake_case via `@@map` (e.g., `@@map("user")`)
-- **Export names**: Match file purpose (e.g., `authPlugin` from `auth.plugin.ts`)
+### Formatting (Prettier)
 
-### Formatting
-- **No semicolons**: Bun/JavaScript default (not enforced)
+- **No semicolons**
+- **Single quotes**
+- **Trailing commas**: Always (including function arguments)
 - **Indentation**: 2 spaces
-- **Trailing commas**: Use in multi-line structures
-- **Line width**: Keep reasonable (80-120 chars)
-- **Quotes**: Double quotes for strings
-- **No comments**: Do not add comments unless absolutely necessary for complex logic
+
+### Naming Conventions
+
+- **Files**: camelCase (`.ts`, `.tsx`) or kebab-case for route files
+  - `auth-client.ts`, `utils.ts` - libraries
+  - `button.tsx`, `input.tsx` - UI components
+  - `auth-layout.tsx` - layout components
+  - `signin.tsx`, `signup.tsx` - route files
+- **Variables**: camelCase
+- **Types/Interfaces**: PascalCase
+- **React components**: PascalCase function declarations
+  ```typescript
+  function SigninPage() { ... }  // not const SigninPage = () => {}
+  function Button({ ... }) { ... }  // ui components
+  ```
+
+### Frontend Patterns
+
+#### Routing (TanStack Router)
+
+- File-based routing in `src/routes/`
+- `__root.tsx` defines the HTML shell via `shellComponent`
+- Routes export a `Route` constant created with `createFileRoute('/path')`
+- Navigation: `router.navigate({ to: '/path' })` or `<Link to="/path">`
+
+#### Components
+
+- **UI components** (`src/components/ui/`): shadcn/ui primitives using Radix, CVA for variants, `cn()` for class merging
+  - Use `data-slot` attributes for targeting in styles
+  - Function components (not arrow functions)
+  - Named exports (e.g., `export { Button }`)
+- **Layout components** (`src/components/layouts/`): Page-level composition wrappers
+- Import from `@/components/...` in route files, `#/components/...` in ui files
+
+#### Forms (TanStack Form)
+
+- `useForm()` with `defaultValues` and `onSubmit`
+- Field-level validation via `validators: { onBlur: schema, onSubmit: schema }`
+- Use `<form.Field name="...">` render prop pattern
+- Use `<form.Subscribe selector={...}>` for reactive form state
+
+#### Auth (better-auth client)
+
+- Import pre-exported hooks from `@/lib/auth-client`:
+  ```typescript
+  import {
+    signIn,
+    signOut,
+    signUp,
+    useSession,
+    useActiveOrganization,
+  } from "@/lib/auth-client";
+  ```
+- Backend URL configured via `PUBLIC_BACKEND_URL` env var
+
+#### Styling
+
+- Tailwind CSS 4 with shadcn theme variables (oklch color space)
+- Dark mode: `.dark` class on parent element
+- Font: Roboto Variable (sans-serif)
+- Base color theme: olive
+- Use semantic tokens: `bg-background`, `text-foreground`, `bg-primary`, etc.
+- Never edit `src/styles.css` theme variables unless adding new tokens
+- shadcn/ui components use `#` path alias for internal imports
 
 ### Error Handling
-- **Elysia error handling**: Use `.onError()` hook at app level
+
+- **Frontend forms**: Catch auth errors and display via local state
   ```typescript
-  .onError(({ error }) => {
-    logger.error(error);
-  })
+  const [serverError, setServerError] = useState<string | null>(null)
+  const { error } = await signIn.email({ ... })
+  if (error) { setServerError(error.message ?? 'fallback message'); return }
   ```
-- **Plugin-level errors**: Return `status(code)` for HTTP errors
-  ```typescript
-  if (!session) return status(401);
-  ```
-- **Logging**: Use pino logger for all logging
-  ```typescript
-  logger.error(error);
-  logger.info(message);
-  ```
+- **Backend**: Use `.onError()` hook at app level, return `status(code)` for HTTP errors
+- **Logging**: Use pino logger on backend
 
-### Code Organization
-- **Integrations**: External service connections (Prisma, better-auth)
-- **Libraries**: Shared utilities, helpers, and constants
-- **Plugins**: Elysia plugins and reusable middleware macros
-- **Generated**: Auto-generated code (Prisma client) - never edit manually
+### Testing
 
-### Elysia Patterns
-- **Macro definitions**: For reusable authentication/authorization logic
-  ```typescript
-  new Elysia({ name: "auth" }).macro({
-    requireAuth: { ... },
-    requireOrg: { ... }
-  })
-  ```
-- **Route handlers**: Use method chaining
-- **Mount external handlers**: Use `.mount()` for better-auth
-  ```typescript
-  .mount(auth.handler)
-  ```
-
-### Prisma Patterns
-- **Schema**: Define models in `prisma/schema.prisma`
-- **Client location**: Generated to `src/generated/prisma/client`
-- **Adapter**: Use PrismaPg adapter for connection pooling
-  ```typescript
-  export const prisma = new PrismaClient({
-    adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
-  });
-  ```
-- **Migrations**: Always use migrations for schema changes in production
-- **Development**: Can use `db:push` for rapid prototyping
-
-### Validation
-- **Zod schemas**: Use Zod for request/response validation
-- **OpenAPI integration**: Pass Zod to OpenAPI plugin
-  ```typescript
-  mapJsonSchema: { zod: z.toJSONSchema }
-  ```
-
-## Testing
-
-**Status**: Not yet configured
-
-When implementing tests:
-- Use Bun's built-in test runner
-- Place test files alongside source files with `.test.ts` or `.spec.ts` extension
-- Run single test: `bun test path/to/file.test.ts`
-- Run all tests: `bun test`
-
-## Database Workflow
-
-1. **Modify schema**: Edit `prisma/schema.prisma`
-2. **Create migration**: `bun run db:migrate` (names migration interactively)
-3. **Generate client**: `bun run db:generate` (automatic with migrate)
-4. **Use in code**: Import from `@/generated/prisma/client` or via `@/integrations/prisma`
-
-## API Documentation
-
-- **OpenAPI spec**: Available at `/openapi/json`
-- **Swagger UI**: Available at `/openapi`
-- **Tags**: Use tags to organize endpoints (e.g., "Health")
+- **Framework**: Vitest + jsdom
+- **Libraries**: @testing-library/react, @testing-library/dom
+- **Place tests**: Alongside source files as `*.test.ts` or `*.test.tsx`
+- **Run all**: `bun run test` (equivalent to `vitest run`)
+- **Run single file**: `bun vitest run src/path/to/file.test.ts`
+- **Run by name**: `bun vitest run -t "test name pattern"`
+- **Watch mode**: `bun vitest` (no `run` flag)
 
 ## Important Notes
 
-- **No ESLint/Prettier**: Project does not currently use linting/formatting tools
-- **No test framework**: Tests not yet implemented
-- **Bun runtime**: Use Bun-specific APIs and package manager
-- **Hot reload**: Development server auto-restarts on file changes
-- **Generated code**: Never commit or manually edit `src/generated/`
+- **Auto-generated files**: Never edit `src/routeTree.gen.ts` (frontend), `src/generated/` (backend)
 - **Environment files**: Use `.env.local` for local development
+- **Generated code**: Never commit Prisma generated client
+- **shadcn/ui**: Use radix-vega style, olive base color, Roboto Variable font
+- **Package manager**: Bun for backend and frontend
+- **ESLint overrides**: import ordering, import cycle, and require-await are disabled
+- **Language**: UI text is in Indonesian (Bahasa Indonesia) - maintain this convention for user-facing strings
