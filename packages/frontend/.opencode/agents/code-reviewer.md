@@ -1,1 +1,0 @@
-/home/lincie/code/bearuang/.opencode/agents/code-reviewer.md

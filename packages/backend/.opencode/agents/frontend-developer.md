@@ -1,1 +1,0 @@
-/home/lincie/code/bearuang/.opencode/agents/frontend-developer.md
