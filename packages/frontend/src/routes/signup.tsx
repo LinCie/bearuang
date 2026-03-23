@@ -280,7 +280,7 @@ function SignupPage() {
           Sudah punya akun?{' '}
           <Link
             to="/signin"
-            className="text-foreground font-semibold hover:underline decoration-2 underline-offset-4 transition-all"
+            className="text-foreground font-semibold hover:underline decoration-2 underline-offset-4 transition-[text-decoration-color]"
           >
             Masuk
           </Link>

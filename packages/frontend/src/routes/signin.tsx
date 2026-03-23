@@ -196,7 +196,7 @@ function SigninPage() {
           Belum memiliki akun?{' '}
           <Link
             to="/signup"
-            className="text-foreground font-semibold hover:underline decoration-2 underline-offset-4 transition-all"
+            className="text-foreground font-semibold hover:underline decoration-2 underline-offset-4 transition-[text-decoration-color]"
           >
             Daftar
           </Link>
