@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect, useRouter } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
@@ -7,10 +7,20 @@ import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AuthLayout } from '@/components/layouts/auth-layout'
-import { signUp } from '@/lib/auth-client'
+import { authClient, signUp } from '@/lib/auth-client'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/signup')({
+  beforeLoad: async () => {
+    try {
+      const { data: session } = await authClient.getSession()
+      if (session) {
+        throw redirect({ to: '/' })
+      }
+    } catch (e) {
+      if (e instanceof Response || (e as { routerCode?: string })?.routerCode) throw e
+    }
+  },
   component: SignupPage,
 })
 
