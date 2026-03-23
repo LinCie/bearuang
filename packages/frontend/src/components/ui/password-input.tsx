@@ -3,7 +3,9 @@ import { Input } from '@/components/ui/input'
 import { Eye, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export interface PasswordInputProps extends React.ComponentProps<typeof Input> {}
+export interface PasswordInputProps extends React.ComponentProps<
+  typeof Input
+> {}
 
 const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
   ({ className, ...props }, ref) => {

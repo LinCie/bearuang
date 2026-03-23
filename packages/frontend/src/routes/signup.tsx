@@ -1,4 +1,9 @@
-import { createFileRoute, Link, redirect, useRouter } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  Link,
+  redirect,
+  useRouter,
+} from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
@@ -18,7 +23,8 @@ export const Route = createFileRoute('/signup')({
         throw redirect({ to: '/' })
       }
     } catch (e) {
-      if (e instanceof Response || (e as { routerCode?: string })?.routerCode) throw e
+      if (e instanceof Response || (e as { routerCode?: string })?.routerCode)
+        throw e
     }
   },
   component: SignupPage,
