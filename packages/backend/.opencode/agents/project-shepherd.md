@@ -1,0 +1,1 @@
+/home/lincie/code/bearuang/.opencode/agents/project-shepherd.md

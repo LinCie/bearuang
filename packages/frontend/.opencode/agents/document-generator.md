@@ -1,0 +1,1 @@
+/home/lincie/code/bearuang/.opencode/agents/document-generator.md
