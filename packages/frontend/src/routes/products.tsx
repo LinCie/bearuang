@@ -63,6 +63,7 @@ import type {
 
 export const Route = createFileRoute('/products')({
   beforeLoad: async () => {
+    if (typeof window === 'undefined') return
     const { data: session } = await authClient.getSession()
     if (!session) {
       throw redirect({ to: '/signin' })

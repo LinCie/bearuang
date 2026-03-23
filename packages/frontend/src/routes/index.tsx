@@ -5,6 +5,7 @@ import { TrendingUp, ShoppingBag, ArrowRight } from 'lucide-react'
 
 export const Route = createFileRoute('/')({
   beforeLoad: async () => {
+    if (typeof window === 'undefined') return
     const { data: session } = await authClient.getSession()
     if (!session) {
       throw redirect({ to: '/signin' })
