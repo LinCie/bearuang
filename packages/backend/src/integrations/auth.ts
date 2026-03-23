@@ -8,6 +8,7 @@ import { ac, owner, admin, member } from "@/libraries/permissions";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
+  trustedOrigins: ["*"],
   emailAndPassword: { enabled: true },
   plugins: [
     organization({

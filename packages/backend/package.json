@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@better-auth/api-key": "^1.5.5",
+    "@elysiajs/cors": "^1.4.1",
     "@elysiajs/openapi": "^1.4.14",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",

@@ -1,4 +1,5 @@
 import { Elysia } from "elysia";
+import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
 import { auth } from "./integrations/auth";
 import { z } from "zod";
@@ -55,6 +56,13 @@ const app = new Elysia()
       },
       path: "/openapi",
       specPath: "/openapi/json",
+    }),
+  )
+  .use(
+    cors({
+      origin: true,
+      credentials: true,
+      allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
     }),
   )
   .mount(auth.handler)
