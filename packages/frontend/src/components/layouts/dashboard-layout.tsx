@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Link, useRouter, useRouterState } from '@tanstack/react-router'
 import {
   Home,
+  Package,
   BadgeDollarSign,
   ShoppingCart,
   BarChart4,
@@ -44,6 +45,7 @@ interface NavItem {
 
 const MAIN_NAV: NavItem[] = [
   { icon: Home, label: 'Home', to: '/' },
+  { icon: Package, label: 'Produk', to: '/products' },
   { icon: BadgeDollarSign, label: 'Sales', to: '/sales' },
   { icon: ShoppingCart, label: 'Orders', to: '/orders' },
   { icon: BarChart4, label: 'Reports', to: '/reports' },
