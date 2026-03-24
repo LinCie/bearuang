@@ -131,7 +131,8 @@ export function StockMovementFormSheet({
 
   // Fetch products list
   const { data: productsData } = useProducts({ pageSize: 100 })
-  const products: Product[] = (productsData?.data as Product[]) ?? []
+  const products: Product[] =
+    (productsData?.data as Product[] | undefined) ?? []
 
   // Track selected product
   const [selectedProductId, setSelectedProductId] = React.useState<string>('')

@@ -8,7 +8,7 @@ export const Route = createFileRoute('/_dashboard/')({
 
 function DashboardPage() {
   const { data: sessionData } = useSession()
-  const userName = sessionData?.user?.name || 'User'
+  const userName = sessionData?.user.name || 'User'
   const firstName = userName.split(' ')[0]
 
   return (

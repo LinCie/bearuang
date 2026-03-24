@@ -118,8 +118,8 @@ function NavItemLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: sessionData } = useSession()
-  const userName = sessionData?.user?.name || 'User'
-  const userEmail = sessionData?.user?.email || ''
+  const userName = sessionData?.user.name || 'User'
+  const userEmail = sessionData?.user.email || ''
   const firstName = userName.split(' ')[0]
   const router = useRouter()
   const routerState = useRouterState()

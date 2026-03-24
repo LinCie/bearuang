@@ -39,7 +39,7 @@ interface SearchParams {
 function StockMovementsPage() {
   const search = useSearch({
     from: '/_dashboard/stock-movements/',
-  }) as SearchParams
+  })
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
