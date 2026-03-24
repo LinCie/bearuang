@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-export const Route = createFileRoute('/_dashboard/products_/$productId')({
+export const Route = createFileRoute('/_dashboard/products/$productId')({
   beforeLoad: async () => {
     if (typeof window === 'undefined') return
     const { data: session } = await authClient.getSession()
