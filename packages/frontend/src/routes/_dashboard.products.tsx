@@ -27,7 +27,6 @@ import {
   Eye,
 } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
-import { DashboardLayout } from '@/components/layouts/dashboard-layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -69,7 +68,7 @@ import type {
   UpdateProductInput,
 } from '@/hooks/use-products'
 
-export const Route = createFileRoute('/products')({
+export const Route = createFileRoute('/_dashboard/products')({
   beforeLoad: async () => {
     if (typeof window === 'undefined') return
     const { data: session } = await authClient.getSession()
@@ -366,7 +365,7 @@ function ProductsPage() {
   // ─── Render ────────────────────────────────────────────────
 
   return (
-    <DashboardLayout>
+    <>
       {/* Page Header & Toolbar */}
       <div className="flex flex-col gap-6 mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -723,7 +722,7 @@ function ProductsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </DashboardLayout>
+    </>
   )
 }
 

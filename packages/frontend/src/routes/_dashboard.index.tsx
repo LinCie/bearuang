@@ -1,9 +1,8 @@
 import { createFileRoute, redirect, isRedirect } from '@tanstack/react-router'
 import { authClient, useSession } from '@/lib/auth-client'
-import { DashboardLayout } from '@/components/layouts/dashboard-layout'
 import { TrendingUp, ShoppingBag, ArrowRight } from 'lucide-react'
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute('/_dashboard/')({
   beforeLoad: async ({ location }) => {
     try {
       const { data: session } = await authClient.getSession()
@@ -43,7 +42,7 @@ function DashboardPage() {
   const firstName = userName.split(' ')[0]
 
   return (
-    <DashboardLayout>
+    <>
       {/* Welcome Header */}
       <header className="mb-14">
         <h2 className="text-2xl font-medium text-foreground mb-1">
@@ -280,6 +279,6 @@ function DashboardPage() {
           </div>
         </div>
       </section>
-    </DashboardLayout>
+    </>
   )
 }

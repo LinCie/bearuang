@@ -1,7 +1,6 @@
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { authClient } from '@/lib/auth-client'
 import { useProduct } from '@/hooks/use-products'
-import { DashboardLayout } from '@/components/layouts/dashboard-layout'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Package, PawPrint, AlertCircle } from 'lucide-react'
 import {
@@ -13,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-export const Route = createFileRoute('/products_/$productId')({
+export const Route = createFileRoute('/_dashboard/products_/$productId')({
   beforeLoad: async () => {
     if (typeof window === 'undefined') return
     const { data: session } = await authClient.getSession()
@@ -30,7 +29,7 @@ function ProductDetailPage() {
 
   if (isLoading) {
     return (
-      <DashboardLayout>
+      <>
         <div className="flex flex-col items-center justify-center py-32 animate-in fade-in zoom-in-95 duration-500">
           <div className="relative flex items-center justify-center h-20 w-20 mb-6">
             <div className="absolute inset-0 rounded-3xl bg-amber-500/15 animate-ping opacity-75 duration-1000" />
@@ -42,13 +41,13 @@ function ProductDetailPage() {
             Beruang sedang membongkar catatan produk...
           </p>
         </div>
-      </DashboardLayout>
+      </>
     )
   }
 
   if (isError || !product) {
     return (
-      <DashboardLayout>
+      <>
         <div className="flex flex-col items-center justify-center py-20 animate-in fade-in duration-500">
           <div className="flex items-center justify-center h-16 w-16 mb-4 rounded-2xl bg-destructive/10 text-destructive/80">
             <AlertCircle className="h-7 w-7" strokeWidth={1.5} />
@@ -75,12 +74,12 @@ function ProductDetailPage() {
             </Button>
           </div>
         </div>
-      </DashboardLayout>
+      </>
     )
   }
 
   return (
-    <DashboardLayout>
+    <>
       <div className="flex flex-col gap-8 lg:gap-10 mt-6 mb-20 mx-auto">
         {/* Header Section */}
         <div className="flex items-start gap-4 lg:gap-5">
@@ -214,6 +213,6 @@ function ProductDetailPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   )
 }

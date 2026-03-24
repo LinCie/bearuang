@@ -11,10 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SigninRouteImport } from './routes/signin'
-import { Route as ProductsRouteImport } from './routes/products'
 import { Route as OrganizationsRouteImport } from './routes/organizations'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProductsProductIdRouteImport } from './routes/products_.$productId'
+import { Route as DashboardRouteImport } from './routes/_dashboard'
+import { Route as DashboardIndexRouteImport } from './routes/_dashboard.index'
+import { Route as DashboardProductsRouteImport } from './routes/_dashboard.products'
+import { Route as DashboardProductsProductIdRouteImport } from './routes/_dashboard.products_.$productId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -26,86 +27,91 @@ const SigninRoute = SigninRouteImport.update({
   path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProductsRoute = ProductsRouteImport.update({
-  id: '/products',
-  path: '/products',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const OrganizationsRoute = OrganizationsRouteImport.update({
   id: '/organizations',
   path: '/organizations',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/_dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => DashboardRoute,
 } as any)
-const ProductsProductIdRoute = ProductsProductIdRouteImport.update({
-  id: '/products_/$productId',
-  path: '/products/$productId',
-  getParentRoute: () => rootRouteImport,
+const DashboardProductsRoute = DashboardProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardProductsProductIdRoute =
+  DashboardProductsProductIdRouteImport.update({
+    id: '/products_/$productId',
+    path: '/products/$productId',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof DashboardIndexRoute
   '/organizations': typeof OrganizationsRoute
-  '/products': typeof ProductsRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
-  '/products/$productId': typeof ProductsProductIdRoute
+  '/products': typeof DashboardProductsRoute
+  '/products/$productId': typeof DashboardProductsProductIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/organizations': typeof OrganizationsRoute
-  '/products': typeof ProductsRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
-  '/products/$productId': typeof ProductsProductIdRoute
+  '/products': typeof DashboardProductsRoute
+  '/': typeof DashboardIndexRoute
+  '/products/$productId': typeof DashboardProductsProductIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_dashboard': typeof DashboardRouteWithChildren
   '/organizations': typeof OrganizationsRoute
-  '/products': typeof ProductsRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
-  '/products_/$productId': typeof ProductsProductIdRoute
+  '/_dashboard/products': typeof DashboardProductsRoute
+  '/_dashboard/': typeof DashboardIndexRoute
+  '/_dashboard/products_/$productId': typeof DashboardProductsProductIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/organizations'
-    | '/products'
     | '/signin'
     | '/signup'
+    | '/products'
     | '/products/$productId'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/organizations'
-    | '/products'
     | '/signin'
     | '/signup'
+    | '/products'
+    | '/'
     | '/products/$productId'
   id:
     | '__root__'
-    | '/'
+    | '/_dashboard'
     | '/organizations'
-    | '/products'
     | '/signin'
     | '/signup'
-    | '/products_/$productId'
+    | '/_dashboard/products'
+    | '/_dashboard/'
+    | '/_dashboard/products_/$productId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
   OrganizationsRoute: typeof OrganizationsRoute
-  ProductsRoute: typeof ProductsRoute
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
-  ProductsProductIdRoute: typeof ProductsProductIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -124,13 +130,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/products': {
-      id: '/products'
-      path: '/products'
-      fullPath: '/products'
-      preLoaderRoute: typeof ProductsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/organizations': {
       id: '/organizations'
       path: '/organizations'
@@ -138,30 +137,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrganizationsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
+    '/_dashboard': {
+      id: '/_dashboard'
+      path: ''
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/products_/$productId': {
-      id: '/products_/$productId'
+    '/_dashboard/': {
+      id: '/_dashboard/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/products': {
+      id: '/_dashboard/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof DashboardProductsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/products_/$productId': {
+      id: '/_dashboard/products_/$productId'
       path: '/products/$productId'
       fullPath: '/products/$productId'
-      preLoaderRoute: typeof ProductsProductIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof DashboardProductsProductIdRouteImport
+      parentRoute: typeof DashboardRoute
     }
   }
 }
 
+interface DashboardRouteChildren {
+  DashboardProductsRoute: typeof DashboardProductsRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardProductsProductIdRoute: typeof DashboardProductsProductIdRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardProductsRoute: DashboardProductsRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardProductsProductIdRoute: DashboardProductsProductIdRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRouteWithChildren,
   OrganizationsRoute: OrganizationsRoute,
-  ProductsRoute: ProductsRoute,
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
-  ProductsProductIdRoute: ProductsProductIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
