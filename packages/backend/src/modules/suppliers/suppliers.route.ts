@@ -11,7 +11,7 @@ import {
   sortQuery,
 } from "@/common/pagination";
 
-const supplierSchema = z.object({
+export const supplierSchema = z.object({
   id: z.string(),
   organizationId: z.string(),
   name: z.string(),
@@ -23,14 +23,14 @@ const supplierSchema = z.object({
   updatedAt: z.iso.datetime(),
 });
 
-const createSupplierDto = z.object({
+export const createSupplierDto = z.object({
   name: z.string().min(1),
   email: z.string().email().optional(),
   phone: z.string().optional(),
   address: z.string().optional(),
 });
 
-const updateSupplierDto = z.object({
+export const updateSupplierDto = z.object({
   name: z.string().min(1).optional(),
   email: z.string().email().nullable().optional(),
   phone: z.string().nullable().optional(),
@@ -38,7 +38,7 @@ const updateSupplierDto = z.object({
   isActive: z.boolean().optional(),
 });
 
-const listSuppliersQuery = paginationQuery
+export const listSuppliersQuery = paginationQuery
   .extend(sortQuery(["name", "createdAt", "updatedAt"]).shape)
   .extend({
     isActive: z
@@ -47,6 +47,11 @@ const listSuppliersQuery = paginationQuery
       .pipe(z.boolean())
       .optional(),
   });
+
+export type Supplier = z.infer<typeof supplierSchema>
+export type CreateSupplierInput = z.infer<typeof createSupplierDto>
+export type UpdateSupplierInput = z.infer<typeof updateSupplierDto>
+export type ListSuppliersQuery = z.infer<typeof listSuppliersQuery>
 
 const supplierIdParam = z.object({
   id: z.string().uuid(),

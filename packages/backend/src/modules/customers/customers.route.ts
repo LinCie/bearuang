@@ -11,7 +11,7 @@ import {
   sortQuery,
 } from "@/common/pagination";
 
-const customerSchema = z.object({
+export const customerSchema = z.object({
   id: z.string(),
   organizationId: z.string(),
   name: z.string(),
@@ -23,14 +23,14 @@ const customerSchema = z.object({
   updatedAt: z.iso.datetime(),
 });
 
-const createCustomerDto = z.object({
+export const createCustomerDto = z.object({
   name: z.string().min(1),
   email: z.string().email().optional(),
   phone: z.string().optional(),
   address: z.string().optional(),
 });
 
-const updateCustomerDto = z.object({
+export const updateCustomerDto = z.object({
   name: z.string().min(1).optional(),
   email: z.string().email().nullable().optional(),
   phone: z.string().nullable().optional(),
@@ -38,7 +38,7 @@ const updateCustomerDto = z.object({
   isActive: z.boolean().optional(),
 });
 
-const listCustomersQuery = paginationQuery
+export const listCustomersQuery = paginationQuery
   .extend(sortQuery(["name", "createdAt", "updatedAt"]).shape)
   .extend({
     search: z.string().optional(),
@@ -48,6 +48,11 @@ const listCustomersQuery = paginationQuery
       .pipe(z.boolean())
       .optional(),
   });
+
+export type Customer = z.infer<typeof customerSchema>
+export type CreateCustomerInput = z.infer<typeof createCustomerDto>
+export type UpdateCustomerInput = z.infer<typeof updateCustomerDto>
+export type ListCustomersQuery = z.infer<typeof listCustomersQuery>
 
 const customerIdParam = z.object({
   id: z.string().uuid(),
