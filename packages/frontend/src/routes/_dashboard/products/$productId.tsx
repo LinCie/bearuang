@@ -1,8 +1,7 @@
-import { createFileRoute, Link, redirect } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import * as React from 'react'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
-import { authClient } from '@/lib/auth-client'
 import { useProduct } from '@/hooks/use-products'
 import {
   useProductVariants,
@@ -54,13 +53,6 @@ import {
 } from 'lucide-react'
 
 export const Route = createFileRoute('/_dashboard/products/$productId')({
-  beforeLoad: async () => {
-    if (typeof window === 'undefined') return
-    const { data: session } = await authClient.getSession()
-    if (!session) {
-      throw redirect({ to: '/signin' })
-    }
-  },
   component: ProductDetailPage,
 })
 

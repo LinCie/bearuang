@@ -1,6 +1,5 @@
 import {
   createFileRoute,
-  isRedirect,
   redirect,
   useRouter,
 } from '@tanstack/react-router'
@@ -9,6 +8,7 @@ import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import { PawPrint, Plus, ArrowRight, TreePine } from 'lucide-react'
 import { authClient, useListOrganizations } from '@/lib/auth-client'
+import { sessionQueryOptions } from '@/lib/session'
 import { AuthLayout } from '@/components/layouts/auth-layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,21 +24,13 @@ import {
 } from '@/components/ui/sheet'
 
 export const Route = createFileRoute('/organizations')({
-  beforeLoad: async ({ location }) => {
-    try {
-      const { data: session } = await authClient.getSession()
+  ssr: false,
+  beforeLoad: async ({ context, location }) => {
+    const session = await context.queryClient.ensureQueryData(
+      sessionQueryOptions,
+    )
 
-      if (!session) {
-        throw redirect({
-          to: '/signin',
-          search: {
-            redirect: location.href,
-          },
-        })
-      }
-    } catch (error) {
-      if (isRedirect(error)) throw error
-
+    if (!session) {
       throw redirect({
         to: '/signin',
         search: { redirect: location.href },

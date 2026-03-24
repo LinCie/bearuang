@@ -4,6 +4,7 @@ import {
   redirect,
   useRouter,
 } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
@@ -12,19 +13,18 @@ import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AuthLayout } from '@/components/layouts/auth-layout'
-import { authClient, signIn } from '@/lib/auth-client'
+import { signIn } from '@/lib/auth-client'
+import { sessionQueryOptions } from '@/lib/session'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/signin')({
-  beforeLoad: async () => {
-    try {
-      const { data: session } = await authClient.getSession()
-      if (session) {
-        throw redirect({ to: '/' })
-      }
-    } catch (e) {
-      if (e instanceof Response || (e as { routerCode?: string })?.routerCode)
-        throw e
+  ssr: false,
+  beforeLoad: async ({ context }) => {
+    const session = await context.queryClient.ensureQueryData(
+      sessionQueryOptions,
+    )
+    if (session) {
+      throw redirect({ to: '/' })
     }
   },
   component: SigninPage,
@@ -38,6 +38,7 @@ const passwordSchema = z.string().min(1, 'Kata sandi wajib diisi')
 
 function SigninPage() {
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   const [serverError, setServerError] = useState<string | null>(null)
 
@@ -58,6 +59,8 @@ function SigninPage() {
         setServerError(error.message ?? 'Terjadi kesalahan. Coba lagi.')
         return
       }
+      await queryClient.invalidateQueries({ queryKey: ['session'] })
+      await router.invalidate()
       router.navigate({ to: '/' })
     },
   })

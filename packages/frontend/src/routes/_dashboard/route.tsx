@@ -1,42 +1,29 @@
-import {
-  Outlet,
-  createFileRoute,
-  isRedirect,
-  redirect,
-} from '@tanstack/react-router'
+import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import { DashboardLayout } from '@/components/layouts/dashboard-layout'
-import { authClient } from '@/lib/auth-client'
+import { sessionQueryOptions } from '@/lib/session'
 
 export const Route = createFileRoute('/_dashboard')({
-  beforeLoad: async ({ location }) => {
-    try {
-      const { data: session } = await authClient.getSession()
+  ssr: false,
+  beforeLoad: async ({ context, location }) => {
+    const session = await context.queryClient.ensureQueryData(
+      sessionQueryOptions,
+    )
 
-      if (!session) {
-        throw redirect({
-          to: '/signin',
-          search: {
-            redirect: location.href,
-          },
-        })
-      }
-
-      if (!session.session.activeOrganizationId) {
-        throw redirect({
-          to: '/organizations',
-          search: {
-            redirect: location.href,
-          },
-        })
-      }
-    } catch (error) {
-      if (isRedirect(error)) throw error
-
+    if (!session) {
       throw redirect({
         to: '/signin',
         search: { redirect: location.href },
       })
     }
+
+    if (!session.session.activeOrganizationId) {
+      throw redirect({
+        to: '/organizations',
+        search: { redirect: location.href },
+      })
+    }
+
+    return { session }
   },
   component: DashboardRoute,
 })
