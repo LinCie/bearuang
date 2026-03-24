@@ -42,10 +42,10 @@ import {
   useCreateProduct,
   useUpdateProduct,
   useDeleteProduct,
-  type CreateProductInput,
-  type UpdateProductInput,
+  ProductFormSheet,
+  DeleteDialog,
 } from '@/modules/products'
-import { ProductFormSheet, DeleteDialog } from '@/modules/products'
+import type { CreateProductInput, UpdateProductInput } from '@/modules/products'
 
 export const Route = createFileRoute('/_dashboard/products/')({
   component: ProductsPage,

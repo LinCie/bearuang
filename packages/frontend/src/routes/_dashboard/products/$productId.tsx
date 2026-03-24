@@ -9,11 +9,6 @@ import {
   useCreateVariant,
   useUpdateVariant,
   useDeleteVariant,
-  type UpdateProductInput,
-  type CreateVariantInput,
-  type UpdateVariantInput,
-} from '@/modules/products'
-import {
   ProductDetailHeader,
   EmptyVariantsState,
   VariantsTable,
@@ -22,6 +17,11 @@ import {
   ProductFormSheet,
   VariantFormSheet,
   DeleteDialog,
+} from '@/modules/products'
+import type {
+  UpdateProductInput,
+  CreateVariantInput,
+  UpdateVariantInput,
 } from '@/modules/products'
 import { Button } from '@/components/ui/button'
 
@@ -199,14 +199,28 @@ function ProductDetailPage() {
         {/* Content Section */}
         <div className="flex flex-col gap-12 lg:pl-14">
           {/* Description */}
-          {product.description && (
-            <p className="text-[15px] text-foreground/80 leading-relaxed whitespace-pre-wrap max-w-3xl">
-              {product.description}
-            </p>
-          )}
-
-          {/* Divider */}
-          {product.description && <div className="w-full h-px bg-border/20" />}
+          <div className="flex flex-col gap-3">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              Deskripsi Produk
+            </h2>
+            {product.description ? (
+              <p className="text-base text-foreground leading-relaxed whitespace-pre-wrap max-w-3xl">
+                {product.description}
+              </p>
+            ) : (
+              <div className="flex flex-col gap-3 py-4">
+                <p className="text-muted-foreground text-sm">
+                  Belum ada deskripsi untuk produk ini.
+                </p>
+                <button
+                  onClick={handleProductEdit}
+                  className="text-sm text-amber-700 hover:text-amber-800 font-medium self-start transition-colors"
+                >
+                  Tambahkan deskripsi →
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Variants Section */}
           <div className="flex flex-col gap-4">

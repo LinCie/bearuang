@@ -14,8 +14,11 @@ import { Route as SigninRouteImport } from './routes/signin'
 import { Route as OrganizationsRouteImport } from './routes/organizations'
 import { Route as DashboardRouteRouteImport } from './routes/_dashboard/route'
 import { Route as DashboardIndexRouteImport } from './routes/_dashboard/index'
+import { Route as DashboardWarehousesRouteRouteImport } from './routes/_dashboard/warehouses/route'
 import { Route as DashboardProductsRouteRouteImport } from './routes/_dashboard/products/route'
+import { Route as DashboardWarehousesIndexRouteImport } from './routes/_dashboard/warehouses/index'
 import { Route as DashboardProductsIndexRouteImport } from './routes/_dashboard/products/index'
+import { Route as DashboardWarehousesWarehouseIdRouteImport } from './routes/_dashboard/warehouses/$warehouseId'
 import { Route as DashboardProductsProductIdRouteImport } from './routes/_dashboard/products/$productId'
 
 const SignupRoute = SignupRouteImport.update({
@@ -42,16 +45,34 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardWarehousesRouteRoute =
+  DashboardWarehousesRouteRouteImport.update({
+    id: '/warehouses',
+    path: '/warehouses',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardProductsRouteRoute = DashboardProductsRouteRouteImport.update({
   id: '/products',
   path: '/products',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardWarehousesIndexRoute =
+  DashboardWarehousesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => DashboardWarehousesRouteRoute,
+  } as any)
 const DashboardProductsIndexRoute = DashboardProductsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardProductsRouteRoute,
 } as any)
+const DashboardWarehousesWarehouseIdRoute =
+  DashboardWarehousesWarehouseIdRouteImport.update({
+    id: '/$warehouseId',
+    path: '/$warehouseId',
+    getParentRoute: () => DashboardWarehousesRouteRoute,
+  } as any)
 const DashboardProductsProductIdRoute =
   DashboardProductsProductIdRouteImport.update({
     id: '/$productId',
@@ -65,8 +86,11 @@ export interface FileRoutesByFullPath {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/products': typeof DashboardProductsRouteRouteWithChildren
+  '/warehouses': typeof DashboardWarehousesRouteRouteWithChildren
   '/products/$productId': typeof DashboardProductsProductIdRoute
+  '/warehouses/$warehouseId': typeof DashboardWarehousesWarehouseIdRoute
   '/products/': typeof DashboardProductsIndexRoute
+  '/warehouses/': typeof DashboardWarehousesIndexRoute
 }
 export interface FileRoutesByTo {
   '/organizations': typeof OrganizationsRoute
@@ -74,7 +98,9 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/': typeof DashboardIndexRoute
   '/products/$productId': typeof DashboardProductsProductIdRoute
+  '/warehouses/$warehouseId': typeof DashboardWarehousesWarehouseIdRoute
   '/products': typeof DashboardProductsIndexRoute
+  '/warehouses': typeof DashboardWarehousesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -83,9 +109,12 @@ export interface FileRoutesById {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/_dashboard/products': typeof DashboardProductsRouteRouteWithChildren
+  '/_dashboard/warehouses': typeof DashboardWarehousesRouteRouteWithChildren
   '/_dashboard/': typeof DashboardIndexRoute
   '/_dashboard/products/$productId': typeof DashboardProductsProductIdRoute
+  '/_dashboard/warehouses/$warehouseId': typeof DashboardWarehousesWarehouseIdRoute
   '/_dashboard/products/': typeof DashboardProductsIndexRoute
+  '/_dashboard/warehouses/': typeof DashboardWarehousesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -95,8 +124,11 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/products'
+    | '/warehouses'
     | '/products/$productId'
+    | '/warehouses/$warehouseId'
     | '/products/'
+    | '/warehouses/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/organizations'
@@ -104,7 +136,9 @@ export interface FileRouteTypes {
     | '/signup'
     | '/'
     | '/products/$productId'
+    | '/warehouses/$warehouseId'
     | '/products'
+    | '/warehouses'
   id:
     | '__root__'
     | '/_dashboard'
@@ -112,9 +146,12 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/_dashboard/products'
+    | '/_dashboard/warehouses'
     | '/_dashboard/'
     | '/_dashboard/products/$productId'
+    | '/_dashboard/warehouses/$warehouseId'
     | '/_dashboard/products/'
+    | '/_dashboard/warehouses/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -161,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/_dashboard/warehouses': {
+      id: '/_dashboard/warehouses'
+      path: '/warehouses'
+      fullPath: '/warehouses'
+      preLoaderRoute: typeof DashboardWarehousesRouteRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/_dashboard/products': {
       id: '/_dashboard/products'
       path: '/products'
@@ -168,12 +212,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProductsRouteRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/_dashboard/warehouses/': {
+      id: '/_dashboard/warehouses/'
+      path: '/'
+      fullPath: '/warehouses/'
+      preLoaderRoute: typeof DashboardWarehousesIndexRouteImport
+      parentRoute: typeof DashboardWarehousesRouteRoute
+    }
     '/_dashboard/products/': {
       id: '/_dashboard/products/'
       path: '/'
       fullPath: '/products/'
       preLoaderRoute: typeof DashboardProductsIndexRouteImport
       parentRoute: typeof DashboardProductsRouteRoute
+    }
+    '/_dashboard/warehouses/$warehouseId': {
+      id: '/_dashboard/warehouses/$warehouseId'
+      path: '/$warehouseId'
+      fullPath: '/warehouses/$warehouseId'
+      preLoaderRoute: typeof DashboardWarehousesWarehouseIdRouteImport
+      parentRoute: typeof DashboardWarehousesRouteRoute
     }
     '/_dashboard/products/$productId': {
       id: '/_dashboard/products/$productId'
@@ -201,13 +259,31 @@ const DashboardProductsRouteRouteWithChildren =
     DashboardProductsRouteRouteChildren,
   )
 
+interface DashboardWarehousesRouteRouteChildren {
+  DashboardWarehousesWarehouseIdRoute: typeof DashboardWarehousesWarehouseIdRoute
+  DashboardWarehousesIndexRoute: typeof DashboardWarehousesIndexRoute
+}
+
+const DashboardWarehousesRouteRouteChildren: DashboardWarehousesRouteRouteChildren =
+  {
+    DashboardWarehousesWarehouseIdRoute: DashboardWarehousesWarehouseIdRoute,
+    DashboardWarehousesIndexRoute: DashboardWarehousesIndexRoute,
+  }
+
+const DashboardWarehousesRouteRouteWithChildren =
+  DashboardWarehousesRouteRoute._addFileChildren(
+    DashboardWarehousesRouteRouteChildren,
+  )
+
 interface DashboardRouteRouteChildren {
   DashboardProductsRouteRoute: typeof DashboardProductsRouteRouteWithChildren
+  DashboardWarehousesRouteRoute: typeof DashboardWarehousesRouteRouteWithChildren
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardProductsRouteRoute: DashboardProductsRouteRouteWithChildren,
+  DashboardWarehousesRouteRoute: DashboardWarehousesRouteRouteWithChildren,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
