@@ -169,7 +169,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <NavItemLink
                     key={item.label}
                     item={item}
-                    isActive={currentPath === item.to}
+                    isActive={
+                      item.to === '/'
+                        ? currentPath === '/'
+                        : currentPath === item.to ||
+                          currentPath.startsWith(item.to + '/')
+                    }
                   />
                 ))}
               </SidebarMenu>
@@ -189,7 +194,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <NavItemLink
                     key={item.label}
                     item={item}
-                    isActive={currentPath === item.to}
+                    isActive={
+                      item.to === '/'
+                        ? currentPath === '/'
+                        : currentPath === item.to ||
+                          currentPath.startsWith(item.to + '/')
+                    }
                   />
                 ))}
               </SidebarMenu>
