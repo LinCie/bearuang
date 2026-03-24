@@ -5,9 +5,8 @@ import { sessionQueryOptions } from '@/lib/session'
 export const Route = createFileRoute('/_dashboard')({
   ssr: false,
   beforeLoad: async ({ context, location }) => {
-    const session = await context.queryClient.ensureQueryData(
-      sessionQueryOptions,
-    )
+    const session =
+      await context.queryClient.ensureQueryData(sessionQueryOptions)
 
     if (!session) {
       throw redirect({

@@ -19,9 +19,8 @@ import { useState } from 'react'
 export const Route = createFileRoute('/signup')({
   ssr: false,
   beforeLoad: async ({ context }) => {
-    const session = await context.queryClient.ensureQueryData(
-      sessionQueryOptions,
-    )
+    const session =
+      await context.queryClient.ensureQueryData(sessionQueryOptions)
     if (session) {
       throw redirect({ to: '/' })
     }

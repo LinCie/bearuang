@@ -79,7 +79,9 @@ export function useProductVariants(productId: string) {
   return useQuery({
     queryKey: variantKeys.byProduct(productId),
     queryFn: async () => {
-      const { data, error } = await api.products({ id: productId }).variants.get()
+      const { data, error } = await api
+        .products({ id: productId })
+        .variants.get()
       if (error) throw error
       return data
     },

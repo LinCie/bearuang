@@ -99,7 +99,10 @@ const productSchema = z.object({
     .trim()
     .min(1, 'Slug wajib diisi')
     .max(100, 'Slug maksimal 100 karakter')
-    .regex(slugRegex, 'Slug hanya boleh berisi huruf kecil, angka, strip, dan garis bawah'),
+    .regex(
+      slugRegex,
+      'Slug hanya boleh berisi huruf kecil, angka, strip, dan garis bawah',
+    ),
   description: z
     .string()
     .trim()
@@ -880,7 +883,8 @@ function ProductFormSheet({
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
                 <p className="text-xs text-muted-foreground">
-                  URL-friendly identifier. Hanya huruf kecil, angka, strip (-), dan garis bawah (_).
+                  URL-friendly identifier. Hanya huruf kecil, angka, strip (-),
+                  dan garis bawah (_).
                 </p>
                 {field.state.meta.errors[0] && (
                   <p className="text-xs text-destructive font-medium">

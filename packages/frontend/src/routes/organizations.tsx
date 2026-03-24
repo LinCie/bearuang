@@ -1,8 +1,4 @@
-import {
-  createFileRoute,
-  redirect,
-  useRouter,
-} from '@tanstack/react-router'
+import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import * as React from 'react'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
@@ -26,9 +22,8 @@ import {
 export const Route = createFileRoute('/organizations')({
   ssr: false,
   beforeLoad: async ({ context, location }) => {
-    const session = await context.queryClient.ensureQueryData(
-      sessionQueryOptions,
-    )
+    const session =
+      await context.queryClient.ensureQueryData(sessionQueryOptions)
 
     if (!session) {
       throw redirect({
