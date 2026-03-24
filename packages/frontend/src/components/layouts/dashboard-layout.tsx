@@ -11,6 +11,7 @@ import {
   Search,
   PawPrint,
   LogOut,
+  ArrowLeftRight,
 } from 'lucide-react'
 import { signOut, useSession } from '@/lib/auth-client'
 import { cn } from '@/lib/utils'
@@ -48,6 +49,7 @@ const MAIN_NAV: NavItem[] = [
   { icon: Home, label: 'Home', to: '/' },
   { icon: Package, label: 'Produk', to: '/products' },
   { icon: Warehouse, label: 'Gudang', to: '/warehouses' },
+  { icon: ArrowLeftRight, label: 'Pergerakan Stok', to: '/stock-movements' },
   { icon: BadgeDollarSign, label: 'Sales', to: '/sales' },
   { icon: ShoppingCart, label: 'Orders', to: '/orders' },
   { icon: BarChart4, label: 'Reports', to: '/reports' },
