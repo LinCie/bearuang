@@ -3,9 +3,11 @@
   "private": true,
   "workspaces": [
     "packages/*"
-  ],
+  ],  
   "scripts": {
-    "dev:backend": "bun run --watch ./packages/backend/src/index.ts"
+    "dev": "bun run --parallel dev:backend dev:frontend",
+    "dev:backend": "bun run --cwd packages/backend dev",
+    "dev:frontend": "bun run --cwd packages/frontend dev"
   },
   "overrides": {
     "@tanstack/query-core": "5.95.2"
