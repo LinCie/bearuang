@@ -11,7 +11,7 @@ import {
   sortQuery,
 } from "@/common/pagination";
 
-const warehouseSchema = z.object({
+export const warehouseSchema = z.object({
   id: z.string(),
   organizationId: z.string(),
   name: z.string(),
@@ -21,25 +21,30 @@ const warehouseSchema = z.object({
   updatedAt: z.iso.datetime(),
 });
 
-const createWarehouseDto = z.object({
+export const createWarehouseDto = z.object({
   name: z.string().min(1),
   address: z.string().optional(),
   isActive: z.boolean().optional(),
 });
 
-const updateWarehouseDto = z.object({
+export const updateWarehouseDto = z.object({
   name: z.string().min(1).optional(),
   address: z.string().optional(),
   isActive: z.boolean().optional(),
 });
 
+export const listWarehousesQuery = paginationQuery.merge(
+  sortQuery(["name", "createdAt", "updatedAt"]),
+);
+
+export type Warehouse = z.infer<typeof warehouseSchema>;
+export type CreateWarehouseInput = z.infer<typeof createWarehouseDto>;
+export type UpdateWarehouseInput = z.infer<typeof updateWarehouseDto>;
+export type ListWarehousesQuery = z.infer<typeof listWarehousesQuery>;
+
 const warehouseIdParam = z.object({
   id: z.string().uuid(),
 });
-
-const listWarehousesQuery = paginationQuery.merge(
-  sortQuery(["name", "createdAt", "updatedAt"]),
-);
 
 const serializeWarehouse = (w: {
   id: string;
@@ -70,7 +75,9 @@ export const warehousesRoute = new Elysia({
         {
           skip,
           take,
-          orderBy: sortBy ? { field: sortBy, order: sortOrder ?? "desc" } : undefined,
+          orderBy: sortBy
+            ? { field: sortBy, order: sortOrder ?? "desc" }
+            : undefined,
         },
       );
       return {

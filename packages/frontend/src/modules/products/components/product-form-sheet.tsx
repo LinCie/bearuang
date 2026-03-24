@@ -14,6 +14,7 @@ import {
   SheetDescription,
   SheetFooter,
 } from '@/components/ui/sheet'
+import type { Product } from 'backend/src/modules/products/products.route'
 
 const slugRegex = /^[a-z0-9_-]+$/
 
@@ -39,14 +40,6 @@ const productSchema = z.object({
     .optional(),
   isActive: z.boolean(),
 })
-
-interface Product {
-  id: string
-  name: string
-  slug: string
-  description: string | null
-  isActive: boolean
-}
 
 interface ProductFormSheetProps {
   open: boolean

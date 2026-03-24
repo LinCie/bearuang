@@ -22,28 +22,13 @@ import type {
   UpdateProductInput,
   CreateVariantInput,
   UpdateVariantInput,
+  ProductVariant,
 } from '@/modules/products'
 import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/_dashboard/products/$productId')({
   component: ProductDetailPage,
 })
-
-// ─── Types ────────────────────────────────────────────────────
-
-interface Variant {
-  id: string
-  productId: string
-  sku: string
-  name: string
-  price: number
-  stock: number
-  unit: string
-  attributes: Record<string, unknown>
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-}
 
 // ─── Page Component ───────────────────────────────────────────
 
@@ -53,9 +38,9 @@ function ProductDetailPage() {
   const { data: product, isLoading, isError } = useProduct(productId)
   const { data: variantsData } = useProductVariants(productId)
 
-  const variants: Variant[] = (variantsData ??
+  const variants: ProductVariant[] = (variantsData ??
     product?.variants ??
-    []) as Variant[]
+    []) as ProductVariant[]
 
   // Mutations
   const createVariant = useCreateVariant(productId)
@@ -66,15 +51,13 @@ function ProductDetailPage() {
 
   // Sheet state (create / edit variant)
   const [sheetOpen, setSheetOpen] = React.useState(false)
-  const [editingVariant, setEditingVariant] = React.useState<Variant | null>(
-    null,
-  )
+  const [editingVariant, setEditingVariant] =
+    React.useState<ProductVariant | null>(null)
 
   // Delete dialog state (variant)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
-  const [deletingVariant, setDeletingVariant] = React.useState<Variant | null>(
-    null,
-  )
+  const [deletingVariant, setDeletingVariant] =
+    React.useState<ProductVariant | null>(null)
 
   // Product edit sheet state
   const [productSheetOpen, setProductSheetOpen] = React.useState(false)
@@ -90,12 +73,12 @@ function ProductDetailPage() {
     setSheetOpen(true)
   }, [])
 
-  const handleEdit = React.useCallback((variant: Variant) => {
+  const handleEdit = React.useCallback((variant: ProductVariant) => {
     setEditingVariant(variant)
     setSheetOpen(true)
   }, [])
 
-  const handleDeleteClick = React.useCallback((variant: Variant) => {
+  const handleDeleteClick = React.useCallback((variant: ProductVariant) => {
     setDeletingVariant(variant)
     setDeleteDialogOpen(true)
   }, [])

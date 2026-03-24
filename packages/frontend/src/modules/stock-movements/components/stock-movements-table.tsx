@@ -8,7 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import type { StockMovement, StockMovementType } from '@/modules/stock-movements'
+import type {
+  StockMovement,
+  StockMovementType,
+} from '@/modules/stock-movements'
 
 interface StockMovementsTableProps {
   movements: StockMovement[]
@@ -156,9 +159,7 @@ export function StockMovementsTable({
                     </span>
                   </div>
                 ) : (
-                  <span className="text-muted-foreground text-xs">
-                    Manual
-                  </span>
+                  <span className="text-muted-foreground text-xs">Manual</span>
                 )}
               </TableCell>
             </TableRow>

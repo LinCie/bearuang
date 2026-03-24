@@ -38,7 +38,9 @@ export function DeleteDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>{cancelLabel}</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>
+            {cancelLabel}
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault()

@@ -8,32 +8,20 @@ import {
   MovementErrorState,
   DeleteDialog,
 } from '@/modules/stock-movements'
-import type { StockMovementType } from '@/modules/stock-movements'
+import type {
+  StockMovement as StockMovementType,
+  StockMovementType as MovementType,
+} from '@/modules/stock-movements'
 
-export const Route = createFileRoute('/_dashboard/stock-movements/$movementId')({
-  component: StockMovementDetailPage,
-})
-
-// ─── Types ────────────────────────────────────────────────────
-
-interface StockMovementItem {
-  id: string
-  organizationId: string
-  warehouseId: string
-  variantId: string
-  type: StockMovementType
-  quantity: number
-  referenceId: string | null
-  referenceType: string | null
-  note: string | null
-  createdAt: string
-  variant: { id: string; sku: string; name: string }
-  warehouse: { id: string; name: string }
-}
+export const Route = createFileRoute('/_dashboard/stock-movements/$movementId')(
+  {
+    component: StockMovementDetailPage,
+  },
+)
 
 // ─── Utilities ────────────────────────────────────────────────
 
-function getTypeLabel(type: StockMovementType) {
+function getTypeLabel(type: MovementType) {
   switch (type) {
     case 'IN':
       return 'Masuk'
@@ -68,7 +56,12 @@ function formatRelativeTime(dateString: string): string {
 function StockMovementDetailPage() {
   const { movementId } = Route.useParams()
   const router = useRouter()
-  const { data: movement, isLoading, isError, refetch } = useStockMovement(movementId)
+  const {
+    data: movement,
+    isLoading,
+    isError,
+    refetch,
+  } = useStockMovement(movementId)
 
   // Mutations
   const deleteMovement = useDeleteStockMovement()
@@ -91,7 +84,10 @@ function StockMovementDetailPage() {
     if (!movement) return
     await deleteMovement.mutateAsync(movement.id)
     setDeleteDialogOpen(false)
-    router.navigate({ to: '/stock-movements', search: { warehouseId: '', variantId: '' } })
+    router.navigate({
+      to: '/stock-movements',
+      search: { warehouseId: '', variantId: '' },
+    })
   }, [movement, deleteMovement, router])
 
   // ─── Loading State ─────────────────────────────────────────
@@ -106,7 +102,7 @@ function StockMovementDetailPage() {
     return <MovementErrorState onRetry={() => refetch()} />
   }
 
-  const movementData = movement as StockMovementItem
+  const movementData = movement as StockMovementType
 
   // ─── Main Render ───────────────────────────────────────────
 
@@ -128,24 +124,35 @@ function StockMovementDetailPage() {
               Ringkasan Pergerakan
             </h2>
             <div className="flex items-center gap-6 p-6 bg-card border border-border/40 rounded-xl shadow-sm">
-              <div className={`flex items-center justify-center h-16 w-16 rounded-2xl ${
-                movementData.type === 'IN' 
-                  ? 'bg-emerald-100 text-emerald-600' 
-                  : movementData.type === 'OUT'
-                    ? 'bg-rose-100 text-rose-600'
-                    : 'bg-amber-100 text-amber-600'
-              }`}>
-                <span className={`text-2xl font-bold ${
-                  movementData.type === 'OUT' ? 'text-rose-600' : 
-                  movementData.type === 'IN' ? 'text-emerald-600' : 'text-amber-600'
-                }`}>
-                  {movementData.type === 'OUT' ? '-' : '+'}{movementData.quantity}
+              <div
+                className={`flex items-center justify-center h-16 w-16 rounded-2xl ${
+                  movementData.type === 'IN'
+                    ? 'bg-emerald-100 text-emerald-600'
+                    : movementData.type === 'OUT'
+                      ? 'bg-rose-100 text-rose-600'
+                      : 'bg-amber-100 text-amber-600'
+                }`}
+              >
+                <span
+                  className={`text-2xl font-bold ${
+                    movementData.type === 'OUT'
+                      ? 'text-rose-600'
+                      : movementData.type === 'IN'
+                        ? 'text-emerald-600'
+                        : 'text-amber-600'
+                  }`}
+                >
+                  {movementData.type === 'OUT' ? '-' : '+'}
+                  {movementData.quantity}
                 </span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-sm text-muted-foreground">Jumlah Perubahan Stok</span>
+                <span className="text-sm text-muted-foreground">
+                  Jumlah Perubahan Stok
+                </span>
                 <span className="text-lg font-medium text-foreground">
-                  {getTypeLabel(movementData.type)} - {movementData.quantity} unit
+                  {getTypeLabel(movementData.type)} - {movementData.quantity}{' '}
+                  unit
                 </span>
               </div>
             </div>
@@ -158,7 +165,9 @@ function StockMovementDetailPage() {
             </h2>
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 max-w-2xl">
               <div className="sm:col-span-2">
-                <dt className="text-xs text-muted-foreground mb-1">Nama Varian</dt>
+                <dt className="text-xs text-muted-foreground mb-1">
+                  Nama Varian
+                </dt>
                 <dd className="text-base font-medium text-foreground">
                   {movementData.variant.name}
                 </dd>
@@ -170,9 +179,12 @@ function StockMovementDetailPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground mb-1">ID Varian</dt>
+                <dt className="text-xs text-muted-foreground mb-1">
+                  ID Varian
+                </dt>
                 <dd className="text-sm font-mono text-foreground/70">
-                  {movementData.variant.id.slice(0, 8)}...{movementData.variant.id.slice(-4)}
+                  {movementData.variant.id.slice(0, 8)}...
+                  {movementData.variant.id.slice(-4)}
                 </dd>
               </div>
             </dl>
@@ -185,15 +197,20 @@ function StockMovementDetailPage() {
             </h2>
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 max-w-2xl">
               <div>
-                <dt className="text-xs text-muted-foreground mb-1">Nama Gudang</dt>
+                <dt className="text-xs text-muted-foreground mb-1">
+                  Nama Gudang
+                </dt>
                 <dd className="text-base font-medium text-foreground">
                   {movementData.warehouse.name}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground mb-1">ID Gudang</dt>
+                <dt className="text-xs text-muted-foreground mb-1">
+                  ID Gudang
+                </dt>
                 <dd className="text-sm font-mono text-foreground/70">
-                  {movementData.warehouse.id.slice(0, 8)}...{movementData.warehouse.id.slice(-4)}
+                  {movementData.warehouse.id.slice(0, 8)}...
+                  {movementData.warehouse.id.slice(-4)}
                 </dd>
               </div>
             </dl>
@@ -207,15 +224,20 @@ function StockMovementDetailPage() {
               </h2>
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 max-w-2xl">
                 <div>
-                  <dt className="text-xs text-muted-foreground mb-1">Tipe Referensi</dt>
+                  <dt className="text-xs text-muted-foreground mb-1">
+                    Tipe Referensi
+                  </dt>
                   <dd className="text-sm font-medium text-foreground">
                     {movementData.referenceType || '-'}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-muted-foreground mb-1">ID Referensi</dt>
+                  <dt className="text-xs text-muted-foreground mb-1">
+                    ID Referensi
+                  </dt>
                   <dd className="text-sm font-mono text-foreground/70">
-                    {movementData.referenceId.slice(0, 8)}...{movementData.referenceId.slice(-4)}
+                    {movementData.referenceId.slice(0, 8)}...
+                    {movementData.referenceId.slice(-4)}
                   </dd>
                 </div>
               </dl>
@@ -245,19 +267,26 @@ function StockMovementDetailPage() {
             </h2>
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 max-w-2xl">
               <div>
-                <dt className="text-xs text-muted-foreground mb-1">ID Pergerakan</dt>
+                <dt className="text-xs text-muted-foreground mb-1">
+                  ID Pergerakan
+                </dt>
                 <dd className="text-sm font-mono text-foreground/70 break-all">
                   {movementData.id}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground mb-1">ID Organisasi</dt>
+                <dt className="text-xs text-muted-foreground mb-1">
+                  ID Organisasi
+                </dt>
                 <dd className="text-sm font-mono text-foreground/70">
-                  {movementData.organizationId.slice(0, 8)}...{movementData.organizationId.slice(-4)}
+                  {movementData.organizationId.slice(0, 8)}...
+                  {movementData.organizationId.slice(-4)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground mb-1">Dibuat pada</dt>
+                <dt className="text-xs text-muted-foreground mb-1">
+                  Dibuat pada
+                </dt>
                 <dd className="text-sm text-foreground">
                   {new Intl.DateTimeFormat('id-ID', {
                     day: 'numeric',

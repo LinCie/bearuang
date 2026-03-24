@@ -1,43 +1,35 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import type {
+  CreateProductInput,
+  ListProductsQuery,
+  UpdateProductInput,
+} from 'backend/src/modules/products/products.route'
 
 // ─── Query Keys ──────────────────────────────────────────────
 
 export const productKeys = {
   all: ['products'] as const,
   lists: () => [...productKeys.all, 'list'] as const,
-  list: (params: ListProductsParams) =>
+  list: (params: ListProductsQuery) =>
     [...productKeys.lists(), params] as const,
   details: () => [...productKeys.all, 'detail'] as const,
   detail: (id: string) => [...productKeys.details(), id] as const,
 }
 
-// ─── Parameter Types ─────────────────────────────────────────
+// ─── Re-exports ──────────────────────────────────────────────
 
-export interface ListProductsParams {
-  page?: number
-  pageSize?: number
-  sortBy?: 'name' | 'createdAt' | 'updatedAt'
-  sortOrder?: 'asc' | 'desc'
-}
-
-export interface CreateProductInput {
-  name: string
-  slug: string
-  description?: string
-  isActive?: boolean
-}
-
-export interface UpdateProductInput {
-  name?: string
-  slug?: string
-  description?: string
-  isActive?: boolean
-}
+export type {
+  CreateProductInput,
+  ListProductsQuery,
+  Product,
+  ProductVariant,
+  UpdateProductInput,
+} from 'backend/src/modules/products/products.route'
 
 // ─── Queries ─────────────────────────────────────────────────
 
-export function useProducts(params: ListProductsParams = {}) {
+export function useProducts(params: ListProductsQuery = {}) {
   return useQuery({
     queryKey: productKeys.list(params),
     queryFn: async () => {

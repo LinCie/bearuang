@@ -1,41 +1,35 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import type {
+  CreateWarehouseInput,
+  ListWarehousesQuery,
+  UpdateWarehouseInput,
+  Warehouse,
+} from 'backend/src/modules/warehouses/warehouses.route'
 
 // ─── Query Keys ──────────────────────────────────────────────
 
 export const warehouseKeys = {
   all: ['warehouses'] as const,
   lists: () => [...warehouseKeys.all, 'list'] as const,
-  list: (params: ListWarehousesParams) =>
+  list: (params: ListWarehousesQuery) =>
     [...warehouseKeys.lists(), params] as const,
   details: () => [...warehouseKeys.all, 'detail'] as const,
   detail: (id: string) => [...warehouseKeys.details(), id] as const,
 }
 
-// ─── Parameter Types ─────────────────────────────────────────
+// ─── Re-exports ──────────────────────────────────────────────
 
-export interface ListWarehousesParams {
-  page?: number
-  pageSize?: number
-  sortBy?: 'name' | 'createdAt' | 'updatedAt'
-  sortOrder?: 'asc' | 'desc'
-}
-
-export interface CreateWarehouseInput {
-  name: string
-  address?: string
-  isActive?: boolean
-}
-
-export interface UpdateWarehouseInput {
-  name?: string
-  address?: string
-  isActive?: boolean
+export type {
+  CreateWarehouseInput,
+  ListWarehousesQuery,
+  UpdateWarehouseInput,
+  Warehouse,
 }
 
 // ─── Queries ─────────────────────────────────────────────────
 
-export function useWarehouses(params: ListWarehousesParams = {}) {
+export function useWarehouses(params: ListWarehousesQuery = {}) {
   return useQuery({
     queryKey: warehouseKeys.list(params),
     queryFn: async () => {

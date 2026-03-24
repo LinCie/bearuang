@@ -47,22 +47,12 @@ import {
 import type {
   CreateWarehouseInput,
   UpdateWarehouseInput,
+  Warehouse as WarehouseType,
 } from '@/modules/warehouses'
 
 export const Route = createFileRoute('/_dashboard/warehouses/')({
   component: WarehousesPage,
 })
-
-// ─── Types ────────────────────────────────────────────────────
-
-interface WarehouseItem {
-  id: string
-  name: string
-  address: string | null
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-}
 
 // ─── Component ────────────────────────────────────────────────
 
@@ -79,12 +69,12 @@ function WarehousesPage() {
   // Sheet state
   const [sheetOpen, setSheetOpen] = React.useState(false)
   const [editingWarehouse, setEditingWarehouse] =
-    React.useState<WarehouseItem | null>(null)
+    React.useState<WarehouseType | null>(null)
 
   // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [deletingWarehouse, setDeletingWarehouse] =
-    React.useState<WarehouseItem | null>(null)
+    React.useState<WarehouseType | null>(null)
 
   const sortBy = sorting[0]?.id as
     | 'name'
@@ -104,7 +94,7 @@ function WarehousesPage() {
   const updateWarehouse = useUpdateWarehouse()
   const deleteWarehouse = useDeleteWarehouse()
 
-  const warehouses = (data?.data ?? []) as WarehouseItem[]
+  const warehouses = (data?.data ?? []) as WarehouseType[]
   const meta = data?.meta
 
   // Client-side search filter
@@ -125,12 +115,12 @@ function WarehousesPage() {
     setSheetOpen(true)
   }, [])
 
-  const handleEdit = React.useCallback((warehouse: WarehouseItem) => {
+  const handleEdit = React.useCallback((warehouse: WarehouseType) => {
     setEditingWarehouse(warehouse)
     setSheetOpen(true)
   }, [])
 
-  const handleDeleteClick = React.useCallback((warehouse: WarehouseItem) => {
+  const handleDeleteClick = React.useCallback((warehouse: WarehouseType) => {
     setDeletingWarehouse(warehouse)
     setDeleteDialogOpen(true)
   }, [])

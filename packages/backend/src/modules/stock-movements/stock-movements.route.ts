@@ -12,13 +12,13 @@ import {
   sortQuery,
 } from "@/common/pagination";
 
-const movementTypeEnum = z.enum([
+export const movementTypeEnum = z.enum([
   StockMovementType.IN,
   StockMovementType.OUT,
   StockMovementType.ADJUSTMENT,
 ]);
 
-const stockMovementSchema = z.object({
+export const stockMovementSchema = z.object({
   id: z.string(),
   organizationId: z.string(),
   warehouseId: z.string(),
@@ -31,12 +31,12 @@ const stockMovementSchema = z.object({
   createdAt: z.iso.datetime(),
 });
 
-const stockMovementWithRelationsSchema = stockMovementSchema.extend({
+export const stockMovementWithRelationsSchema = stockMovementSchema.extend({
   variant: z.object({ id: z.string(), sku: z.string(), name: z.string() }),
   warehouse: z.object({ id: z.string(), name: z.string() }),
 });
 
-const createMovementDto = z.object({
+export const createMovementDto = z.object({
   warehouseId: z.string().uuid(),
   variantId: z.string().uuid(),
   type: movementTypeEnum,
@@ -46,13 +46,21 @@ const createMovementDto = z.object({
   note: z.string().optional(),
 });
 
-const listMovementsQuery = paginationQuery
+export const listMovementsQuery = paginationQuery
   .merge(sortQuery(["createdAt", "quantity", "type"]))
   .extend({
     variantId: z.string().uuid().optional(),
     warehouseId: z.string().uuid().optional(),
     type: movementTypeEnum.optional(),
   });
+
+export type StockMovementType = z.infer<typeof movementTypeEnum>;
+export type StockMovement = z.infer<typeof stockMovementSchema>;
+export type StockMovementWithRelations = z.infer<
+  typeof stockMovementWithRelationsSchema
+>;
+export type CreateMovementInput = z.infer<typeof createMovementDto>;
+export type ListMovementsQuery = z.infer<typeof listMovementsQuery>;
 
 const movementIdParam = z.object({
   id: z.string().uuid(),

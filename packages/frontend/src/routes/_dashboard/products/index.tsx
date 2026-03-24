@@ -45,24 +45,15 @@ import {
   ProductFormSheet,
   DeleteDialog,
 } from '@/modules/products'
-import type { CreateProductInput, UpdateProductInput } from '@/modules/products'
+import type {
+  CreateProductInput,
+  Product,
+  UpdateProductInput,
+} from '@/modules/products'
 
 export const Route = createFileRoute('/_dashboard/products/')({
   component: ProductsPage,
 })
-
-// ─── Types ────────────────────────────────────────────────────
-
-interface Product {
-  id: string
-  name: string
-  slug: string
-  description: string | null
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-  variants: unknown[]
-}
 
 // ─── Component ────────────────────────────────────────────────
 

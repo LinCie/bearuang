@@ -124,7 +124,10 @@ export function StockMovementsFilters({
             onOpenChange={setWarehouseOpen}
             value={filters.warehouseId || null}
             onValueChange={(value) => {
-              onFilterChange({ ...filters, warehouseId: (value as string) || '' })
+              onFilterChange({
+                ...filters,
+                warehouseId: (value as string) || '',
+              })
               setWarehouseOpen(false)
             }}
           >
@@ -264,7 +267,9 @@ export function StockMovementsFilters({
           )}
           {filters.type && (
             <Badge
-              label={typeOptions.find((t) => t.value === filters.type)?.label ?? ''}
+              label={
+                typeOptions.find((t) => t.value === filters.type)?.label ?? ''
+              }
               onRemove={() => onFilterChange({ ...filters, type: '' })}
             />
           )}

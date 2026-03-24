@@ -8,25 +8,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-
-interface Variant {
-  id: string
-  productId: string
-  sku: string
-  name: string
-  price: number
-  stock: number
-  unit: string
-  attributes: Record<string, unknown>
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-}
+import type { ProductVariant } from 'backend/src/modules/products/products.route'
 
 interface VariantsTableProps {
-  variants: Variant[]
-  onEdit: (variant: Variant) => void
-  onDelete: (variant: Variant) => void
+  variants: ProductVariant[]
+  onEdit: (variant: ProductVariant) => void
+  onDelete: (variant: ProductVariant) => void
 }
 
 export function VariantsTable({

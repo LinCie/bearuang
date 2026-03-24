@@ -167,7 +167,9 @@ export function StockMovementFormSheet({
   // Product combobox state
   const [productOpen, setProductOpen] = React.useState(false)
   const [productQuery, setProductQuery] = React.useState('')
-  const selectedProduct = products.find((p: Product) => p.id === selectedProductId)
+  const selectedProduct = products.find(
+    (p: Product) => p.id === selectedProductId,
+  )
   const filteredProducts = React.useMemo(() => {
     if (!productQuery) return products
     const q = productQuery.toLowerCase()

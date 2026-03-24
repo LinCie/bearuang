@@ -1,12 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import type {
+  CreateVariantInput,
+  SearchVariantQuery,
+  UpdateVariantInput,
+  Variant,
+  VariantWithProduct,
+} from 'backend/src/modules/variants/variants.route'
 
 // ─── Query Keys ──────────────────────────────────────────────
 
 export const variantKeys = {
   all: ['variants'] as const,
   lists: () => [...variantKeys.all, 'list'] as const,
-  list: (params: ListVariantsParams) =>
+  list: (params: SearchVariantQuery) =>
     [...variantKeys.lists(), params] as const,
   details: () => [...variantKeys.all, 'detail'] as const,
   detail: (id: string) => [...variantKeys.details(), id] as const,
@@ -14,37 +21,19 @@ export const variantKeys = {
     [...variantKeys.all, 'byProduct', productId] as const,
 }
 
-// ─── Parameter Types ─────────────────────────────────────────
+// ─── Re-exports ──────────────────────────────────────────────
 
-export interface ListVariantsParams {
-  page?: number
-  pageSize?: number
-  sortBy?: 'name' | 'sku' | 'price' | 'stock' | 'createdAt'
-  sortOrder?: 'asc' | 'desc'
-  search?: string
-}
-
-export interface CreateVariantInput {
-  sku: string
-  name: string
-  price: number
-  unit?: string
-  attributes?: Record<string, unknown>
-  isActive?: boolean
-}
-
-export interface UpdateVariantInput {
-  sku?: string
-  name?: string
-  price?: number
-  unit?: string
-  attributes?: Record<string, unknown>
-  isActive?: boolean
+export type {
+  CreateVariantInput,
+  SearchVariantQuery,
+  UpdateVariantInput,
+  Variant,
+  VariantWithProduct,
 }
 
 // ─── Queries ─────────────────────────────────────────────────
 
-export function useVariants(params: ListVariantsParams = {}) {
+export function useVariants(params: SearchVariantQuery = {}) {
   return useQuery({
     queryKey: variantKeys.list(params),
     queryFn: async () => {

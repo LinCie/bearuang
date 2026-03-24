@@ -10,7 +10,7 @@ import {
   WarehouseErrorState,
   DeleteDialog,
 } from '@/modules/warehouses'
-import type { UpdateWarehouseInput } from '@/modules/warehouses'
+import type { UpdateWarehouseInput, Warehouse } from '@/modules/warehouses'
 
 export const Route = createFileRoute('/_dashboard/warehouses/$warehouseId')({
   component: WarehouseDetailPage,
@@ -33,18 +33,6 @@ function formatRelativeTime(dateString: string): string {
   if (diffDays < 7) return `${diffDays} hari yang lalu`
   if (diffDays < 30) return `${Math.floor(diffDays / 7)} minggu yang lalu`
   return `${Math.floor(diffDays / 30)} bulan yang lalu`
-}
-
-// ─── Types ────────────────────────────────────────────────────
-
-interface WarehouseItem {
-  id: string
-  organizationId: string
-  name: string
-  address: string | null
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
 }
 
 // ─── Page Component ───────────────────────────────────────────
@@ -81,21 +69,20 @@ function WarehouseDetailPage() {
     router.navigate({ to: '/warehouses' })
   }, [warehouse, deleteWarehouse, router])
 
-  const handleSubmit = React.useCallback(async (values: {
-    name: string
-    address: string
-    isActive: boolean
-  }) => {
-    if (!warehouse) return
-    const input: UpdateWarehouseInput & { id: string } = {
-      id: warehouse.id,
-      name: values.name,
-      address: values.address || undefined,
-      isActive: values.isActive,
-    }
-    await updateWarehouse.mutateAsync(input)
-    setSheetOpen(false)
-  }, [warehouse, updateWarehouse])
+  const handleSubmit = React.useCallback(
+    async (values: { name: string; address: string; isActive: boolean }) => {
+      if (!warehouse) return
+      const input: UpdateWarehouseInput & { id: string } = {
+        id: warehouse.id,
+        name: values.name,
+        address: values.address || undefined,
+        isActive: values.isActive,
+      }
+      await updateWarehouse.mutateAsync(input)
+      setSheetOpen(false)
+    },
+    [warehouse, updateWarehouse],
+  )
 
   // ─── Loading State ─────────────────────────────────────────
 
@@ -109,7 +96,7 @@ function WarehouseDetailPage() {
     return <WarehouseErrorState />
   }
 
-  const warehouseData = warehouse as WarehouseItem
+  const warehouseData = warehouse as Warehouse
 
   // ─── Main Render ───────────────────────────────────────────
 
@@ -156,7 +143,9 @@ function WarehouseDetailPage() {
             </h2>
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 max-w-2xl">
               <div>
-                <dt className="text-xs text-muted-foreground mb-1">ID Gudang</dt>
+                <dt className="text-xs text-muted-foreground mb-1">
+                  ID Gudang
+                </dt>
                 <dd className="text-sm font-mono text-foreground/70">
                   {warehouseData.id.slice(0, 8)}...{warehouseData.id.slice(-4)}
                 </dd>
@@ -181,7 +170,9 @@ function WarehouseDetailPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground mb-1">Dibuat pada</dt>
+                <dt className="text-xs text-muted-foreground mb-1">
+                  Dibuat pada
+                </dt>
                 <dd className="text-sm text-foreground">
                   {new Intl.DateTimeFormat('id-ID', {
                     day: 'numeric',
@@ -191,7 +182,9 @@ function WarehouseDetailPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground mb-1">Terakhir diperbarui</dt>
+                <dt className="text-xs text-muted-foreground mb-1">
+                  Terakhir diperbarui
+                </dt>
                 <dd className="text-sm text-foreground">
                   {new Intl.DateTimeFormat('id-ID', {
                     day: 'numeric',

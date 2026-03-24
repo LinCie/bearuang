@@ -1,7 +1,17 @@
 import { Link } from '@tanstack/react-router'
-import { ArrowLeft, Pencil, Trash2, ArrowUpRight, ArrowDownRight, RefreshCcw } from 'lucide-react'
+import {
+  ArrowLeft,
+  Pencil,
+  Trash2,
+  ArrowUpRight,
+  ArrowDownRight,
+  RefreshCcw,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import type { StockMovement, StockMovementType } from '@/modules/stock-movements'
+import type {
+  StockMovement,
+  StockMovementType,
+} from '@/modules/stock-movements'
 
 interface MovementDetailHeaderProps {
   movement: StockMovement
@@ -57,7 +67,10 @@ export function MovementDetailHeader({
     <div className="flex items-start justify-between gap-4 lg:gap-5">
       <div className="flex items-start gap-4 lg:gap-5 min-w-0 flex-1">
         <div className="pt-1.5 shrink-0">
-          <Link to="/stock-movements" search={{ warehouseId: '', variantId: '' }}>
+          <Link
+            to="/stock-movements"
+            search={{ warehouseId: '', variantId: '' }}
+          >
             <Button
               variant="ghost"
               size="icon"

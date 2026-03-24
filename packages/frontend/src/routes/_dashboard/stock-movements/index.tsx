@@ -37,7 +37,9 @@ interface SearchParams {
 }
 
 function StockMovementsPage() {
-  const search = useSearch({ from: '/_dashboard/stock-movements/' }) as SearchParams
+  const search = useSearch({
+    from: '/_dashboard/stock-movements/',
+  }) as SearchParams
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
@@ -87,16 +89,20 @@ function StockMovementsPage() {
   const movements = data?.data ?? []
   const meta = data?.meta
 
-  const warehouses = (warehousesData?.data ?? []).map((w: { id: string; name: string }) => ({
-    id: w.id,
-    name: w.name,
-  }))
+  const warehouses = (warehousesData?.data ?? []).map(
+    (w: { id: string; name: string }) => ({
+      id: w.id,
+      name: w.name,
+    }),
+  )
 
-  const variants = (variantsData?.data ?? []).map((v: { id: string; name: string; sku: string }) => ({
-    id: v.id,
-    name: v.name,
-    sku: v.sku,
-  }))
+  const variants = (variantsData?.data ?? []).map(
+    (v: { id: string; name: string; sku: string }) => ({
+      id: v.id,
+      name: v.name,
+      sku: v.sku,
+    }),
+  )
 
   // Client-side search filter
   const filteredMovements = React.useMemo(() => {
@@ -271,7 +277,10 @@ function StockMovementsPage() {
           </div>
         ) : filteredMovements.length === 0 ? (
           <div className="text-center py-24">
-            {filters.search || filters.warehouseId || filters.variantId || filters.type ? (
+            {filters.search ||
+            filters.warehouseId ||
+            filters.variantId ||
+            filters.type ? (
               <div className="flex flex-col items-center justify-center w-full max-w-full text-center animate-in fade-in zoom-in-95 duration-500">
                 <div className="relative mb-8 group cursor-default">
                   <div className="absolute inset-0 bg-stone-100/80 dark:bg-stone-900/40 rounded-full blur-2xl group-hover:bg-stone-200/80 transition-colors duration-500" />
@@ -287,7 +296,8 @@ function StockMovementsPage() {
                       </div>
                     </div>
                   </div>
-                </div>                <h3 className="text-xl font-medium text-foreground mb-3 transition-colors duration-500 group-hover:text-stone-700 dark:group-hover:text-stone-300 whitespace-normal">
+                </div>{' '}
+                <h3 className="text-xl font-medium text-foreground mb-3 transition-colors duration-500 group-hover:text-stone-700 dark:group-hover:text-stone-300 whitespace-normal">
                   Tidak ada hasil yang cocok 🤔
                 </h3>
                 <p className="text-muted-foreground text-sm max-w-[340px] mx-auto text-balance whitespace-normal mb-8 leading-relaxed">
@@ -364,54 +374,57 @@ function StockMovementsPage() {
       </div>
 
       {/* Pagination */}
-      {meta && meta.totalPages > 1 && !isLoading && filteredMovements.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between mt-8 pt-6 border-t border-border/40 text-sm text-muted-foreground gap-5 sm:gap-0 mx-2 pb-6">
-          <p className="text-center sm:text-left text-balance">
-            Menampilkan{' '}
-            <span className="text-foreground font-medium mx-1">
-              {pagination.pageIndex * pagination.pageSize + 1}
-            </span>
-            –
-            <span className="text-foreground font-medium mx-1">
-              {Math.min(
-                (pagination.pageIndex + 1) * pagination.pageSize,
-                meta.total,
-              )}
-            </span>
-            dari{' '}
-            <span className="text-foreground font-medium mx-1">
-              {meta.total}
-            </span>{' '}
-            pergerakan
-          </p>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="px-5 shadow-sm"
-              disabled={!meta.hasPrev}
-              onClick={() =>
-                setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))
-              }
-            >
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Sebelumnya
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="px-5 shadow-sm"
-              disabled={!meta.hasNext}
-              onClick={() =>
-                setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))
-              }
-            >
-              Selanjutnya
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
+      {meta &&
+        meta.totalPages > 1 &&
+        !isLoading &&
+        filteredMovements.length > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between mt-8 pt-6 border-t border-border/40 text-sm text-muted-foreground gap-5 sm:gap-0 mx-2 pb-6">
+            <p className="text-center sm:text-left text-balance">
+              Menampilkan{' '}
+              <span className="text-foreground font-medium mx-1">
+                {pagination.pageIndex * pagination.pageSize + 1}
+              </span>
+              –
+              <span className="text-foreground font-medium mx-1">
+                {Math.min(
+                  (pagination.pageIndex + 1) * pagination.pageSize,
+                  meta.total,
+                )}
+              </span>
+              dari{' '}
+              <span className="text-foreground font-medium mx-1">
+                {meta.total}
+              </span>{' '}
+              pergerakan
+            </p>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="px-5 shadow-sm"
+                disabled={!meta.hasPrev}
+                onClick={() =>
+                  setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))
+                }
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Sebelumnya
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="px-5 shadow-sm"
+                disabled={!meta.hasNext}
+                onClick={() =>
+                  setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))
+                }
+              >
+                Selanjutnya
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Create Sheet */}
       <StockMovementFormSheet

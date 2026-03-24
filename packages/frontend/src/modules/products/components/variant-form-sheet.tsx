@@ -13,6 +13,7 @@ import {
   SheetDescription,
   SheetFooter,
 } from '@/components/ui/sheet'
+import type { ProductVariant } from 'backend/src/modules/products/products.route'
 
 const variantSchema = z.object({
   sku: z.string().trim().min(1, 'SKU wajib diisi'),
@@ -22,24 +23,10 @@ const variantSchema = z.object({
   isActive: z.boolean(),
 })
 
-interface Variant {
-  id: string
-  productId: string
-  sku: string
-  name: string
-  price: number
-  stock: number
-  unit: string
-  attributes: Record<string, unknown>
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-}
-
 interface VariantFormSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  variant: Variant | null
+  variant: ProductVariant | null
   onSubmit: (values: {
     sku: string
     name: string

@@ -12,7 +12,7 @@ import {
   sortQuery,
 } from "@/common/pagination";
 
-const variantSchema = z.object({
+export const variantSchema = z.object({
   id: z.string(),
   productId: z.string(),
   organizationId: z.string(),
@@ -28,11 +28,11 @@ const variantSchema = z.object({
   deletedAt: z.iso.datetime().nullable(),
 });
 
-const variantWithProductSchema = variantSchema.extend({
+export const variantWithProductSchema = variantSchema.extend({
   product: z.object({ name: z.string() }),
 });
 
-const createVariantDto = z.object({
+export const createVariantDto = z.object({
   sku: z.string().min(1),
   name: z.string().min(1),
   price: z.number().min(0),
@@ -41,7 +41,7 @@ const createVariantDto = z.object({
   isActive: z.boolean().optional(),
 });
 
-const updateVariantDto = z.object({
+export const updateVariantDto = z.object({
   sku: z.string().min(1).optional(),
   name: z.string().min(1).optional(),
   price: z.number().min(0).optional(),
@@ -50,6 +50,18 @@ const updateVariantDto = z.object({
   isActive: z.boolean().optional(),
 });
 
+export const searchVariantQuery = paginationQuery
+  .merge(sortQuery(["name", "sku", "price", "stock", "createdAt"]))
+  .extend({
+    search: z.string().optional(),
+  });
+
+export type Variant = z.infer<typeof variantSchema>;
+export type VariantWithProduct = z.infer<typeof variantWithProductSchema>;
+export type CreateVariantInput = z.infer<typeof createVariantDto>;
+export type UpdateVariantInput = z.infer<typeof updateVariantDto>;
+export type SearchVariantQuery = z.infer<typeof searchVariantQuery>;
+
 const variantIdParam = z.object({
   id: z.string().uuid(),
 });
@@ -57,12 +69,6 @@ const variantIdParam = z.object({
 const productIdParam = z.object({
   id: z.string().uuid(),
 });
-
-const searchVariantQuery = paginationQuery
-  .merge(sortQuery(["name", "sku", "price", "stock", "createdAt"]))
-  .extend({
-    search: z.string().optional(),
-  });
 
 const serializeVariant = (v: ProductVariant) => ({
   ...v,
@@ -159,7 +165,9 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
               search,
               skip,
               take,
-              orderBy: sortBy ? { field: sortBy, order: sortOrder ?? "desc" } : undefined,
+              orderBy: sortBy
+                ? { field: sortBy, order: sortOrder ?? "desc" }
+                : undefined,
             },
           );
           return {

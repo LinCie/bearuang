@@ -11,7 +11,7 @@ import {
   sortQuery,
 } from "@/common/pagination";
 
-const variantSchema = z.object({
+export const variantSchema = z.object({
   id: z.string(),
   productId: z.string(),
   organizationId: z.string(),
@@ -27,7 +27,7 @@ const variantSchema = z.object({
   deletedAt: z.iso.datetime().nullable(),
 });
 
-const productSchema = z.object({
+export const productSchema = z.object({
   id: z.string(),
   organizationId: z.string(),
   name: z.string(),
@@ -42,7 +42,7 @@ const productSchema = z.object({
 
 const slugRegex = /^[a-z0-9_-]+$/;
 
-const createProductDto = z.object({
+export const createProductDto = z.object({
   name: z.string().min(1),
   slug: z
     .string()
@@ -52,7 +52,7 @@ const createProductDto = z.object({
   isActive: z.boolean().optional(),
 });
 
-const updateProductDto = z.object({
+export const updateProductDto = z.object({
   name: z.string().min(1).optional(),
   slug: z
     .string()
@@ -63,13 +63,19 @@ const updateProductDto = z.object({
   isActive: z.boolean().optional(),
 });
 
+export const listProductsQuery = paginationQuery.merge(
+  sortQuery(["name", "createdAt", "updatedAt"]),
+);
+
+export type Product = z.infer<typeof productSchema>
+export type ProductVariant = z.infer<typeof variantSchema>
+export type CreateProductInput = z.infer<typeof createProductDto>
+export type UpdateProductInput = z.infer<typeof updateProductDto>
+export type ListProductsQuery = z.infer<typeof listProductsQuery>
+
 const productIdParam = z.object({
   id: z.string().uuid(),
 });
-
-const listProductsQuery = paginationQuery.merge(
-  sortQuery(["name", "createdAt", "updatedAt"]),
-);
 
 export const productsRoute = new Elysia({
   prefix: "/products",

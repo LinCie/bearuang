@@ -14,6 +14,7 @@ import {
   SheetDescription,
   SheetFooter,
 } from '@/components/ui/sheet'
+import type { Warehouse } from 'backend/src/modules/warehouses/warehouses.route'
 
 const warehouseSchema = z.object({
   name: z
@@ -28,13 +29,6 @@ const warehouseSchema = z.object({
     .optional(),
   isActive: z.boolean(),
 })
-
-interface Warehouse {
-  id: string
-  name: string
-  address: string | null
-  isActive: boolean
-}
 
 interface WarehouseFormSheetProps {
   open: boolean
@@ -112,7 +106,10 @@ export function WarehouseFormSheet({
           }}
         >
           {serverError && (
-            <p role="alert" className="text-sm text-destructive bg-destructive/10 rounded-lg px-4 py-3 font-medium">
+            <p
+              role="alert"
+              className="text-sm text-destructive bg-destructive/10 rounded-lg px-4 py-3 font-medium"
+            >
               {serverError}
             </p>
           )}
