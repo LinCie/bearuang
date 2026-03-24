@@ -17,7 +17,6 @@ import { useState } from 'react'
 
 export const Route = createFileRoute('/signin')({
   beforeLoad: async () => {
-    if (typeof window === 'undefined') return
     try {
       const { data: session } = await authClient.getSession()
       if (session) {

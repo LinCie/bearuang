@@ -1,4 +1,9 @@
-import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  isRedirect,
+  redirect,
+  useRouter,
+} from '@tanstack/react-router'
 import * as React from 'react'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
@@ -19,11 +24,25 @@ import {
 } from '@/components/ui/sheet'
 
 export const Route = createFileRoute('/organizations')({
-  beforeLoad: async () => {
-    if (typeof window === 'undefined') return
-    const { data: session } = await authClient.getSession()
-    if (!session) {
-      throw redirect({ to: '/signin' })
+  beforeLoad: async ({ location }) => {
+    try {
+      const { data: session } = await authClient.getSession()
+
+      if (!session) {
+        throw redirect({
+          to: '/signin',
+          search: {
+            redirect: location.href,
+          },
+        })
+      }
+    } catch (error) {
+      if (isRedirect(error)) throw error
+
+      throw redirect({
+        to: '/signin',
+        search: { redirect: location.href },
+      })
     }
   },
   component: OrganizationsPage,
@@ -114,12 +133,12 @@ function OrganizationsPage() {
   return (
     <AuthLayout>
       <div className="mb-8 flex flex-row items-center justify-between gap-4 overflow-hidden py-1">
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out [animation-fill-mode:both]">
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 ease-out fill-mode-[both]">
           <h2 className="text-2xl font-bold text-foreground mb-1.5 tracking-tight flex items-center gap-2">
             {hasOrganizations ? 'Selamat datang kembali' : 'Petualangan Baru'}
             <TreePine
               aria-hidden="true"
-              className="w-6 h-6 text-primary animate-in zoom-in spin-in-12 duration-700 ease-out delay-200 [animation-fill-mode:both]"
+              className="w-6 h-6 text-primary animate-in zoom-in spin-in-12 duration-700 ease-out delay-200 fill-mode-[both]"
             />
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -131,7 +150,7 @@ function OrganizationsPage() {
         {hasOrganizations && (
           <Button
             variant="outline"
-            className="shrink-0 group shadow-xs hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.97] active:-translate-y-0 active:shadow-none animate-in fade-in slide-in-from-right-4 duration-500 ease-out delay-150 [animation-fill-mode:both] transition-all"
+            className="shrink-0 group shadow-xs hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.97] active:translate-y-0 active:shadow-none animate-in fade-in slide-in-from-right-4 duration-500 ease-out delay-150 fill-mode-[both] transition-all"
             onClick={() => setSheetOpen(true)}
           >
             <Plus
@@ -203,7 +222,7 @@ function OrganizationsPage() {
               disabled={selectingOrgId !== null}
               style={{ animationDelay: `${index * 50}ms` }}
               onClick={() => handleSelectOrganization(org.id)}
-              className="group relative w-full flex flex-col items-start gap-4 p-5 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-gradient-to-br hover:from-primary/5 hover:to-transparent cursor-pointer transition-all duration-300 ease-out text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 active:-translate-y-0 hover:shadow-md active:shadow-xs active:scale-[0.98] animate-in fade-in slide-in-from-bottom-4 [animation-fill-mode:both]"
+              className="group relative w-full flex flex-col items-start gap-4 p-5 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-linear-to-br hover:from-primary/5 hover:to-transparent cursor-pointer transition-all duration-300 ease-out text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 active:translate-y-0 hover:shadow-md active:shadow-xs active:scale-[0.98] animate-in fade-in slide-in-from-bottom-4 fill-mode-[both]"
             >
               <div className="w-12 h-12 shrink-0 rounded-lg border border-border bg-background shadow-xs text-foreground flex items-center justify-center text-sm font-semibold uppercase group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 ease-out group-hover:border-primary">
                 {Array.from(org.name)[0] || '?'}
@@ -229,8 +248,8 @@ function OrganizationsPage() {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-16 px-6 text-center rounded-2xl bg-gradient-to-br from-primary/5 via-background to-transparent border border-primary/10 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+        <div className="flex flex-col items-center justify-center py-16 px-6 text-center rounded-2xl bg-linear-to-br from-primary/5 via-background to-transparent border border-primary/10 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px]" />
           <div className="relative w-20 h-20 bg-background border border-primary/10 rounded-2xl flex items-center justify-center mb-6 shadow-sm rotate-3 group-hover:rotate-12 transition-transform duration-500 ease-out">
             <PawPrint aria-hidden="true" className="w-10 h-10 text-primary" />
           </div>
@@ -243,7 +262,7 @@ function OrganizationsPage() {
           </p>
           <Button
             size="lg"
-            className="relative font-semibold shadow-md hover:shadow-lg hover:-translate-y-1 active:-translate-y-0 active:scale-95 active:shadow-none transition-all duration-300 ease-out group/btn"
+            className="relative font-semibold shadow-md hover:shadow-lg hover:-translate-y-1 active:translate-y-0 active:scale-95 active:shadow-none transition-all duration-300 ease-out group/btn"
             onClick={() => setSheetOpen(true)}
           >
             <Plus
