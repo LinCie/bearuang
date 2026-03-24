@@ -76,6 +76,7 @@ export const Route = createFileRoute('/_dashboard/products/')({
 interface Product {
   id: string
   name: string
+  slug: string
   description: string | null
   isActive: boolean
   createdAt: string
@@ -85,12 +86,20 @@ interface Product {
 
 // ─── Validation Schemas ───────────────────────────────────────
 
+const slugRegex = /^[a-z0-9_-]+$/
+
 const productSchema = z.object({
   name: z
     .string()
     .trim()
     .min(1, 'Nama produk wajib diisi')
     .max(100, 'Nama produk maksimal 100 karakter'),
+  slug: z
+    .string()
+    .trim()
+    .min(1, 'Slug wajib diisi')
+    .max(100, 'Slug maksimal 100 karakter')
+    .regex(slugRegex, 'Slug hanya boleh berisi huruf kecil, angka, strip, dan garis bawah'),
   description: z
     .string()
     .trim()
@@ -181,6 +190,7 @@ function ProductsPage() {
 
   async function handleSubmit(values: {
     name: string
+    slug: string
     description: string
     isActive: boolean
   }) {
@@ -188,6 +198,7 @@ function ProductsPage() {
       const input: UpdateProductInput & { id: string } = {
         id: editingProduct.id,
         name: values.name,
+        slug: values.slug,
         description: values.description || undefined,
         isActive: values.isActive,
       }
@@ -195,6 +206,7 @@ function ProductsPage() {
     } else {
       const input: CreateProductInput = {
         name: values.name,
+        slug: values.slug,
         description: values.description || undefined,
         isActive: values.isActive,
       }
@@ -726,6 +738,7 @@ interface ProductFormSheetProps {
   product: Product | null
   onSubmit: (values: {
     name: string
+    slug: string
     description: string
     isActive: boolean
   }) => Promise<void>
@@ -741,9 +754,21 @@ function ProductFormSheet({
 }: ProductFormSheetProps) {
   const [serverError, setServerError] = React.useState<string | null>(null)
 
+  // Auto-generate slug from name
+  function generateSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '') // Remove special chars except spaces, hyphens, underscores
+      .replace(/\s+/g, '-') // Spaces to hyphens
+      .replace(/-+/g, '-') // Multiple hyphens to single
+      .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
+  }
+
   const form = useForm({
     defaultValues: {
       name: product?.name ?? '',
+      slug: product?.slug ?? '',
       description: product?.description ?? '',
       isActive: product?.isActive ?? true,
     },
@@ -762,6 +787,7 @@ function ProductFormSheet({
   React.useEffect(() => {
     if (open) {
       form.setFieldValue('name', product?.name ?? '')
+      form.setFieldValue('slug', product?.slug ?? '')
       form.setFieldValue('description', product?.description ?? '')
       form.setFieldValue('isActive', product?.isActive ?? true)
       setServerError(null)
@@ -815,8 +841,47 @@ function ProductFormSheet({
                   placeholder="Contoh: Kopi Arabika Premium"
                   value={field.state.value}
                   onBlur={field.handleBlur}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    field.handleChange(value)
+                    // Auto-generate slug if creating new product (not editing)
+                    if (!isEditing) {
+                      form.setFieldValue('slug', generateSlug(value))
+                    }
+                  }}
+                />
+                {field.state.meta.errors[0] && (
+                  <p className="text-xs text-destructive font-medium">
+                    {field.state.meta.errors[0].message}
+                  </p>
+                )}
+              </div>
+            )}
+          </form.Field>
+
+          {/* Slug */}
+          <form.Field
+            name="slug"
+            validators={{
+              onBlur: productSchema.shape.slug,
+              onSubmit: productSchema.shape.slug,
+            }}
+          >
+            {(field) => (
+              <div className="space-y-1.5">
+                <Label htmlFor={field.name} className="font-medium">
+                  Slug <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id={field.name}
+                  placeholder="kopi-arabika-premium"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
+                <p className="text-xs text-muted-foreground">
+                  URL-friendly identifier. Hanya huruf kecil, angka, strip (-), dan garis bawah (_).
+                </p>
                 {field.state.meta.errors[0] && (
                   <p className="text-xs text-destructive font-medium">
                     {field.state.meta.errors[0].message}

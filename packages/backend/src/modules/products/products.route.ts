@@ -31,6 +31,7 @@ const productSchema = z.object({
   id: z.string(),
   organizationId: z.string(),
   name: z.string(),
+  slug: z.string(),
   description: z.string().nullable(),
   isActive: z.boolean(),
   createdAt: z.iso.datetime(),
@@ -39,14 +40,25 @@ const productSchema = z.object({
   variants: z.array(variantSchema),
 });
 
+const slugRegex = /^[a-z0-9_-]+$/;
+
 const createProductDto = z.object({
   name: z.string().min(1),
+  slug: z
+    .string()
+    .min(1)
+    .regex(slugRegex, 'Slug hanya boleh berisi huruf kecil, angka, strip, dan garis bawah'),
   description: z.string().optional(),
   isActive: z.boolean().optional(),
 });
 
 const updateProductDto = z.object({
   name: z.string().min(1).optional(),
+  slug: z
+    .string()
+    .min(1)
+    .regex(slugRegex, 'Slug hanya boleh berisi huruf kecil, angka, strip, dan garis bawah')
+    .optional(),
   description: z.string().optional(),
   isActive: z.boolean().optional(),
 });

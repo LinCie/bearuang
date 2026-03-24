@@ -158,6 +158,7 @@ model Product {
   id             String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   organizationId String
   name           String
+  slug           String
   description    String?
   isActive       Boolean   @default(true)
   createdAt      DateTime  @default(now())
@@ -166,6 +167,7 @@ model Product {
 
   variants ProductVariant[]
 
+  @@unique([organizationId, slug])
   @@index([organizationId])
   @@map("product")
 }

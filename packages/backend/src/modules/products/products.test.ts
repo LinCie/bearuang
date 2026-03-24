@@ -8,6 +8,7 @@ const mockProduct = {
   id: MOCK_PRODUCT_ID,
   organizationId: MOCK_ORG_ID,
   name: "Test Product",
+  slug: "test-product",
   description: "A test product",
   isActive: true,
   deletedAt: null,
@@ -101,7 +102,7 @@ describe("Products", () => {
         new Request("http://localhost/products", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ name: "New Product", description: "Desc" }),
+          body: JSON.stringify({ name: "New Product", slug: "new-product", description: "Desc" }),
         }),
       );
 
@@ -115,7 +116,19 @@ describe("Products", () => {
         new Request("http://localhost/products", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ description: "No name" }),
+          body: JSON.stringify({ slug: "test-slug", description: "No name" }),
+        }),
+      );
+
+      expect(res.status).toBe(422);
+    });
+
+    it("returns 422 when slug is missing", async () => {
+      const res = await app.handle(
+        new Request("http://localhost/products", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: "Test", description: "No slug" }),
         }),
       );
 

@@ -34,7 +34,7 @@ export const productsService = {
 
   async createProduct(
     organizationId: string,
-    data: { name: string; description?: string; isActive?: boolean },
+    data: { name: string; slug: string; description?: string; isActive?: boolean },
   ) {
     return prisma.product.create({
       data: { ...data, organizationId },
@@ -45,7 +45,7 @@ export const productsService = {
   async updateProduct(
     organizationId: string,
     id: string,
-    data: { name?: string; description?: string; isActive?: boolean },
+    data: { name?: string; slug?: string; description?: string; isActive?: boolean },
   ) {
     return prisma.product.updateMany({
       where: { id, organizationId, deletedAt: null },

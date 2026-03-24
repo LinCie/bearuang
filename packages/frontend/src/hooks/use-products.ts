@@ -23,12 +23,14 @@ export interface ListProductsParams {
 
 export interface CreateProductInput {
   name: string
+  slug: string
   description?: string
   isActive?: boolean
 }
 
 export interface UpdateProductInput {
   name?: string
+  slug?: string
   description?: string
   isActive?: boolean
 }

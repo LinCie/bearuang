@@ -257,6 +257,12 @@ function ProductDetailPage() {
                 {product.isActive ? 'Tersedia' : 'Diarsipkan'}
               </span>
               <span className="opacity-30">•</span>
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="font-mono bg-muted/50 px-1.5 py-0.5 rounded">
+                  /{product.slug}
+                </span>
+              </span>
+              <span className="opacity-30">•</span>
               <span>
                 Diperbarui{' '}
                 {product.updatedAt
