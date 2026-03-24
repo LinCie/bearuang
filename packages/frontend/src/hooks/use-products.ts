@@ -86,7 +86,10 @@ export function useUpdateProduct() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, ...input }: UpdateProductInput & { id: string }) => {
+    mutationFn: async ({
+      id,
+      ...input
+    }: UpdateProductInput & { id: string }) => {
       const { data, error } = await api.products({ id }).patch(input)
       if (error) throw error
       return data

@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect, Link } from '@tanstack/react-router'
 import * as React from 'react'
 import {
   useReactTable,
@@ -24,6 +24,7 @@ import {
   Sparkles,
   ChevronLeft,
   Search,
+  Eye,
 } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
 import { DashboardLayout } from '@/components/layouts/dashboard-layout'
@@ -237,12 +238,14 @@ function ProductsPage() {
         ),
         cell: ({ row }) => (
           <div className="flex flex-col max-w-[180px] sm:max-w-[300px] md:max-w-[400px]">
-            <span
-              className="font-medium text-foreground truncate"
+            <Link
+              to="/products/$productId"
+              params={{ productId: row.original.id }}
+              className="font-medium text-foreground truncate hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/20 rounded-sm w-fit"
               title={row.original.name}
             >
               {row.original.name}
-            </span>
+            </Link>
             {row.original.description && (
               <span
                 className="text-xs text-muted-foreground mt-0.5 line-clamp-1"
@@ -309,6 +312,20 @@ function ProductsPage() {
         header: () => <span className="sr-only">Aksi</span>,
         cell: ({ row }) => (
           <div className="flex items-center justify-end gap-1 sm:opacity-40 transition-opacity group-hover/row:opacity-100">
+            <Link
+              to="/products/$productId"
+              params={{ productId: row.original.id }}
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                title="Lihat detail produk"
+              >
+                <Eye className="h-4 w-4" />
+                <span className="sr-only">Lihat detail produk</span>
+              </Button>
+            </Link>
             <Button
               variant="ghost"
               size="icon"
