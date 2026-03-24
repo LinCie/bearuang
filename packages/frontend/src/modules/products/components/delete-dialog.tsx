@@ -48,7 +48,11 @@ export function DeleteDialog({
           >
             {cancelLabel}
           </Button>
-          <Button variant="destructive" onClick={onConfirm} disabled={isPending}>
+          <Button
+            variant="destructive"
+            onClick={onConfirm}
+            disabled={isPending}
+          >
             {isPending ? 'Menghapus...' : confirmLabel}
           </Button>
         </DialogFooter>

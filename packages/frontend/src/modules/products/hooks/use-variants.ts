@@ -127,7 +127,7 @@ export function useUpdateVariant() {
       return data
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: variantKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: variantKeys.all })
       queryClient.invalidateQueries({
         queryKey: variantKeys.detail(variables.id),
       })
@@ -145,7 +145,7 @@ export function useDeleteVariant() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: variantKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: variantKeys.all })
     },
   })
 }

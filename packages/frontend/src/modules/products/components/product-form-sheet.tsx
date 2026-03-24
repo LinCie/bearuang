@@ -15,7 +15,6 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet'
 
-
 const slugRegex = /^[a-z0-9_-]+$/
 
 const productSchema = z.object({
@@ -119,9 +118,7 @@ export function ProductFormSheet({
   const description = isEditing
     ? 'Pastikan detail produk selalu up-to-date agar pelanggan tidak bingung.'
     : 'Tambahkan barang atau layanan baru agar pelanggan bisa mulai memesannya.'
-  const submitLabel = isEditing
-    ? 'Simpan Perubahan'
-    : 'Simpan ke Katalog'
+  const submitLabel = isEditing ? 'Simpan Perubahan' : 'Simpan ke Katalog'
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

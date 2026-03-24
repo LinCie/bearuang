@@ -288,9 +288,7 @@ function ProductDetailPage() {
         description={
           <>
             Anda akan menghapus{' '}
-            <span className="font-medium text-foreground">
-              {product?.name}
-            </span>
+            <span className="font-medium text-foreground">{product?.name}</span>
             . Produk ini akan hilang selamanya dan tidak bisa dikembalikan.
           </>
         }

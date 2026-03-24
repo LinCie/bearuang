@@ -40,10 +40,7 @@ export function ProductErrorState({ onRetry }: ProductErrorStateProps) {
       </p>
       <div className="flex items-center gap-3">
         <Link to="/products">
-          <Button
-            variant="ghost"
-            className="hover:bg-muted/50 rounded-full"
-          >
+          <Button variant="ghost" className="hover:bg-muted/50 rounded-full">
             Kembali
           </Button>
         </Link>
