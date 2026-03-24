@@ -50,9 +50,6 @@ const MAIN_NAV: NavItem[] = [
   { icon: Package, label: 'Produk', to: '/products' },
   { icon: Warehouse, label: 'Gudang', to: '/warehouses' },
   { icon: ArrowLeftRight, label: 'Pergerakan Stok', to: '/stock-movements' },
-  { icon: BadgeDollarSign, label: 'Sales', to: '/sales' },
-  { icon: ShoppingCart, label: 'Orders', to: '/orders' },
-  { icon: BarChart4, label: 'Reports', to: '/reports' },
 ]
 
 const SECONDARY_NAV: NavItem[] = [
