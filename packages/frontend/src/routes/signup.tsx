@@ -4,6 +4,7 @@ import {
   redirect,
   useRouter,
 } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
@@ -43,6 +44,7 @@ const termsSchema = z
 
 function SignupPage() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm({
@@ -72,6 +74,7 @@ function SignupPage() {
         return
       }
 
+      await queryClient.fetchQuery(sessionQueryOptions)
       router.navigate({ to: '/signin' })
     },
   })

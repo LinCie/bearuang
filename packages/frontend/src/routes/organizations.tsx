@@ -96,7 +96,7 @@ function OrganizationsPage() {
         return
       }
       await authClient.organization.setActive({ organizationId: org.id })
-      await queryClient.invalidateQueries({ queryKey: ['session'] })
+      await queryClient.fetchQuery(sessionQueryOptions)
       await router.invalidate()
       setSheetOpen(false)
       router.navigate({ to: '/' })
@@ -112,7 +112,7 @@ function OrganizationsPage() {
     setSelectingOrgId(organizationId)
     try {
       await authClient.organization.setActive({ organizationId })
-      await queryClient.invalidateQueries({ queryKey: ['session'] })
+      await queryClient.fetchQuery(sessionQueryOptions)
       await router.invalidate()
       router.navigate({ to: '/' })
     } catch {

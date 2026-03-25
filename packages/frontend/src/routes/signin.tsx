@@ -58,7 +58,7 @@ function SigninPage() {
         setServerError(error.message ?? 'Terjadi kesalahan. Coba lagi.')
         return
       }
-      await queryClient.invalidateQueries({ queryKey: ['session'] })
+      await queryClient.fetchQuery(sessionQueryOptions)
       await router.invalidate()
       router.navigate({ to: '/' })
     },
