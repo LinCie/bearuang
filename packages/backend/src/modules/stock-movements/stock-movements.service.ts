@@ -11,6 +11,8 @@ export const stockMovementService = {
       variantId?: string
       warehouseId?: string
       type?: StockMovementType
+      referenceId?: string
+      referenceType?: string
       orderBy?: { field: "createdAt" | "quantity" | "type"; order: "asc" | "desc" }
     },
   ) {
@@ -19,6 +21,8 @@ export const stockMovementService = {
       ...(params?.variantId && { variantId: params.variantId }),
       ...(params?.warehouseId && { warehouseId: params.warehouseId }),
       ...(params?.type && { type: params.type }),
+      ...(params?.referenceId && { referenceId: params.referenceId }),
+      ...(params?.referenceType && { referenceType: params.referenceType }),
       ...(params?.search && {
         OR: [
           { note: { contains: params.search, mode: "insensitive" as const } },

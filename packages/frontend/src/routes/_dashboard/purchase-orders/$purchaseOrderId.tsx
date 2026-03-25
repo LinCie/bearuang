@@ -55,10 +55,12 @@ import {
   PaymentStatusBadge,
   formatRupiah,
 } from '@/modules/purchase-orders'
+import { useStockMovementsByReference } from '@/modules/stock-movements'
 import type {
   PurchaseOrder,
   UpdatePurchaseOrderInput,
 } from '@/modules/purchase-orders'
+import type { StockMovementType } from '@/modules/stock-movements'
 
 export const Route = createFileRoute(
   '/_dashboard/purchase-orders/$purchaseOrderId',
@@ -249,6 +251,11 @@ function PurchaseOrderDetailPage() {
     [purchaseOrder, updatePurchaseOrder],
   )
 
+  // ─── Stock Movements Query ─────────────────────────────────
+
+  const { data: stockMovements, isLoading: isLoadingMovements } =
+    useStockMovementsByReference(purchaseOrder?.id ?? '', 'purchase_order')
+
   // ─── Loading State ─────────────────────────────────────────
 
   if (isLoading) {
@@ -281,6 +288,34 @@ function PurchaseOrderDetailPage() {
   const canConfirm = po.status === 'PENDING'
   const canReceive = po.status === 'CONFIRMED' || po.status === 'SHIPPED'
   const canComplete = po.status === 'RECEIVED'
+
+  // ─── Helpers ───────────────────────────────────────────────
+
+  function getMovementTypeLabel(type: StockMovementType) {
+    switch (type) {
+      case 'IN':
+        return 'Masuk'
+      case 'OUT':
+        return 'Keluar'
+      case 'ADJUSTMENT':
+        return 'Penyesuaian'
+      default:
+        return type
+    }
+  }
+
+  function getMovementTypeBadgeStyles(type: StockMovementType) {
+    switch (type) {
+      case 'IN':
+        return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+      case 'OUT':
+        return 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border-rose-200 dark:border-rose-800'
+      case 'ADJUSTMENT':
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800'
+      default:
+        return 'bg-muted text-muted-foreground'
+    }
+  }
 
   // ─── Main Render ───────────────────────────────────────────
 
@@ -573,6 +608,86 @@ function PurchaseOrderDetailPage() {
                 </TableBody>
               </Table>
             </div>
+          </section>
+
+          {/* Stock Movements Section */}
+          <section className="flex flex-col gap-5">
+            <h2 className="text-base font-semibold text-foreground">
+              Riwayat Stok
+            </h2>
+            {isLoadingMovements ? (
+              <div className="h-32 bg-muted/50 rounded-lg animate-pulse" />
+            ) : stockMovements?.data && stockMovements.data.length > 0 ? (
+              <div className="border rounded-xl overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tanggal</TableHead>
+                      <TableHead>Produk</TableHead>
+                      <TableHead>Gudang</TableHead>
+                      <TableHead>Tipe</TableHead>
+                      <TableHead className="text-right">Jumlah</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {stockMovements.data.map((movement) => (
+                      <TableRow key={movement.id}>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {new Date(movement.createdAt).toLocaleDateString(
+                            'id-ID',
+                            {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            },
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Link
+                            to="/products/$productId"
+                            params={{ productId: movement.variant.id }}
+                            className="font-medium text-primary hover:underline"
+                          >
+                            {movement.variant.name}
+                          </Link>
+                          <div className="text-xs text-muted-foreground font-mono">
+                            {movement.variant.sku}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {movement.warehouse.name}
+                        </TableCell>
+                        <TableCell>
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${getMovementTypeBadgeStyles(movement.type)}`}
+                          >
+                            {getMovementTypeLabel(movement.type)}
+                          </span>
+                        </TableCell>
+                        <TableCell
+                          className={`text-right font-medium ${
+                            movement.type === 'OUT'
+                              ? 'text-rose-600 dark:text-rose-400'
+                              : movement.type === 'IN'
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : 'text-foreground'
+                          }`}
+                        >
+                          {movement.type === 'OUT' ? '-' : '+'}
+                          {movement.quantity}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                Belum ada pergerakan stok untuk pesanan pembelian ini.
+              </p>
+            )}
           </section>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">

@@ -53,6 +53,8 @@ export const listMovementsQuery = paginationQuery
     variantId: z.string().uuid().optional(),
     warehouseId: z.string().uuid().optional(),
     type: movementTypeEnum.optional(),
+    referenceId: z.string().optional(),
+    referenceType: z.string().optional(),
   });
 
 export type StockMovementType = z.infer<typeof movementTypeEnum>;
@@ -100,6 +102,8 @@ export const stockMovementRoute = new Elysia({
         variantId,
         warehouseId,
         type,
+        referenceId,
+        referenceType,
         sortBy,
         sortOrder,
       } = query;
@@ -113,6 +117,8 @@ export const stockMovementRoute = new Elysia({
           variantId,
           warehouseId,
           type,
+          referenceId,
+          referenceType,
           orderBy: sortBy
             ? { field: sortBy, order: sortOrder ?? "desc" }
             : undefined,

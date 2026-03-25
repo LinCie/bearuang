@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useRouter, Link } from '@tanstack/react-router'
 import * as React from 'react'
 import {
   useStockMovement,
@@ -17,6 +17,23 @@ export const Route = createFileRoute('/_dashboard/stock-movements/$movementId')(
 )
 
 // ─── Utilities ────────────────────────────────────────────────
+
+function getReferenceLink(referenceType: string, referenceId: string) {
+  switch (referenceType) {
+    case 'purchase_order':
+      return {
+        to: '/purchase-orders/$purchaseOrderId' as const,
+        params: { purchaseOrderId: referenceId },
+      }
+    case 'sales_order':
+      return {
+        to: '/sales-orders/$salesOrderId' as const,
+        params: { salesOrderId: referenceId },
+      }
+    default:
+      return null
+  }
+}
 
 function getTypeLabel(type: StockMovementType) {
   switch (type) {
@@ -233,8 +250,29 @@ function StockMovementDetailPage() {
                     ID Referensi
                   </dt>
                   <dd className="text-sm font-mono text-foreground/70">
-                    {movementData.referenceId.slice(0, 8)}...
-                    {movementData.referenceId.slice(-4)}
+                    {(() => {
+                      const link = movementData.referenceType
+                        ? getReferenceLink(
+                            movementData.referenceType,
+                            movementData.referenceId,
+                          )
+                        : null
+                      return link ? (
+                        <Link
+                          to={link.to}
+                          params={link.params}
+                          className="text-primary hover:underline"
+                        >
+                          {movementData.referenceId.slice(0, 8)}...
+                          {movementData.referenceId.slice(-4)}
+                        </Link>
+                      ) : (
+                        <>
+                          {movementData.referenceId.slice(0, 8)}...
+                          {movementData.referenceId.slice(-4)}
+                        </>
+                      )
+                    })()}
                   </dd>
                 </div>
               </dl>

@@ -1,4 +1,5 @@
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -12,6 +13,23 @@ import type {
   StockMovement,
   StockMovementType,
 } from '@/modules/stock-movements'
+
+function getReferenceLink(referenceType: string, referenceId: string) {
+  switch (referenceType) {
+    case 'purchase_order':
+      return {
+        to: '/purchase-orders/$purchaseOrderId',
+        params: { purchaseOrderId: referenceId },
+      }
+    case 'sales_order':
+      return {
+        to: '/sales-orders/$salesOrderId',
+        params: { salesOrderId: referenceId },
+      }
+    default:
+      return null
+  }
+}
 
 interface StockMovementsTableProps {
   movements: StockMovement[]
@@ -150,14 +168,31 @@ export function StockMovementsTable({
               </TableCell>
               <TableCell className="text-sm">
                 {m.referenceId ? (
-                  <div className="flex flex-col">
-                    <span className="text-xs text-muted-foreground">
-                      {m.referenceType}
-                    </span>
-                    <span className="font-mono text-xs truncate max-w-[120px]">
-                      {m.referenceId.slice(0, 8)}...
-                    </span>
-                  </div>
+                  (() => {
+                    const link = m.referenceType
+                      ? getReferenceLink(m.referenceType, m.referenceId)
+                      : null
+                    return (
+                      <div className="flex flex-col">
+                        <span className="text-xs text-muted-foreground">
+                          {m.referenceType}
+                        </span>
+                        {link ? (
+                          <Link
+                            to={link.to}
+                            params={link.params}
+                            className="font-mono text-xs truncate max-w-[120px] text-primary hover:underline"
+                          >
+                            {m.referenceId.slice(0, 8)}...
+                          </Link>
+                        ) : (
+                          <span className="font-mono text-xs truncate max-w-[120px]">
+                            {m.referenceId.slice(0, 8)}...
+                          </span>
+                        )}
+                      </div>
+                    )
+                  })()
                 ) : (
                   <span className="text-muted-foreground text-xs">Manual</span>
                 )}

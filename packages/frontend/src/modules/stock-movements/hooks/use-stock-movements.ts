@@ -30,6 +30,13 @@ export const stockMovementKeys = {
     [...stockMovementKeys.all, 'byVariant', variantId] as const,
   byWarehouse: (warehouseId: string) =>
     [...stockMovementKeys.all, 'byWarehouse', warehouseId] as const,
+  byReference: (referenceId: string, referenceType: string) =>
+    [
+      ...stockMovementKeys.all,
+      'byReference',
+      referenceType,
+      referenceId,
+    ] as const,
 }
 
 // ─── Queries ─────────────────────────────────────────────────
@@ -93,6 +100,23 @@ export function useWarehouseStockMovements(warehouseId: string) {
       return data
     },
     enabled: !!warehouseId,
+  })
+}
+
+export function useStockMovementsByReference(
+  referenceId: string,
+  referenceType: string,
+) {
+  return useQuery({
+    queryKey: stockMovementKeys.byReference(referenceId, referenceType),
+    queryFn: async () => {
+      const { data, error } = await api['stock-movements'].get({
+        query: { referenceId, referenceType, page: 1, pageSize: 100 },
+      })
+      if (error) throw error
+      return data
+    },
+    enabled: !!referenceId && !!referenceType,
   })
 }
 
