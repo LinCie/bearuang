@@ -6,6 +6,7 @@ export const suppliersService = {
     params?: {
       skip?: number
       take?: number
+      search?: string
       isActive?: boolean
       orderBy?: { field: "name" | "createdAt" | "updatedAt"; order: "asc" | "desc" }
     },
@@ -13,6 +14,14 @@ export const suppliersService = {
     const where = {
       organizationId,
       ...(params?.isActive !== undefined && { isActive: params.isActive }),
+      ...(params?.search && {
+        OR: [
+          { name: { contains: params.search, mode: "insensitive" as const } },
+          { email: { contains: params.search, mode: "insensitive" as const } },
+          { phone: { contains: params.search, mode: "insensitive" as const } },
+          { address: { contains: params.search, mode: "insensitive" as const } },
+        ],
+      }),
     }
     const [data, total] = await prisma.$transaction([
       prisma.supplier.findMany({

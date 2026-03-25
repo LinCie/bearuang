@@ -41,6 +41,7 @@ export const updateSupplierDto = z.object({
 export const listSuppliersQuery = paginationQuery
   .extend(sortQuery(["name", "createdAt", "updatedAt"]).shape)
   .extend({
+    search: z.string().optional(),
     isActive: z
       .string()
       .transform((v) => v === "true")
@@ -81,13 +82,14 @@ export const suppliersRoute = new Elysia({
   .get(
     "/",
     async ({ organization, query }) => {
-      const { page, pageSize, isActive, sortBy, sortOrder } = query;
+      const { page, pageSize, search, isActive, sortBy, sortOrder } = query;
       const { skip, take } = paginationToSkipTake(page, pageSize);
       const { data, total } = await suppliersService.listSuppliers(
         organization.id,
         {
           skip,
           take,
+          search,
           isActive,
           orderBy: sortBy
             ? { field: sortBy, order: sortOrder ?? "desc" }

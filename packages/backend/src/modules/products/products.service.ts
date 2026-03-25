@@ -6,10 +6,20 @@ export const productsService = {
     params?: {
       skip?: number
       take?: number
+      search?: string
       orderBy?: { field: "name" | "createdAt" | "updatedAt"; order: "asc" | "desc" }
     },
   ) {
-    const where = { organizationId, deletedAt: null }
+    const where = {
+      organizationId,
+      deletedAt: null,
+      ...(params?.search && {
+        OR: [
+          { name: { contains: params.search, mode: "insensitive" as const } },
+          { description: { contains: params.search, mode: "insensitive" as const } },
+        ],
+      }),
+    }
     const [data, total] = await prisma.$transaction([
       prisma.product.findMany({
         where,

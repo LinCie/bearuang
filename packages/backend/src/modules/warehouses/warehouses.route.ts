@@ -33,9 +33,11 @@ export const updateWarehouseDto = z.object({
   isActive: z.boolean().optional(),
 });
 
-export const listWarehousesQuery = paginationQuery.merge(
-  sortQuery(["name", "createdAt", "updatedAt"]),
-);
+export const listWarehousesQuery = paginationQuery
+  .merge(sortQuery(["name", "createdAt", "updatedAt"]))
+  .extend({
+    search: z.string().optional(),
+  });
 
 export type Warehouse = z.infer<typeof warehouseSchema>;
 export type CreateWarehouseInput = z.infer<typeof createWarehouseDto>;
@@ -68,13 +70,14 @@ export const warehousesRoute = new Elysia({
   .get(
     "/",
     async ({ organization, query }) => {
-      const { page, pageSize, sortBy, sortOrder } = query;
+      const { page, pageSize, search, sortBy, sortOrder } = query;
       const { skip, take } = paginationToSkipTake(page, pageSize);
       const { data, total } = await warehousesService.listWarehouses(
         organization.id,
         {
           skip,
           take,
+          search,
           orderBy: sortBy
             ? { field: sortBy, order: sortOrder ?? "desc" }
             : undefined,

@@ -63,9 +63,11 @@ export const updateProductDto = z.object({
   isActive: z.boolean().optional(),
 });
 
-export const listProductsQuery = paginationQuery.merge(
-  sortQuery(["name", "createdAt", "updatedAt"]),
-);
+export const listProductsQuery = paginationQuery
+  .merge(sortQuery(["name", "createdAt", "updatedAt"]))
+  .extend({
+    search: z.string().optional(),
+  });
 
 export type Product = z.infer<typeof productSchema>
 export type ProductVariant = z.infer<typeof variantSchema>
@@ -85,13 +87,14 @@ export const productsRoute = new Elysia({
   .get(
     "/",
     async ({ organization, query }) => {
-      const { page, pageSize, sortBy, sortOrder } = query;
+      const { page, pageSize, search, sortBy, sortOrder } = query;
       const { skip, take } = paginationToSkipTake(page, pageSize);
       const { data, total } = await productsService.listProducts(
         organization.id,
         {
           skip,
           take,
+          search,
           orderBy: sortBy ? { field: sortBy, order: sortOrder ?? "desc" } : undefined,
         },
       );

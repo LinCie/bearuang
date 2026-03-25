@@ -7,6 +7,7 @@ export const stockMovementService = {
     params?: {
       skip?: number
       take?: number
+      search?: string
       variantId?: string
       warehouseId?: string
       type?: StockMovementType
@@ -18,6 +19,13 @@ export const stockMovementService = {
       ...(params?.variantId && { variantId: params.variantId }),
       ...(params?.warehouseId && { warehouseId: params.warehouseId }),
       ...(params?.type && { type: params.type }),
+      ...(params?.search && {
+        OR: [
+          { note: { contains: params.search, mode: "insensitive" as const } },
+          { variant: { name: { contains: params.search, mode: "insensitive" as const } } },
+          { variant: { sku: { contains: params.search, mode: "insensitive" as const } } },
+        ],
+      }),
     }
     const [data, total] = await prisma.$transaction([
       prisma.stockMovement.findMany({

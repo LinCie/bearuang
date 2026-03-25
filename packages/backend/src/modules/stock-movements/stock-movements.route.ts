@@ -49,6 +49,7 @@ export const createMovementDto = z.object({
 export const listMovementsQuery = paginationQuery
   .merge(sortQuery(["createdAt", "quantity", "type"]))
   .extend({
+    search: z.string().optional(),
     variantId: z.string().uuid().optional(),
     warehouseId: z.string().uuid().optional(),
     type: movementTypeEnum.optional(),
@@ -95,6 +96,7 @@ export const stockMovementRoute = new Elysia({
       const {
         page,
         pageSize,
+        search,
         variantId,
         warehouseId,
         type,
@@ -107,6 +109,7 @@ export const stockMovementRoute = new Elysia({
         {
           skip,
           take,
+          search,
           variantId,
           warehouseId,
           type,

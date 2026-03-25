@@ -6,10 +6,19 @@ export const warehousesService = {
     params?: {
       skip?: number
       take?: number
+      search?: string
       orderBy?: { field: "name" | "createdAt" | "updatedAt"; order: "asc" | "desc" }
     },
   ) {
-    const where = { organizationId }
+    const where = {
+      organizationId,
+      ...(params?.search && {
+        OR: [
+          { name: { contains: params.search, mode: "insensitive" as const } },
+          { address: { contains: params.search, mode: "insensitive" as const } },
+        ],
+      }),
+    }
     const [data, total] = await prisma.$transaction([
       prisma.warehouse.findMany({
         where,
