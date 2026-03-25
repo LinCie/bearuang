@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
 import {
   useReactTable,
@@ -50,14 +50,21 @@ import type {
   Product,
   UpdateProductInput,
 } from '@/modules/products'
+import { useDebounce } from '@/hooks/use-debounce'
 
 export const Route = createFileRoute('/_dashboard/products/')({
   component: ProductsPage,
+  validateSearch: (search): { search?: string } => ({
+    search: (search.search as string) || undefined,
+  }),
 })
 
 // ─── Component ────────────────────────────────────────────────
 
 function ProductsPage() {
+  const navigate = useNavigate({ from: '/products/' })
+  const { search: searchParam } = Route.useSearch()
+
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'createdAt', desc: true },
   ])
@@ -65,7 +72,8 @@ function ProductsPage() {
     pageIndex: 0,
     pageSize: 10,
   })
-  const [search, setSearch] = React.useState('')
+  const [search, setSearch] = React.useState(searchParam)
+  const debouncedSearch = useDebounce(search, 300)
 
   // Sheet state
   const [sheetOpen, setSheetOpen] = React.useState(false)
@@ -86,30 +94,33 @@ function ProductsPage() {
     | undefined
   const sortOrder = sorting[0]?.desc ? 'desc' : 'asc'
 
+  // Sync URL with search state
+  React.useEffect(() => {
+    navigate({
+      search: () => ({ search: debouncedSearch || undefined }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value)
+    setPagination((p) => ({ ...p, pageIndex: 0 }))
+  }
+
   const { data, isLoading, isError } = useProducts({
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
     sortBy,
     sortOrder,
+    search: debouncedSearch || undefined,
   })
 
   const createProduct = useCreateProduct()
   const updateProduct = useUpdateProduct()
   const deleteProduct = useDeleteProduct()
 
-  const products = (data?.data ?? []) as Product[]
+  const products = data?.data ?? []
   const meta = data?.meta
-
-  // Client-side search filter
-  const filteredProducts = React.useMemo(() => {
-    if (!search) return products
-    const q = search.toLowerCase()
-    return products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        (p.description?.toLowerCase().includes(q) ?? false),
-    )
-  }, [products, search])
 
   // ─── Handlers ──────────────────────────────────────────────
 
@@ -304,7 +315,7 @@ function ProductsPage() {
   )
 
   const table = useReactTable({
-    data: filteredProducts,
+    data: products,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -346,7 +357,7 @@ function ProductsPage() {
           <Input
             placeholder="Cari produk berdasarkan nama atau deskripsi..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-10 pr-4 h-11 bg-card border-border/60 hover:border-border focus-visible:ring-1 focus-visible:ring-primary/30 rounded-xl shadow-sm transition-all sm:text-sm"
             aria-label="Cari produk"
           />
@@ -462,7 +473,7 @@ function ProductsPage() {
                   </Button>
                 </TableCell>
               </TableRow>
-            ) : filteredProducts.length === 0 ? (
+            ) : products.length === 0 ? (
               <TableRow className="hover:bg-transparent border-none">
                 <TableCell
                   colSpan={columns.length}

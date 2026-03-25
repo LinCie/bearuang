@@ -1,4 +1,4 @@
-import { createFileRoute, useSearch } from '@tanstack/react-router'
+import { createFileRoute, useSearch, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
 import {
   Plus,
@@ -22,21 +22,21 @@ import {
 import { useWarehouses } from '@/modules/warehouses'
 import { useVariants } from '@/modules/products'
 import type { StockMovementType } from '@/modules/stock-movements'
+import { useDebounce } from '@/hooks/use-debounce'
 
 export const Route = createFileRoute('/_dashboard/stock-movements/')({
   component: StockMovementsPage,
-  validateSearch: (search) => ({
-    warehouseId: (search.warehouseId as string) || '',
-    variantId: (search.variantId as string) || '',
+  validateSearch: (
+    search,
+  ): { warehouseId?: string; variantId?: string; search?: string } => ({
+    warehouseId: (search.warehouseId as string) || undefined,
+    variantId: (search.variantId as string) || undefined,
+    search: (search.search as string) || undefined,
   }),
 })
 
-interface SearchParams {
-  warehouseId: string
-  variantId: string
-}
-
 function StockMovementsPage() {
+  const navigate = useNavigate({ from: '/stock-movements/' })
   const search = useSearch({
     from: '/_dashboard/stock-movements/',
   })
@@ -54,11 +54,13 @@ function StockMovementsPage() {
 
   // Filters state
   const [filters, setFilters] = React.useState({
-    warehouseId: search.warehouseId,
-    variantId: search.variantId,
+    warehouseId: search.warehouseId ?? '',
+    variantId: search.variantId ?? '',
     type: '' as StockMovementType | '',
-    search: '',
+    search: search.search ?? '',
   })
+
+  const debouncedSearch = useDebounce(filters.search, 300)
 
   // Sheet state
   const [sheetOpen, setSheetOpen] = React.useState(false)
@@ -69,6 +71,19 @@ function StockMovementsPage() {
     string | null
   >(null)
 
+  // Reset pagination when filters change
+  React.useEffect(() => {
+    setPagination((p) => ({ ...p, pageIndex: 0 }))
+  }, [debouncedSearch, filters.warehouseId, filters.variantId, filters.type])
+
+  // Sync URL with search state
+  React.useEffect(() => {
+    navigate({
+      search: () => ({ search: debouncedSearch || undefined }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
   // Fetch data
   const { data, isLoading, isError } = useStockMovements({
     page: pagination.pageIndex + 1,
@@ -78,6 +93,7 @@ function StockMovementsPage() {
     variantId: filters.variantId || undefined,
     warehouseId: filters.warehouseId || undefined,
     type: filters.type || undefined,
+    search: debouncedSearch || undefined,
   })
 
   const { data: warehousesData } = useWarehouses({ pageSize: 100 })
@@ -103,18 +119,6 @@ function StockMovementsPage() {
       sku: v.sku,
     }),
   )
-
-  // Client-side search filter
-  const filteredMovements = React.useMemo(() => {
-    if (!filters.search) return movements
-    const q = filters.search.toLowerCase()
-    return movements.filter(
-      (m) =>
-        m.variant.name.toLowerCase().includes(q) ||
-        m.variant.sku.toLowerCase().includes(q) ||
-        (m.note?.toLowerCase().includes(q) ?? false),
-    )
-  }, [movements, filters.search])
 
   // ─── Handlers ──────────────────────────────────────────────
 
@@ -275,7 +279,7 @@ function StockMovementsPage() {
               Coba Muat Ulang
             </Button>
           </div>
-        ) : filteredMovements.length === 0 ? (
+        ) : movements.length === 0 ? (
           <div className="text-center py-24">
             {filters.search ||
             filters.warehouseId ||
@@ -365,7 +369,7 @@ function StockMovementsPage() {
           </div>
         ) : (
           <StockMovementsTable
-            movements={filteredMovements}
+            movements={movements}
             sortBy={sorting.sortBy}
             sortOrder={sorting.sortOrder}
             onSort={handleSort}
@@ -374,57 +378,54 @@ function StockMovementsPage() {
       </div>
 
       {/* Pagination */}
-      {meta &&
-        meta.totalPages > 1 &&
-        !isLoading &&
-        filteredMovements.length > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between mt-8 pt-6 border-t border-border/40 text-sm text-muted-foreground gap-5 sm:gap-0 mx-2 pb-6">
-            <p className="text-center sm:text-left text-balance">
-              Menampilkan{' '}
-              <span className="text-foreground font-medium mx-1">
-                {pagination.pageIndex * pagination.pageSize + 1}
-              </span>
-              –
-              <span className="text-foreground font-medium mx-1">
-                {Math.min(
-                  (pagination.pageIndex + 1) * pagination.pageSize,
-                  meta.total,
-                )}
-              </span>
-              dari{' '}
-              <span className="text-foreground font-medium mx-1">
-                {meta.total}
-              </span>{' '}
-              pergerakan
-            </p>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                className="px-5 shadow-sm"
-                disabled={!meta.hasPrev}
-                onClick={() =>
-                  setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))
-                }
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Sebelumnya
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="px-5 shadow-sm"
-                disabled={!meta.hasNext}
-                onClick={() =>
-                  setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))
-                }
-              >
-                Selanjutnya
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
+      {meta && meta.totalPages > 1 && !isLoading && movements.length > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between mt-8 pt-6 border-t border-border/40 text-sm text-muted-foreground gap-5 sm:gap-0 mx-2 pb-6">
+          <p className="text-center sm:text-left text-balance">
+            Menampilkan{' '}
+            <span className="text-foreground font-medium mx-1">
+              {pagination.pageIndex * pagination.pageSize + 1}
+            </span>
+            –
+            <span className="text-foreground font-medium mx-1">
+              {Math.min(
+                (pagination.pageIndex + 1) * pagination.pageSize,
+                meta.total,
+              )}
+            </span>
+            dari{' '}
+            <span className="text-foreground font-medium mx-1">
+              {meta.total}
+            </span>{' '}
+            pergerakan
+          </p>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="px-5 shadow-sm"
+              disabled={!meta.hasPrev}
+              onClick={() =>
+                setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))
+              }
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Sebelumnya
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="px-5 shadow-sm"
+              disabled={!meta.hasNext}
+              onClick={() =>
+                setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))
+              }
+            >
+              Selanjutnya
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
           </div>
-        )}
+        </div>
+      )}
 
       {/* Create Sheet */}
       <StockMovementFormSheet

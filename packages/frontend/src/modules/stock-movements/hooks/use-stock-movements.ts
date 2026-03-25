@@ -44,6 +44,7 @@ export function useStockMovements(params: ListMovementsQuery = {}) {
           pageSize: params.pageSize ?? 50,
           sortBy: params.sortBy,
           sortOrder: params.sortOrder,
+          search: params.search,
           variantId: params.variantId,
           warehouseId: params.warehouseId,
           type: params.type,

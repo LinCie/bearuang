@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
 import {
   useReactTable,
@@ -51,14 +51,21 @@ import type {
   UpdateCustomerInput,
   Customer,
 } from '@/modules/customers'
+import { useDebounce } from '@/hooks/use-debounce'
 
 export const Route = createFileRoute('/_dashboard/customers/')({
   component: CustomersPage,
+  validateSearch: (search): { search?: string } => ({
+    search: (search.search as string) || undefined,
+  }),
 })
 
 // ─── Component ────────────────────────────────────────────────
 
 function CustomersPage() {
+  const navigate = useNavigate({ from: '/customers/' })
+  const { search: searchParam } = Route.useSearch()
+
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'createdAt', desc: true },
   ])
@@ -66,7 +73,8 @@ function CustomersPage() {
     pageIndex: 0,
     pageSize: 10,
   })
-  const [search, setSearch] = React.useState('')
+  const [search, setSearch] = React.useState(searchParam)
+  const debouncedSearch = useDebounce(search, 300)
 
   // Sheet state
   const [sheetOpen, setSheetOpen] = React.useState(false)
@@ -86,32 +94,33 @@ function CustomersPage() {
     | undefined
   const sortOrder = sorting[0]?.desc ? 'desc' : 'asc'
 
+  // Sync URL with search state
+  React.useEffect(() => {
+    navigate({
+      search: () => ({ search: debouncedSearch || undefined }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value)
+    setPagination((p) => ({ ...p, pageIndex: 0 }))
+  }
+
   const { data, isLoading, isError } = useCustomers({
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
     sortBy,
     sortOrder,
+    search: debouncedSearch || undefined,
   })
 
   const createCustomer = useCreateCustomer()
   const updateCustomer = useUpdateCustomer()
   const deleteCustomer = useDeleteCustomer()
 
-  const customers = (data?.data ?? []) as Customer[]
+  const customers = data?.data ?? []
   const meta = data?.meta
-
-  // Client-side search filter
-  const filteredCustomers = React.useMemo(() => {
-    if (!search) return customers
-    const q = search.toLowerCase()
-    return customers.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        (c.email?.toLowerCase().includes(q) ?? false) ||
-        (c.phone?.toLowerCase().includes(q) ?? false) ||
-        (c.address?.toLowerCase().includes(q) ?? false),
-    )
-  }, [customers, search])
 
   // ─── Handlers ──────────────────────────────────────────────
 
@@ -327,7 +336,7 @@ function CustomersPage() {
   )
 
   const table = useReactTable({
-    data: filteredCustomers,
+    data: customers,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -370,7 +379,7 @@ function CustomersPage() {
           <Input
             placeholder="Cari pelanggan berdasarkan nama, email, telepon, atau alamat..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-10 pr-4 h-11 bg-card border-border/60 hover:border-border focus-visible:ring-1 focus-visible:ring-primary/30 rounded-xl shadow-sm transition-all sm:text-sm"
             aria-label="Cari pelanggan"
           />
@@ -486,7 +495,7 @@ function CustomersPage() {
                   </Button>
                 </TableCell>
               </TableRow>
-            ) : filteredCustomers.length === 0 ? (
+            ) : customers.length === 0 ? (
               <TableRow className="hover:bg-transparent border-none">
                 <TableCell
                   colSpan={columns.length}

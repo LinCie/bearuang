@@ -39,6 +39,7 @@ export function useProducts(params: ListProductsQuery = {}) {
           pageSize: params.pageSize ?? 50,
           sortBy: params.sortBy,
           sortOrder: params.sortOrder,
+          search: params.search,
         },
       })
       if (error) throw error

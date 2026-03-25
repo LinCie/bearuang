@@ -39,6 +39,7 @@ export function useSuppliers(params: ListSuppliersQuery = {}) {
           pageSize: params.pageSize ?? 50,
           sortBy: params.sortBy,
           sortOrder: params.sortOrder,
+          search: params.search,
           isActive: params.isActive,
         },
       })

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
 import {
   useReactTable,
@@ -51,14 +51,21 @@ import type {
   UpdateSupplierInput,
   Supplier,
 } from '@/modules/suppliers'
+import { useDebounce } from '@/hooks/use-debounce'
 
 export const Route = createFileRoute('/_dashboard/suppliers/')({
   component: SuppliersPage,
+  validateSearch: (search): { search?: string } => ({
+    search: (search.search as string) || undefined,
+  }),
 })
 
 // ─── Component ────────────────────────────────────────────────
 
 function SuppliersPage() {
+  const navigate = useNavigate({ from: '/suppliers/' })
+  const { search: searchParam } = Route.useSearch()
+
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'createdAt', desc: true },
   ])
@@ -66,7 +73,8 @@ function SuppliersPage() {
     pageIndex: 0,
     pageSize: 10,
   })
-  const [search, setSearch] = React.useState('')
+  const [search, setSearch] = React.useState(searchParam)
+  const debouncedSearch = useDebounce(search, 300)
 
   // Sheet state
   const [sheetOpen, setSheetOpen] = React.useState(false)
@@ -86,32 +94,33 @@ function SuppliersPage() {
     | undefined
   const sortOrder = sorting[0]?.desc ? 'desc' : 'asc'
 
+  // Sync URL with search state
+  React.useEffect(() => {
+    navigate({
+      search: () => ({ search: debouncedSearch || undefined }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value)
+    setPagination((p) => ({ ...p, pageIndex: 0 }))
+  }
+
   const { data, isLoading, isError } = useSuppliers({
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
     sortBy,
     sortOrder,
+    search: debouncedSearch || undefined,
   })
 
   const createSupplier = useCreateSupplier()
   const updateSupplier = useUpdateSupplier()
   const deleteSupplier = useDeleteSupplier()
 
-  const suppliers = (data?.data ?? []) as Supplier[]
+  const suppliers = data?.data ?? []
   const meta = data?.meta
-
-  // Client-side search filter
-  const filteredSuppliers = React.useMemo(() => {
-    if (!search) return suppliers
-    const q = search.toLowerCase()
-    return suppliers.filter(
-      (s) =>
-        s.name.toLowerCase().includes(q) ||
-        (s.email?.toLowerCase().includes(q) ?? false) ||
-        (s.phone?.toLowerCase().includes(q) ?? false) ||
-        (s.address?.toLowerCase().includes(q) ?? false),
-    )
-  }, [suppliers, search])
 
   // ─── Handlers ──────────────────────────────────────────────
 
@@ -327,7 +336,7 @@ function SuppliersPage() {
   )
 
   const table = useReactTable({
-    data: filteredSuppliers,
+    data: suppliers,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -370,7 +379,7 @@ function SuppliersPage() {
           <Input
             placeholder="Cari pemasok berdasarkan nama, email, telepon, atau alamat..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-10 pr-4 h-11 bg-card border-border/60 hover:border-border focus-visible:ring-1 focus-visible:ring-primary/30 rounded-xl shadow-sm transition-all sm:text-sm"
             aria-label="Cari pemasok"
           />
@@ -486,7 +495,7 @@ function SuppliersPage() {
                   </Button>
                 </TableCell>
               </TableRow>
-            ) : filteredSuppliers.length === 0 ? (
+            ) : suppliers.length === 0 ? (
               <TableRow className="hover:bg-transparent border-none">
                 <TableCell
                   colSpan={columns.length}

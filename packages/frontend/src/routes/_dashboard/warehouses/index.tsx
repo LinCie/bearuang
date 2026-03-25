@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
 import {
   useReactTable,
@@ -49,14 +49,21 @@ import type {
   UpdateWarehouseInput,
   Warehouse as WarehouseType,
 } from '@/modules/warehouses'
+import { useDebounce } from '@/hooks/use-debounce'
 
 export const Route = createFileRoute('/_dashboard/warehouses/')({
   component: WarehousesPage,
+  validateSearch: (search): { search?: string } => ({
+    search: (search.search as string) || undefined,
+  }),
 })
 
 // ─── Component ────────────────────────────────────────────────
 
 function WarehousesPage() {
+  const navigate = useNavigate({ from: '/warehouses/' })
+  const { search: searchParam } = Route.useSearch()
+
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'createdAt', desc: true },
   ])
@@ -64,7 +71,8 @@ function WarehousesPage() {
     pageIndex: 0,
     pageSize: 10,
   })
-  const [search, setSearch] = React.useState('')
+  const [search, setSearch] = React.useState(searchParam)
+  const debouncedSearch = useDebounce(search, 300)
 
   // Sheet state
   const [sheetOpen, setSheetOpen] = React.useState(false)
@@ -83,30 +91,33 @@ function WarehousesPage() {
     | undefined
   const sortOrder = sorting[0]?.desc ? 'desc' : 'asc'
 
+  // Sync URL with search state
+  React.useEffect(() => {
+    navigate({
+      search: () => ({ search: debouncedSearch || undefined }),
+      replace: true,
+    })
+  }, [debouncedSearch, navigate])
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value)
+    setPagination((p) => ({ ...p, pageIndex: 0 }))
+  }
+
   const { data, isLoading, isError } = useWarehouses({
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
     sortBy,
     sortOrder,
+    search: debouncedSearch || undefined,
   })
 
   const createWarehouse = useCreateWarehouse()
   const updateWarehouse = useUpdateWarehouse()
   const deleteWarehouse = useDeleteWarehouse()
 
-  const warehouses = (data?.data ?? []) as WarehouseType[]
+  const warehouses = data?.data ?? []
   const meta = data?.meta
-
-  // Client-side search filter
-  const filteredWarehouses = React.useMemo(() => {
-    if (!search) return warehouses
-    const q = search.toLowerCase()
-    return warehouses.filter(
-      (w) =>
-        w.name.toLowerCase().includes(q) ||
-        (w.address?.toLowerCase().includes(q) ?? false),
-    )
-  }, [warehouses, search])
 
   // ─── Handlers ──────────────────────────────────────────────
 
@@ -299,7 +310,7 @@ function WarehousesPage() {
   )
 
   const table = useReactTable({
-    data: filteredWarehouses,
+    data: warehouses,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -341,7 +352,7 @@ function WarehousesPage() {
           <Input
             placeholder="Cari gudang berdasarkan nama atau alamat..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-10 pr-4 h-11 bg-card border-border/60 hover:border-border focus-visible:ring-1 focus-visible:ring-primary/30 rounded-xl shadow-sm transition-all sm:text-sm"
             aria-label="Cari gudang"
           />
@@ -457,7 +468,7 @@ function WarehousesPage() {
                   </Button>
                 </TableCell>
               </TableRow>
-            ) : filteredWarehouses.length === 0 ? (
+            ) : warehouses.length === 0 ? (
               <TableRow className="hover:bg-transparent border-none">
                 <TableCell
                   colSpan={columns.length}
