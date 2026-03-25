@@ -38,9 +38,7 @@ function ProductDetailPage() {
   const { data: product, isLoading, isError } = useProduct(productId)
   const { data: variantsData } = useProductVariants(productId)
 
-  const variants: ProductVariant[] = (variantsData ??
-    product?.variants ??
-    []) as ProductVariant[]
+  const variants: ProductVariant[] = variantsData ?? product?.variants ?? []
 
   // Mutations
   const createVariant = useCreateVariant(productId)

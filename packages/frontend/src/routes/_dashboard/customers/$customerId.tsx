@@ -105,7 +105,7 @@ function CustomerDetailPage() {
     return <CustomerErrorState />
   }
 
-  const customerData = customer as Customer
+  const customerData = customer
 
   // ─── Main Render ───────────────────────────────────────────
 

@@ -102,7 +102,7 @@ function StockMovementDetailPage() {
     return <MovementErrorState onRetry={() => refetch()} />
   }
 
-  const movementData = movement as StockMovementType
+  const movementData = movement
 
   // ─── Main Render ───────────────────────────────────────────
 

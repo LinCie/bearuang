@@ -96,7 +96,7 @@ function WarehouseDetailPage() {
     return <WarehouseErrorState />
   }
 
-  const warehouseData = warehouse as Warehouse
+  const warehouseData = warehouse
 
   // ─── Main Render ───────────────────────────────────────────
 

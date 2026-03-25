@@ -105,7 +105,7 @@ function SupplierDetailPage() {
     return <SupplierErrorState />
   }
 
-  const supplierData = supplier as Supplier
+  const supplierData = supplier
 
   // ─── Main Render ───────────────────────────────────────────
 
