@@ -13,6 +13,7 @@ import {
   Users,
   ClipboardList,
   ShoppingCart,
+  UserPlus,
 } from 'lucide-react'
 import { signOut, useSession } from '@/lib/auth-client'
 import { cn } from '@/lib/utils'
@@ -58,6 +59,7 @@ const MAIN_NAV: NavItem[] = [
 ]
 
 const SECONDARY_NAV: NavItem[] = [
+  { icon: UserPlus, label: 'Anggota', to: '/members' },
   { icon: Settings, label: 'Settings', to: '/settings' },
 ]
 
