@@ -10,7 +10,6 @@ import type { SortingState, ColumnDef } from '@tanstack/react-table'
 
 import {
   Plus,
-  Pencil,
   Trash2,
   ArrowUpDown,
   ArrowUp,
@@ -49,7 +48,6 @@ import {
 import {
   usePurchaseOrders,
   useCreatePurchaseOrder,
-  useUpdatePurchaseOrder,
   useDeletePurchaseOrder,
   PurchaseOrderFormSheet,
   StatusBadge,
@@ -59,7 +57,6 @@ import {
 } from '@/modules/purchase-orders'
 import type {
   CreatePurchaseOrderInput,
-  UpdatePurchaseOrderInput,
   PurchaseOrder,
 } from '@/modules/purchase-orders'
 
@@ -112,9 +109,6 @@ function PurchaseOrdersPage() {
 
   // Sheet state
   const [sheetOpen, setSheetOpen] = React.useState(false)
-  const [editingOrder, setEditingOrder] = React.useState<PurchaseOrder | null>(
-    null,
-  )
 
   // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
@@ -161,7 +155,6 @@ function PurchaseOrdersPage() {
   })
 
   const createPurchaseOrder = useCreatePurchaseOrder()
-  const updatePurchaseOrder = useUpdatePurchaseOrder()
   const deletePurchaseOrder = useDeletePurchaseOrder()
 
   const purchaseOrders = data?.data ?? []
@@ -170,7 +163,6 @@ function PurchaseOrdersPage() {
   // ─── Handlers ──────────────────────────────────────────────
 
   const handleCreate = React.useCallback(() => {
-    setEditingOrder(null)
     setSheetOpen(true)
   }, [])
 
@@ -183,11 +175,6 @@ function PurchaseOrdersPage() {
     },
     [navigate],
   )
-
-  const handleEdit = React.useCallback((order: PurchaseOrder) => {
-    setEditingOrder(order)
-    setSheetOpen(true)
-  }, [])
 
   const handleDeleteClick = React.useCallback((order: PurchaseOrder) => {
     setDeletingOrder(order)
@@ -206,23 +193,13 @@ function PurchaseOrdersPage() {
     warehouseId: string
     items: Array<{ variantId: string; quantity: number; unitCost: number }>
   }) {
-    if (editingOrder) {
-      const input: UpdatePurchaseOrderInput & { id: string } = {
-        id: editingOrder.id,
-        supplierId: values.supplierId,
-        warehouseId: values.warehouseId,
-      }
-      await updatePurchaseOrder.mutateAsync(input)
-    } else {
-      const input: CreatePurchaseOrderInput = {
-        supplierId: values.supplierId,
-        warehouseId: values.warehouseId,
-        items: values.items,
-      }
-      await createPurchaseOrder.mutateAsync(input)
+    const input: CreatePurchaseOrderInput = {
+      supplierId: values.supplierId,
+      warehouseId: values.warehouseId,
+      items: values.items,
     }
+    await createPurchaseOrder.mutateAsync(input)
     setSheetOpen(false)
-    setEditingOrder(null)
   }
 
   // ─── Table Columns ─────────────────────────────────────────
@@ -365,16 +342,6 @@ function PurchaseOrdersPage() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-              onClick={() => handleEdit(row.original)}
-              title="Edit pesanan"
-            >
-              <Pencil className="h-4 w-4" />
-              <span className="sr-only">Edit pesanan</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
               className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
               onClick={() => handleDeleteClick(row.original)}
               title="Hapus pesanan"
@@ -386,7 +353,7 @@ function PurchaseOrdersPage() {
         ),
       },
     ],
-    [handleViewDetail, handleEdit, handleDeleteClick],
+    [handleViewDetail, handleDeleteClick],
   )
 
   const table = useReactTable({
@@ -745,19 +712,12 @@ function PurchaseOrdersPage() {
         </div>
       )}
 
-      {/* Create / Edit Sheet */}
+      {/* Create Sheet */}
       <PurchaseOrderFormSheet
         open={sheetOpen}
-        onOpenChange={(open) => {
-          setSheetOpen(open)
-          if (!open) setEditingOrder(null)
-        }}
-        order={editingOrder}
+        onOpenChange={setSheetOpen}
         onSubmit={handleSubmit}
-        isPending={
-          createPurchaseOrder.isPending || updatePurchaseOrder.isPending
-        }
-        mode={editingOrder ? 'edit' : 'create'}
+        isPending={createPurchaseOrder.isPending}
       />
 
       {/* Delete Confirmation Dialog */}

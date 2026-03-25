@@ -24,7 +24,6 @@ import {
 import { useSuppliers } from '@/modules/suppliers'
 import { useWarehouses } from '@/modules/warehouses'
 import { useVariants } from '@/modules/products'
-import type { PurchaseOrder } from '@/modules/purchase-orders'
 import type { Variant } from 'backend/src/modules/variants/variants.route'
 
 const purchaseOrderItemSchema = z.object({
@@ -44,14 +43,12 @@ const createPurchaseOrderSchema = z.object({
 interface PurchaseOrderFormSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  order: PurchaseOrder | null
   onSubmit: (values: {
     supplierId: string
     warehouseId: string
     items: Array<{ variantId: string; quantity: number; unitCost: number }>
   }) => Promise<void>
   isPending: boolean
-  mode?: 'create' | 'edit'
 }
 
 interface VariantComboboxProps {
@@ -130,13 +127,10 @@ function VariantCombobox({
 export function PurchaseOrderFormSheet({
   open,
   onOpenChange,
-  order,
   onSubmit,
   isPending,
-  mode = 'create',
 }: PurchaseOrderFormSheetProps) {
   const [serverError, setServerError] = React.useState<string | null>(null)
-  const isEditing = mode === 'edit' && !!order
 
   const { data: suppliersData } = useSuppliers({ pageSize: 100 })
   const { data: warehousesData } = useWarehouses({ pageSize: 100 })
@@ -148,8 +142,8 @@ export function PurchaseOrderFormSheet({
 
   const form = useForm({
     defaultValues: {
-      supplierId: order?.supplierId ?? '',
-      warehouseId: order?.warehouseId ?? '',
+      supplierId: '',
+      warehouseId: '',
       items: [] as Array<{
         variantId: string
         quantity: number
@@ -167,21 +161,20 @@ export function PurchaseOrderFormSheet({
     },
   })
 
-  // Reset form when order changes
+  // Reset form when sheet opens
   React.useEffect(() => {
     if (open) {
-      form.setFieldValue('supplierId', order?.supplierId ?? '')
-      form.setFieldValue('warehouseId', order?.warehouseId ?? '')
+      form.setFieldValue('supplierId', '')
+      form.setFieldValue('warehouseId', '')
       form.setFieldValue('items', [])
       setServerError(null)
     }
-  }, [open, order, form])
+  }, [open, form])
 
-  const title = isEditing ? 'Edit Pesanan' : 'Pesanan Baru'
-  const description = isEditing
-    ? 'Ubah pemasok atau gudang untuk pesanan ini.'
-    : 'Buat pesanan pembelian baru. Pilih produk dan tentukan jumlah yang dipesan.'
-  const submitLabel = isEditing ? 'Simpan Perubahan' : 'Buat Pesanan'
+  const title = 'Pesanan Baru'
+  const description =
+    'Buat pesanan pembelian baru. Pilih produk dan tentukan jumlah yang dipesan.'
+  const submitLabel = 'Buat Pesanan'
 
   // Supplier combobox state
   const [supplierOpen, setSupplierOpen] = React.useState(false)
