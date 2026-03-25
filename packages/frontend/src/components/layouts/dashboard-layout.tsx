@@ -50,11 +50,11 @@ const MAIN_NAV: NavItem[] = [
   { icon: Home, label: 'Home', to: '/' },
   { icon: Package, label: 'Produk', to: '/products' },
   { icon: Warehouse, label: 'Gudang', to: '/warehouses' },
-  { icon: Truck, label: 'Pemasok', to: '/suppliers' },
-  { icon: Users, label: 'Pelanggan', to: '/customers' },
-  { icon: ClipboardList, label: 'Pesanan Pembelian', to: '/purchase-orders' },
-  { icon: ShoppingCart, label: 'Pesanan Penjualan', to: '/sales-orders' },
   { icon: ArrowLeftRight, label: 'Pergerakan Stok', to: '/stock-movements' },
+  { icon: Truck, label: 'Pemasok', to: '/suppliers' },
+  { icon: ClipboardList, label: 'Pesanan Pembelian', to: '/purchase-orders' },
+  { icon: Users, label: 'Pelanggan', to: '/customers' },
+  { icon: ShoppingCart, label: 'Pesanan Penjualan', to: '/sales-orders' },
 ]
 
 const SECONDARY_NAV: NavItem[] = [

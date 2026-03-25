@@ -646,12 +646,12 @@ function PurchaseOrderDetailPage() {
       <Sheet open={editSheetOpen} onOpenChange={setEditSheetOpen}>
         <SheetContent className="sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>Edit Pesanan Pembelian</SheetTitle>
-            <SheetDescription>
+            <SheetTitle className="text-2xl">Edit Pesanan Pembelian</SheetTitle>
+            <SheetDescription className="text-base mt-1 text-balance">
               Ubah detail pesanan pembelian. Klik simpan ketika selesai.
             </SheetDescription>
           </SheetHeader>
-          <div className="flex flex-col gap-6 py-6">
+          <div className="flex flex-col gap-6 px-4">
             <div className="flex flex-col gap-2">
               <Label htmlFor="orderedAt">Tanggal Pesan</Label>
               <Input
