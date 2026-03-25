@@ -73,7 +73,7 @@ function SuppliersPage() {
     pageIndex: 0,
     pageSize: 10,
   })
-  const [search, setSearch] = React.useState(searchParam)
+  const [search, setSearch] = React.useState(searchParam ?? '')
   const debouncedSearch = useDebounce(search, 300)
 
   // Sheet state
