@@ -97,6 +97,12 @@ const purchaseOrderIdParam = z.object({
   id: z.string().uuid(),
 })
 
+export type PurchaseOrder = z.infer<typeof purchaseOrderSchema>
+export type CreatePurchaseOrderInput = z.infer<typeof createPurchaseOrderDto>
+export type UpdatePurchaseOrderInput = z.infer<typeof updatePurchaseOrderDto>
+export type ReceivePurchaseOrderInput = z.infer<typeof receivePurchaseOrderDto>
+export type ListPurchaseOrdersQuery = z.infer<typeof listPurchaseOrdersQuery>
+
 const serializePurchaseOrder = (po: {
   id: string
   organizationId: string

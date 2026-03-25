@@ -19,11 +19,13 @@ import { Route as DashboardProductsRouteRouteImport } from './routes/_dashboard/
 import { Route as DashboardWarehousesIndexRouteImport } from './routes/_dashboard/warehouses/index'
 import { Route as DashboardSuppliersIndexRouteImport } from './routes/_dashboard/suppliers/index'
 import { Route as DashboardStockMovementsIndexRouteImport } from './routes/_dashboard/stock-movements/index'
+import { Route as DashboardPurchaseOrdersIndexRouteImport } from './routes/_dashboard/purchase-orders/index'
 import { Route as DashboardProductsIndexRouteImport } from './routes/_dashboard/products/index'
 import { Route as DashboardCustomersIndexRouteImport } from './routes/_dashboard/customers/index'
 import { Route as DashboardWarehousesWarehouseIdRouteImport } from './routes/_dashboard/warehouses/$warehouseId'
 import { Route as DashboardSuppliersSupplierIdRouteImport } from './routes/_dashboard/suppliers/$supplierId'
 import { Route as DashboardStockMovementsMovementIdRouteImport } from './routes/_dashboard/stock-movements/$movementId'
+import { Route as DashboardPurchaseOrdersPurchaseOrderIdRouteImport } from './routes/_dashboard/purchase-orders/$purchaseOrderId'
 import { Route as DashboardProductsProductIdRouteImport } from './routes/_dashboard/products/$productId'
 import { Route as DashboardCustomersCustomerIdRouteImport } from './routes/_dashboard/customers/$customerId'
 
@@ -79,6 +81,12 @@ const DashboardStockMovementsIndexRoute =
     path: '/stock-movements/',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
+const DashboardPurchaseOrdersIndexRoute =
+  DashboardPurchaseOrdersIndexRouteImport.update({
+    id: '/purchase-orders/',
+    path: '/purchase-orders/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardProductsIndexRoute = DashboardProductsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -107,6 +115,12 @@ const DashboardStockMovementsMovementIdRoute =
     path: '/stock-movements/$movementId',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
+const DashboardPurchaseOrdersPurchaseOrderIdRoute =
+  DashboardPurchaseOrdersPurchaseOrderIdRouteImport.update({
+    id: '/purchase-orders/$purchaseOrderId',
+    path: '/purchase-orders/$purchaseOrderId',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardProductsProductIdRoute =
   DashboardProductsProductIdRouteImport.update({
     id: '/$productId',
@@ -129,11 +143,13 @@ export interface FileRoutesByFullPath {
   '/warehouses': typeof DashboardWarehousesRouteRouteWithChildren
   '/customers/$customerId': typeof DashboardCustomersCustomerIdRoute
   '/products/$productId': typeof DashboardProductsProductIdRoute
+  '/purchase-orders/$purchaseOrderId': typeof DashboardPurchaseOrdersPurchaseOrderIdRoute
   '/stock-movements/$movementId': typeof DashboardStockMovementsMovementIdRoute
   '/suppliers/$supplierId': typeof DashboardSuppliersSupplierIdRoute
   '/warehouses/$warehouseId': typeof DashboardWarehousesWarehouseIdRoute
   '/customers/': typeof DashboardCustomersIndexRoute
   '/products/': typeof DashboardProductsIndexRoute
+  '/purchase-orders/': typeof DashboardPurchaseOrdersIndexRoute
   '/stock-movements/': typeof DashboardStockMovementsIndexRoute
   '/suppliers/': typeof DashboardSuppliersIndexRoute
   '/warehouses/': typeof DashboardWarehousesIndexRoute
@@ -145,11 +161,13 @@ export interface FileRoutesByTo {
   '/': typeof DashboardIndexRoute
   '/customers/$customerId': typeof DashboardCustomersCustomerIdRoute
   '/products/$productId': typeof DashboardProductsProductIdRoute
+  '/purchase-orders/$purchaseOrderId': typeof DashboardPurchaseOrdersPurchaseOrderIdRoute
   '/stock-movements/$movementId': typeof DashboardStockMovementsMovementIdRoute
   '/suppliers/$supplierId': typeof DashboardSuppliersSupplierIdRoute
   '/warehouses/$warehouseId': typeof DashboardWarehousesWarehouseIdRoute
   '/customers': typeof DashboardCustomersIndexRoute
   '/products': typeof DashboardProductsIndexRoute
+  '/purchase-orders': typeof DashboardPurchaseOrdersIndexRoute
   '/stock-movements': typeof DashboardStockMovementsIndexRoute
   '/suppliers': typeof DashboardSuppliersIndexRoute
   '/warehouses': typeof DashboardWarehousesIndexRoute
@@ -165,11 +183,13 @@ export interface FileRoutesById {
   '/_dashboard/': typeof DashboardIndexRoute
   '/_dashboard/customers/$customerId': typeof DashboardCustomersCustomerIdRoute
   '/_dashboard/products/$productId': typeof DashboardProductsProductIdRoute
+  '/_dashboard/purchase-orders/$purchaseOrderId': typeof DashboardPurchaseOrdersPurchaseOrderIdRoute
   '/_dashboard/stock-movements/$movementId': typeof DashboardStockMovementsMovementIdRoute
   '/_dashboard/suppliers/$supplierId': typeof DashboardSuppliersSupplierIdRoute
   '/_dashboard/warehouses/$warehouseId': typeof DashboardWarehousesWarehouseIdRoute
   '/_dashboard/customers/': typeof DashboardCustomersIndexRoute
   '/_dashboard/products/': typeof DashboardProductsIndexRoute
+  '/_dashboard/purchase-orders/': typeof DashboardPurchaseOrdersIndexRoute
   '/_dashboard/stock-movements/': typeof DashboardStockMovementsIndexRoute
   '/_dashboard/suppliers/': typeof DashboardSuppliersIndexRoute
   '/_dashboard/warehouses/': typeof DashboardWarehousesIndexRoute
@@ -185,11 +205,13 @@ export interface FileRouteTypes {
     | '/warehouses'
     | '/customers/$customerId'
     | '/products/$productId'
+    | '/purchase-orders/$purchaseOrderId'
     | '/stock-movements/$movementId'
     | '/suppliers/$supplierId'
     | '/warehouses/$warehouseId'
     | '/customers/'
     | '/products/'
+    | '/purchase-orders/'
     | '/stock-movements/'
     | '/suppliers/'
     | '/warehouses/'
@@ -201,11 +223,13 @@ export interface FileRouteTypes {
     | '/'
     | '/customers/$customerId'
     | '/products/$productId'
+    | '/purchase-orders/$purchaseOrderId'
     | '/stock-movements/$movementId'
     | '/suppliers/$supplierId'
     | '/warehouses/$warehouseId'
     | '/customers'
     | '/products'
+    | '/purchase-orders'
     | '/stock-movements'
     | '/suppliers'
     | '/warehouses'
@@ -220,11 +244,13 @@ export interface FileRouteTypes {
     | '/_dashboard/'
     | '/_dashboard/customers/$customerId'
     | '/_dashboard/products/$productId'
+    | '/_dashboard/purchase-orders/$purchaseOrderId'
     | '/_dashboard/stock-movements/$movementId'
     | '/_dashboard/suppliers/$supplierId'
     | '/_dashboard/warehouses/$warehouseId'
     | '/_dashboard/customers/'
     | '/_dashboard/products/'
+    | '/_dashboard/purchase-orders/'
     | '/_dashboard/stock-movements/'
     | '/_dashboard/suppliers/'
     | '/_dashboard/warehouses/'
@@ -309,6 +335,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardStockMovementsIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/_dashboard/purchase-orders/': {
+      id: '/_dashboard/purchase-orders/'
+      path: '/purchase-orders'
+      fullPath: '/purchase-orders/'
+      preLoaderRoute: typeof DashboardPurchaseOrdersIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/_dashboard/products/': {
       id: '/_dashboard/products/'
       path: '/'
@@ -342,6 +375,13 @@ declare module '@tanstack/react-router' {
       path: '/stock-movements/$movementId'
       fullPath: '/stock-movements/$movementId'
       preLoaderRoute: typeof DashboardStockMovementsMovementIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/_dashboard/purchase-orders/$purchaseOrderId': {
+      id: '/_dashboard/purchase-orders/$purchaseOrderId'
+      path: '/purchase-orders/$purchaseOrderId'
+      fullPath: '/purchase-orders/$purchaseOrderId'
+      preLoaderRoute: typeof DashboardPurchaseOrdersPurchaseOrderIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/_dashboard/products/$productId': {
@@ -398,9 +438,11 @@ interface DashboardRouteRouteChildren {
   DashboardWarehousesRouteRoute: typeof DashboardWarehousesRouteRouteWithChildren
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardCustomersCustomerIdRoute: typeof DashboardCustomersCustomerIdRoute
+  DashboardPurchaseOrdersPurchaseOrderIdRoute: typeof DashboardPurchaseOrdersPurchaseOrderIdRoute
   DashboardStockMovementsMovementIdRoute: typeof DashboardStockMovementsMovementIdRoute
   DashboardSuppliersSupplierIdRoute: typeof DashboardSuppliersSupplierIdRoute
   DashboardCustomersIndexRoute: typeof DashboardCustomersIndexRoute
+  DashboardPurchaseOrdersIndexRoute: typeof DashboardPurchaseOrdersIndexRoute
   DashboardStockMovementsIndexRoute: typeof DashboardStockMovementsIndexRoute
   DashboardSuppliersIndexRoute: typeof DashboardSuppliersIndexRoute
 }
@@ -410,10 +452,13 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardWarehousesRouteRoute: DashboardWarehousesRouteRouteWithChildren,
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardCustomersCustomerIdRoute: DashboardCustomersCustomerIdRoute,
+  DashboardPurchaseOrdersPurchaseOrderIdRoute:
+    DashboardPurchaseOrdersPurchaseOrderIdRoute,
   DashboardStockMovementsMovementIdRoute:
     DashboardStockMovementsMovementIdRoute,
   DashboardSuppliersSupplierIdRoute: DashboardSuppliersSupplierIdRoute,
   DashboardCustomersIndexRoute: DashboardCustomersIndexRoute,
+  DashboardPurchaseOrdersIndexRoute: DashboardPurchaseOrdersIndexRoute,
   DashboardStockMovementsIndexRoute: DashboardStockMovementsIndexRoute,
   DashboardSuppliersIndexRoute: DashboardSuppliersIndexRoute,
 }
