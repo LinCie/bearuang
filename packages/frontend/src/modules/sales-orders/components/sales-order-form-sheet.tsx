@@ -25,7 +25,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCustomers } from '@/modules/customers'
 import { useWarehouses } from '@/modules/warehouses'
 import { useVariants } from '@/modules/products'
-import type { SalesOrder } from '@/modules/sales-orders'
 import type { Variant } from 'backend/src/modules/variants/variants.route'
 
 const salesOrderItemSchema = z.object({
@@ -47,7 +46,6 @@ const createSalesOrderSchema = z.object({
 interface SalesOrderFormSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  order: SalesOrder | null
   onSubmit: (values: {
     customerId?: string
     guestName?: string
@@ -56,7 +54,6 @@ interface SalesOrderFormSheetProps {
     items: Array<{ variantId: string; quantity: number; unitPrice: number }>
   }) => Promise<void>
   isPending: boolean
-  mode?: 'create' | 'edit'
 }
 
 interface VariantComboboxProps {
@@ -137,25 +134,12 @@ type CustomerType = 'existing' | 'guest'
 export function SalesOrderFormSheet({
   open,
   onOpenChange,
-  order,
   onSubmit,
   isPending,
-  mode = 'create',
 }: SalesOrderFormSheetProps) {
   const [serverError, setServerError] = React.useState<string | null>(null)
-  const isEditing = mode === 'edit' && !!order
-
-  // Determine initial tab based on order data
-  const getInitialCustomerType = (): CustomerType => {
-    if (!order) return 'existing'
-    if (order.customerId) return 'existing'
-    if (order.guestName || order.guestEmail) return 'guest'
-    return 'existing'
-  }
-
-  const [customerType, setCustomerType] = React.useState<CustomerType>(
-    getInitialCustomerType(),
-  )
+  const [customerType, setCustomerType] =
+    React.useState<CustomerType>('existing')
 
   const { data: customersData } = useCustomers({ pageSize: 100 })
   const { data: warehousesData } = useWarehouses({ pageSize: 100 })
@@ -167,10 +151,10 @@ export function SalesOrderFormSheet({
 
   const form = useForm({
     defaultValues: {
-      customerId: order?.customerId ?? '',
-      guestName: order?.guestName ?? '',
-      guestEmail: order?.guestEmail ?? '',
-      warehouseId: order?.warehouseId ?? '',
+      customerId: '',
+      guestName: '',
+      guestEmail: '',
+      warehouseId: '',
       items: [] as Array<{
         variantId: string
         quantity: number
@@ -202,19 +186,18 @@ export function SalesOrderFormSheet({
     },
   })
 
-  // Reset form when order changes
+  // Reset form when sheet opens
   React.useEffect(() => {
     if (open) {
-      const newCustomerType = getInitialCustomerType()
-      setCustomerType(newCustomerType)
-      form.setFieldValue('customerId', order?.customerId ?? '')
-      form.setFieldValue('guestName', order?.guestName ?? '')
-      form.setFieldValue('guestEmail', order?.guestEmail ?? '')
-      form.setFieldValue('warehouseId', order?.warehouseId ?? '')
+      setCustomerType('existing')
+      form.setFieldValue('customerId', '')
+      form.setFieldValue('guestName', '')
+      form.setFieldValue('guestEmail', '')
+      form.setFieldValue('warehouseId', '')
       form.setFieldValue('items', [])
       setServerError(null)
     }
-  }, [open, order, form])
+  }, [open, form])
 
   // Handle tab change - clear the other tab's values
   const handleCustomerTypeChange = (value: string) => {
@@ -231,11 +214,10 @@ export function SalesOrderFormSheet({
     }
   }
 
-  const title = isEditing ? 'Edit Pesanan' : 'Pesanan Baru'
-  const description = isEditing
-    ? 'Ubah data pesanan ini.'
-    : 'Buat pesanan penjualan baru. Pilih produk dan tentukan jumlah yang dipesan.'
-  const submitLabel = isEditing ? 'Simpan Perubahan' : 'Buat Pesanan'
+  const title = 'Pesanan Baru'
+  const description =
+    'Buat pesanan penjualan baru. Pilih produk dan tentukan jumlah yang dipesan.'
+  const submitLabel = 'Buat Pesanan'
 
   // Customer combobox state
   const [customerOpen, setCustomerOpen] = React.useState(false)

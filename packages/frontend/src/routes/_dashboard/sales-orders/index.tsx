@@ -10,7 +10,6 @@ import type { SortingState, ColumnDef } from '@tanstack/react-table'
 
 import {
   Plus,
-  Pencil,
   Trash2,
   ArrowUpDown,
   ArrowUp,
@@ -51,7 +50,6 @@ import {
 import {
   useSalesOrders,
   useCreateSalesOrder,
-  useUpdateSalesOrder,
   useDeleteSalesOrder,
   SalesOrderFormSheet,
   StatusBadge,
@@ -59,11 +57,7 @@ import {
   formatRupiah,
   DeleteDialog,
 } from '@/modules/sales-orders'
-import type {
-  CreateSalesOrderInput,
-  UpdateSalesOrderInput,
-  SalesOrder,
-} from '@/modules/sales-orders'
+import type { CreateSalesOrderInput, SalesOrder } from '@/modules/sales-orders'
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -119,9 +113,6 @@ function SalesOrdersPage() {
 
   // Sheet state
   const [sheetOpen, setSheetOpen] = React.useState(false)
-  const [editingOrder, setEditingOrder] = React.useState<SalesOrder | null>(
-    null,
-  )
 
   // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
@@ -176,7 +167,6 @@ function SalesOrdersPage() {
   })
 
   const createSalesOrder = useCreateSalesOrder()
-  const updateSalesOrder = useUpdateSalesOrder()
   const deleteSalesOrder = useDeleteSalesOrder()
 
   const salesOrders = data?.data ?? []
@@ -185,7 +175,6 @@ function SalesOrdersPage() {
   // ─── Handlers ──────────────────────────────────────────────
 
   const handleCreate = React.useCallback(() => {
-    setEditingOrder(null)
     setSheetOpen(true)
   }, [])
 
@@ -198,11 +187,6 @@ function SalesOrdersPage() {
     },
     [navigate],
   )
-
-  const handleEdit = React.useCallback((order: SalesOrder) => {
-    setEditingOrder(order)
-    setSheetOpen(true)
-  }, [])
 
   const handleDeleteClick = React.useCallback((order: SalesOrder) => {
     setDeletingOrder(order)
@@ -223,27 +207,15 @@ function SalesOrdersPage() {
     warehouseId: string
     items: Array<{ variantId: string; quantity: number; unitPrice: number }>
   }) {
-    if (editingOrder) {
-      const input: UpdateSalesOrderInput & { id: string } = {
-        id: editingOrder.id,
-        customerId: values.customerId,
-        guestName: values.guestName,
-        guestEmail: values.guestEmail,
-        warehouseId: values.warehouseId,
-      }
-      await updateSalesOrder.mutateAsync(input)
-    } else {
-      const input: CreateSalesOrderInput = {
-        customerId: values.customerId,
-        guestName: values.guestName,
-        guestEmail: values.guestEmail,
-        warehouseId: values.warehouseId,
-        items: values.items,
-      }
-      await createSalesOrder.mutateAsync(input)
+    const input: CreateSalesOrderInput = {
+      customerId: values.customerId,
+      guestName: values.guestName,
+      guestEmail: values.guestEmail,
+      warehouseId: values.warehouseId,
+      items: values.items,
     }
+    await createSalesOrder.mutateAsync(input)
     setSheetOpen(false)
-    setEditingOrder(null)
   }
 
   // ─── Table Columns ─────────────────────────────────────────
@@ -289,7 +261,7 @@ function SalesOrdersPage() {
           const guestName = row.original.guestName
           return (
             <div className="flex items-center gap-1.5">
-              <User className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+              <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
               <span className="text-sm truncate max-w-[150px]">
                 {customer?.name || guestName || 'Tanpa Nama'}
               </span>
@@ -302,7 +274,7 @@ function SalesOrdersPage() {
         header: 'Gudang',
         cell: ({ row }) => (
           <div className="flex items-center gap-1.5">
-            <Building2 className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+            <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
             <span className="text-sm truncate max-w-[150px]">
               {row.original.warehouse.name}
             </span>
@@ -389,16 +361,6 @@ function SalesOrdersPage() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-              onClick={() => handleEdit(row.original)}
-              title="Edit pesanan"
-            >
-              <Pencil className="h-4 w-4" />
-              <span className="sr-only">Edit pesanan</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
               className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
               onClick={() => handleDeleteClick(row.original)}
               title="Hapus pesanan"
@@ -410,7 +372,7 @@ function SalesOrdersPage() {
         ),
       },
     ],
-    [handleViewDetail, handleEdit, handleDeleteClick],
+    [handleViewDetail, handleDeleteClick],
   )
 
   const table = useReactTable({
@@ -783,17 +745,12 @@ function SalesOrdersPage() {
         </div>
       )}
 
-      {/* Create / Edit Sheet */}
+      {/* Create Sheet */}
       <SalesOrderFormSheet
         open={sheetOpen}
-        onOpenChange={(open) => {
-          setSheetOpen(open)
-          if (!open) setEditingOrder(null)
-        }}
-        order={editingOrder}
+        onOpenChange={setSheetOpen}
         onSubmit={handleSubmit}
-        isPending={createSalesOrder.isPending || updateSalesOrder.isPending}
-        mode={editingOrder ? 'edit' : 'create'}
+        isPending={createSalesOrder.isPending}
       />
 
       {/* Delete Confirmation Dialog */}
