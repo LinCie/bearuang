@@ -130,7 +130,15 @@ const serializeSalesOrder = (so: {
     ...item,
     unitPrice: item.unitPrice.toString(),
   })),
-})
+}))
+
+// ─── Type Exports ────────────────────────────────────────────
+
+export type SalesOrder = z.infer<typeof salesOrderSchema>
+export type SalesOrderItem = z.infer<typeof salesOrderItemSchema>
+export type CreateSalesOrderInput = z.infer<typeof createSalesOrderDto>
+export type UpdateSalesOrderInput = z.infer<typeof updateSalesOrderDto>
+export type ListSalesOrdersQuery = z.infer<typeof listSalesOrdersQuery>
 
 export const salesOrdersRoute = new Elysia({
   prefix: "/sales-orders",
