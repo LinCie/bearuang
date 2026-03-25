@@ -12,6 +12,7 @@ import {
   Truck,
   Users,
   ClipboardList,
+  ShoppingCart,
 } from 'lucide-react'
 import { signOut, useSession } from '@/lib/auth-client'
 import { cn } from '@/lib/utils'
@@ -52,6 +53,7 @@ const MAIN_NAV: NavItem[] = [
   { icon: Truck, label: 'Pemasok', to: '/suppliers' },
   { icon: Users, label: 'Pelanggan', to: '/customers' },
   { icon: ClipboardList, label: 'Pesanan Pembelian', to: '/purchase-orders' },
+  { icon: ShoppingCart, label: 'Pesanan Penjualan', to: '/sales-orders' },
   { icon: ArrowLeftRight, label: 'Pergerakan Stok', to: '/stock-movements' },
 ]
 

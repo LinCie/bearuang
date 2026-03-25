@@ -88,6 +88,7 @@ const listSalesOrdersQuery = paginationQuery
     status: z.enum(["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "COMPLETED", "CANCELLED"]).optional(),
     paymentStatus: z.enum(["UNPAID", "PARTIALLY_PAID", "PAID"]).optional(),
     customerId: z.string().uuid().optional(),
+    warehouseId: z.string().uuid().optional(),
     search: z.string().optional(),
   })
 
@@ -120,17 +121,19 @@ const serializeSalesOrder = (so: {
     quantity: number
     unitPrice: { toString: () => string }
   }>
-}) => ({
-  ...so,
-  orderedAt: so.orderedAt?.toISOString() ?? null,
-  shippedAt: so.shippedAt?.toISOString() ?? null,
-  createdAt: so.createdAt.toISOString(),
-  updatedAt: so.updatedAt.toISOString(),
-  items: so.items.map((item) => ({
-    ...item,
-    unitPrice: item.unitPrice.toString(),
-  })),
-}))
+}) => {
+  return {
+    ...so,
+    orderedAt: so.orderedAt?.toISOString() ?? null,
+    shippedAt: so.shippedAt?.toISOString() ?? null,
+    createdAt: so.createdAt.toISOString(),
+    updatedAt: so.updatedAt.toISOString(),
+    items: so.items.map((item) => ({
+      ...item,
+      unitPrice: item.unitPrice.toString(),
+    })),
+  }
+}
 
 // ─── Type Exports ────────────────────────────────────────────
 
