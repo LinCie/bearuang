@@ -11,7 +11,7 @@ import {
   CustomerErrorState,
   DeleteDialog,
 } from '@/modules/customers'
-import type { UpdateCustomerInput, Customer } from '@/modules/customers'
+import type { UpdateCustomerInput } from '@/modules/customers'
 
 export const Route = createFileRoute('/_dashboard/customers/$customerId')({
   component: CustomerDetailPage,

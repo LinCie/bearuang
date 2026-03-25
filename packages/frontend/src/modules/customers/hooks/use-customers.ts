@@ -29,9 +29,9 @@ export type {
 
 // ─── Queries ─────────────────────────────────────────────────
 
-export function useCustomers(params: ListCustomersQuery = {}) {
+export function useCustomers(params: Partial<ListCustomersQuery> = {}) {
   return useQuery({
-    queryKey: customerKeys.list(params),
+    queryKey: customerKeys.list(params as ListCustomersQuery),
     queryFn: async () => {
       const { data, error } = await api.customers.get({
         query: {

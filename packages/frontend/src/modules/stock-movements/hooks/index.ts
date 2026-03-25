@@ -2,8 +2,6 @@ export * from './use-stock-movements'
 export type {
   StockMovement,
   StockMovementType,
-  PaginatedStockMovements,
-  CreateStockMovementInput,
-  UpdateStockMovementInput,
-  ListStockMovementsParams,
+  CreateMovementInput as CreateStockMovementInput,
+  ListMovementsQuery as ListStockMovementsParams,
 } from './use-stock-movements'

@@ -29,9 +29,9 @@ export type {
 
 // ─── Queries ─────────────────────────────────────────────────
 
-export function useSuppliers(params: ListSuppliersQuery = {}) {
+export function useSuppliers(params: Partial<ListSuppliersQuery> = {}) {
   return useQuery({
-    queryKey: supplierKeys.list(params),
+    queryKey: supplierKeys.list(params as ListSuppliersQuery),
     queryFn: async () => {
       const { data, error } = await api.suppliers.get({
         query: {

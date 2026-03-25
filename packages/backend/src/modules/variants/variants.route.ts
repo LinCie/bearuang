@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { z } from "zod";
 import { authPlugin } from "@/plugins/auth.plugin";
 import { variantsService } from "./variants.service";
-import { ProductVariant } from "@/generated/prisma/client";
+import type { ProductVariant } from "@/generated/prisma/client";
 import { errorResponse } from "@/common/error.response";
 import {
   paginationQuery,

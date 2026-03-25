@@ -29,9 +29,9 @@ export type {
 
 // ─── Queries ─────────────────────────────────────────────────
 
-export function useProducts(params: ListProductsQuery = {}) {
+export function useProducts(params: Partial<ListProductsQuery> = {}) {
   return useQuery({
-    queryKey: productKeys.list(params),
+    queryKey: productKeys.list(params as ListProductsQuery),
     queryFn: async () => {
       const { data, error } = await api.products.get({
         query: {

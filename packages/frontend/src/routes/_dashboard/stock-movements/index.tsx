@@ -96,8 +96,8 @@ function StockMovementsPage() {
     search: debouncedSearch || undefined,
   })
 
-  const { data: warehousesData } = useWarehouses({ pageSize: 100 })
-  const { data: variantsData } = useVariants({ pageSize: 100 })
+  const { data: warehousesData } = useWarehouses({ page: 1, pageSize: 100 })
+  const { data: variantsData } = useVariants({ page: 1, pageSize: 100 })
 
   const createMovement = useCreateStockMovement()
   const deleteMovement = useDeleteStockMovement()
@@ -312,8 +312,8 @@ function StockMovementsPage() {
                   variant="outline"
                   onClick={() =>
                     setFilters({
-                      warehouseId: search.warehouseId,
-                      variantId: search.variantId,
+                      warehouseId: search.warehouseId ?? '',
+                      variantId: search.variantId ?? '',
                       type: '',
                       search: '',
                     })

@@ -29,9 +29,9 @@ export type {
 
 // ─── Queries ─────────────────────────────────────────────────
 
-export function useWarehouses(params: ListWarehousesQuery = {}) {
+export function useWarehouses(params: Partial<ListWarehousesQuery> = {}) {
   return useQuery({
-    queryKey: warehouseKeys.list(params),
+    queryKey: warehouseKeys.list(params as ListWarehousesQuery),
     queryFn: async () => {
       const { data, error } = await api.warehouses.get({
         query: {

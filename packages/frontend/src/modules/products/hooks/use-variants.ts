@@ -33,9 +33,9 @@ export type {
 
 // ─── Queries ─────────────────────────────────────────────────
 
-export function useVariants(params: SearchVariantQuery = {}) {
+export function useVariants(params: Partial<SearchVariantQuery> = {}) {
   return useQuery({
-    queryKey: variantKeys.list(params),
+    queryKey: variantKeys.list(params as SearchVariantQuery),
     queryFn: async () => {
       const { data, error } = await api.variants.get({
         query: {

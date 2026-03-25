@@ -130,7 +130,7 @@ export function StockMovementFormSheet({
   ]
 
   // Fetch products list
-  const { data: productsData } = useProducts({ pageSize: 100 })
+  const { data: productsData } = useProducts({ page: 1, pageSize: 100 })
   const products: Product[] =
     (productsData?.data as Product[] | undefined) ?? []
 

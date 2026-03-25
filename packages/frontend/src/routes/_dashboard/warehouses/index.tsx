@@ -170,7 +170,7 @@ function WarehousesPage() {
 
   // ─── Table Columns ─────────────────────────────────────────
 
-  const columns = React.useMemo<ColumnDef<WarehouseItem>[]>(
+  const columns = React.useMemo<ColumnDef<WarehouseType>[]>(
     () => [
       {
         accessorKey: 'name',

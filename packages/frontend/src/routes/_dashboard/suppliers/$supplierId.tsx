@@ -1,6 +1,6 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import * as React from 'react'
-import { Mail, Phone, Truck } from 'lucide-react'
+import { Mail, Phone } from 'lucide-react'
 import {
   useSupplier,
   useUpdateSupplier,
@@ -11,7 +11,7 @@ import {
   SupplierErrorState,
   DeleteDialog,
 } from '@/modules/suppliers'
-import type { UpdateSupplierInput, Supplier } from '@/modules/suppliers'
+import type { UpdateSupplierInput } from '@/modules/suppliers'
 
 export const Route = createFileRoute('/_dashboard/suppliers/$supplierId')({
   component: SupplierDetailPage,

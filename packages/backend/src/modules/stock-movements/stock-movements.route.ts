@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { z } from "zod";
 import { authPlugin } from "@/plugins/auth.plugin";
 import { stockMovementService } from "./stock-movements.service";
-import { StockMovementType } from "@/generated/prisma/client";
+import { StockMovementType as PrismaStockMovementType } from "@/generated/prisma/client";
 import { errorResponse } from "@/common/error.response";
 import {
   paginationQuery,
@@ -13,9 +13,9 @@ import {
 } from "@/common/pagination";
 
 export const movementTypeEnum = z.enum([
-  StockMovementType.IN,
-  StockMovementType.OUT,
-  StockMovementType.ADJUSTMENT,
+  PrismaStockMovementType.IN,
+  PrismaStockMovementType.OUT,
+  PrismaStockMovementType.ADJUSTMENT,
 ]);
 
 export const stockMovementSchema = z.object({

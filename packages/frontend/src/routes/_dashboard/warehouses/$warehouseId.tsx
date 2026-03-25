@@ -10,7 +10,7 @@ import {
   WarehouseErrorState,
   DeleteDialog,
 } from '@/modules/warehouses'
-import type { UpdateWarehouseInput, Warehouse } from '@/modules/warehouses'
+import type { UpdateWarehouseInput } from '@/modules/warehouses'
 
 export const Route = createFileRoute('/_dashboard/warehouses/$warehouseId')({
   component: WarehouseDetailPage,

@@ -22,24 +22,9 @@ const supplierSchema = z.object({
     .trim()
     .min(1, 'Nama pemasok wajib diisi')
     .max(100, 'Nama pemasok maksimal 100 karakter'),
-  email: z
-    .string()
-    .trim()
-    .email('Format email tidak valid')
-    .optional()
-    .or(z.literal('')),
-  phone: z
-    .string()
-    .trim()
-    .max(20, 'Nomor telepon maksimal 20 karakter')
-    .optional()
-    .or(z.literal('')),
-  address: z
-    .string()
-    .trim()
-    .max(500, 'Alamat maksimal 500 karakter')
-    .optional()
-    .or(z.literal('')),
+  email: z.union([z.string().email('Format email tidak valid'), z.literal('')]),
+  phone: z.string().max(20, 'Nomor telepon maksimal 20 karakter'),
+  address: z.string().max(500, 'Alamat maksimal 500 karakter'),
   isActive: z.boolean(),
 })
 
@@ -153,9 +138,9 @@ export function SupplierFormSheet({
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
-                {field.state.meta.errors[0] && (
+                {field.state.meta.errors.length > 0 && (
                   <p className="text-xs text-destructive font-medium">
-                    {field.state.meta.errors[0].message}
+                    {String(field.state.meta.errors[0])}
                   </p>
                 )}
               </div>
@@ -183,9 +168,9 @@ export function SupplierFormSheet({
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
-                {field.state.meta.errors[0] && (
+                {field.state.meta.errors.length > 0 && (
                   <p className="text-xs text-destructive font-medium">
-                    {field.state.meta.errors[0].message}
+                    {String(field.state.meta.errors[0])}
                   </p>
                 )}
               </div>
@@ -213,9 +198,9 @@ export function SupplierFormSheet({
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
-                {field.state.meta.errors[0] && (
+                {field.state.meta.errors.length > 0 && (
                   <p className="text-xs text-destructive font-medium">
-                    {field.state.meta.errors[0].message}
+                    {String(field.state.meta.errors[0])}
                   </p>
                 )}
               </div>

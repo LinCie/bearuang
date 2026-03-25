@@ -8,10 +8,7 @@ import {
   MovementErrorState,
   DeleteDialog,
 } from '@/modules/stock-movements'
-import type {
-  StockMovement as StockMovementType,
-  StockMovementType as MovementType,
-} from '@/modules/stock-movements'
+import type { StockMovementType } from 'backend/src/modules/stock-movements/stock-movements.route'
 
 export const Route = createFileRoute('/_dashboard/stock-movements/$movementId')(
   {
@@ -21,7 +18,7 @@ export const Route = createFileRoute('/_dashboard/stock-movements/$movementId')(
 
 // ─── Utilities ────────────────────────────────────────────────
 
-function getTypeLabel(type: MovementType) {
+function getTypeLabel(type: StockMovementType) {
   switch (type) {
     case 'IN':
       return 'Masuk'

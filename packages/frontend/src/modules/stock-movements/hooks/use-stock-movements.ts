@@ -34,9 +34,9 @@ export const stockMovementKeys = {
 
 // ─── Queries ─────────────────────────────────────────────────
 
-export function useStockMovements(params: ListMovementsQuery = {}) {
+export function useStockMovements(params: Partial<ListMovementsQuery> = {}) {
   return useQuery({
-    queryKey: stockMovementKeys.list(params),
+    queryKey: stockMovementKeys.list(params as ListMovementsQuery),
     queryFn: async () => {
       const { data, error } = await api['stock-movements'].get({
         query: {
