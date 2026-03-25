@@ -58,6 +58,7 @@ const slugSchema = z
 
 function OrganizationsPage() {
   const router = useRouter()
+  const queryClient = router.options.context.queryClient
   const {
     data: organizations,
     isPending,
@@ -95,6 +96,8 @@ function OrganizationsPage() {
         return
       }
       await authClient.organization.setActive({ organizationId: org.id })
+      await queryClient.invalidateQueries({ queryKey: ['session'] })
+      await router.invalidate()
       setSheetOpen(false)
       router.navigate({ to: '/' })
     },
@@ -109,6 +112,8 @@ function OrganizationsPage() {
     setSelectingOrgId(organizationId)
     try {
       await authClient.organization.setActive({ organizationId })
+      await queryClient.invalidateQueries({ queryKey: ['session'] })
+      await router.invalidate()
       router.navigate({ to: '/' })
     } catch {
       setSelectingOrgId(null)
