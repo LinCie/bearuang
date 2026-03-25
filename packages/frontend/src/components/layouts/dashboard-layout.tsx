@@ -9,6 +9,8 @@ import {
   PawPrint,
   LogOut,
   ArrowLeftRight,
+  Truck,
+  Users,
 } from 'lucide-react'
 import { signOut, useSession } from '@/lib/auth-client'
 import { cn } from '@/lib/utils'
@@ -46,6 +48,8 @@ const MAIN_NAV: NavItem[] = [
   { icon: Home, label: 'Home', to: '/' },
   { icon: Package, label: 'Produk', to: '/products' },
   { icon: Warehouse, label: 'Gudang', to: '/warehouses' },
+  { icon: Truck, label: 'Pemasok', to: '/suppliers' },
+  { icon: Users, label: 'Pelanggan', to: '/customers' },
   { icon: ArrowLeftRight, label: 'Pergerakan Stok', to: '/stock-movements' },
 ]
 
