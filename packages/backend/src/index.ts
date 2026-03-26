@@ -17,6 +17,7 @@ import { membersRoute } from "@/modules/members/members.route";
 import { invitationsRoute } from "@/modules/invitations/invitations.route";
 import { rolesRoute } from "@/modules/roles/roles.route";
 import { permissionsRoute } from "@/modules/permissions/permissions.route";
+import { dashboardRoute } from "@/modules/dashboard/dashboard.route";
 
 const app = new Elysia()
   .onError(({ error }) => {
@@ -55,6 +56,7 @@ const app = new Elysia()
           { name: "Members", description: "Organization member management endpoints" },
           { name: "Invitations", description: "Organization invitation management endpoints" },
           { name: "Roles", description: "Custom role management endpoints" },
+          { name: "Dashboard", description: "Dashboard summary and metrics endpoints" },
         ],
       },
       mapJsonSchema: { zod: z.toJSONSchema },
@@ -86,6 +88,7 @@ const app = new Elysia()
   .use(invitationsRoute)
   .use(rolesRoute)
   .use(permissionsRoute)
+  .use(dashboardRoute)
   .get("/health", () => "ok")
   .listen(Number(process.env.PORT) || 8000);
 
