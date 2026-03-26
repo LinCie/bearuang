@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { PawPrint, Plus, ArrowRight, TreePine } from 'lucide-react'
 import { authClient, useListOrganizations } from '@/lib/auth-client'
 import { sessionQueryOptions } from '@/lib/session'
+import { PendingComponent } from '@/components/ui/pending-component'
 import { AuthLayout } from '@/components/layouts/auth-layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +22,7 @@ import {
 
 export const Route = createFileRoute('/organizations')({
   ssr: false,
+  pendingComponent: PendingComponent,
   beforeLoad: async ({ context, location }) => {
     const session =
       await context.queryClient.ensureQueryData(sessionQueryOptions)

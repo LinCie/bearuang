@@ -1,5 +1,6 @@
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import { DashboardLayout } from '@/components/layouts/dashboard-layout'
+import { PendingComponent } from '@/components/ui/pending-component'
 import { sessionQueryOptions } from '@/lib/session'
 import { permissionsQueryOptions } from '@/lib/use-permissions'
 
@@ -16,6 +17,7 @@ const ROUTE_PERMISSION_MAP: Record<string, string> = {
 
 export const Route = createFileRoute('/_dashboard')({
   ssr: false,
+  pendingComponent: PendingComponent,
   beforeLoad: async ({ context, location }) => {
     const session =
       await context.queryClient.ensureQueryData(sessionQueryOptions)

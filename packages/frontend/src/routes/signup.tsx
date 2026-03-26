@@ -13,12 +13,14 @@ import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AuthLayout } from '@/components/layouts/auth-layout'
+import { PendingComponent } from '@/components/ui/pending-component'
 import { signUp } from '@/lib/auth-client'
 import { sessionQueryOptions } from '@/lib/session'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/signup')({
   ssr: false,
+  pendingComponent: PendingComponent,
   beforeLoad: async ({ context }) => {
     const session =
       await context.queryClient.ensureQueryData(sessionQueryOptions)
