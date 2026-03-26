@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useRoles } from '@/modules/roles'
 
 const inviteSchema = z.object({
   email: z
@@ -26,32 +27,35 @@ const inviteSchema = z.object({
     .trim()
     .min(1, 'Email wajib diisi')
     .email('Format email tidak valid'),
-  role: z.enum(['member', 'admin', 'owner']),
+  role: z.string().min(1, 'Peran wajib dipilih'),
 })
 
 interface InviteMemberSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (values: {
-    email: string
-    role: 'member' | 'admin' | 'owner'
-  }) => Promise<void>
+  onSubmit: (values: { email: string; role: string }) => Promise<void>
   isPending: boolean
 }
 
-const roleOptions = [
+interface RoleOption {
+  value: string
+  label: string
+  description: string
+}
+
+const systemRoleOptions: RoleOption[] = [
   {
-    value: 'member' as const,
+    value: 'member',
     label: 'Anggota',
     description: 'Akses dasar ke data organisasi',
   },
   {
-    value: 'admin' as const,
+    value: 'admin',
     label: 'Admin',
     description: 'Akses penuh kecuali pengaturan organisasi',
   },
   {
-    value: 'owner' as const,
+    value: 'owner',
     label: 'Pemilik',
     description: 'Akses penuh termasuk pengaturan organisasi',
   },
@@ -64,11 +68,12 @@ export function InviteMemberSheet({
   isPending,
 }: InviteMemberSheetProps) {
   const [serverError, setServerError] = React.useState<string | null>(null)
+  const { data: customRoles } = useRoles()
 
   const form = useForm({
     defaultValues: {
       email: '',
-      role: 'member' as 'member' | 'admin' | 'owner',
+      role: 'member',
     },
     onSubmit: async ({ value }) => {
       setServerError(null)
@@ -88,6 +93,21 @@ export function InviteMemberSheet({
       setServerError(null)
     }
   }, [open])
+
+  // Combine system roles with custom roles
+  const allRoleOptions = React.useMemo(() => {
+    const options = [...systemRoleOptions]
+    if (customRoles) {
+      for (const role of customRoles) {
+        options.push({
+          value: role.role,
+          label: role.role,
+          description: `${role.permissions.length} izin kustom`,
+        })
+      }
+    }
+    return options
+  }, [customRoles])
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -149,15 +169,13 @@ export function InviteMemberSheet({
                 <Label className="font-medium">Peran</Label>
                 <Select
                   value={field.state.value}
-                  onValueChange={(value) =>
-                    field.handleChange(value as 'member' | 'admin' | 'owner')
-                  }
+                  onValueChange={(value) => field.handleChange(value)}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Pilih peran" />
                   </SelectTrigger>
                   <SelectContent>
-                    {roleOptions.map((option) => (
+                    {allRoleOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         <div className="flex flex-col">
                           <span>{option.label}</span>
@@ -168,7 +186,7 @@ export function InviteMemberSheet({
                 </Select>
                 <p className="text-xs text-muted-foreground">
                   {
-                    roleOptions.find((r) => r.value === field.state.value)
+                    allRoleOptions.find((r) => r.value === field.state.value)
                       ?.description
                   }
                 </p>

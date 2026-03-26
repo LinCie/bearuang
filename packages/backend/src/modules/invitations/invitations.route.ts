@@ -24,7 +24,7 @@ export const invitationSchema = z.object({
 
 export const createInvitationDto = z.object({
   email: z.string().email(),
-  role: z.enum(["member", "owner", "admin"]),
+  role: z.string().min(1),
 });
 
 export const invitationIdParam = z.object({

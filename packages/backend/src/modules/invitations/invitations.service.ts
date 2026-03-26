@@ -46,11 +46,11 @@ export const invitationsService = {
 
   async createInvitation(
     headers: Headers,
-    data: { email: string; role: "member" | "owner" | "admin" },
+    data: { email: string; role: string },
   ) {
     return auth.api.createInvitation({
       headers,
-      body: { email: data.email, role: data.role },
+      body: { email: data.email, role: data.role as "member" | "admin" | "owner" },
     });
   },
 

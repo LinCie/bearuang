@@ -20,6 +20,8 @@ import {
   Crown,
   ChevronLeft,
   ChevronRight,
+  Shield,
+  Settings2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -59,6 +61,8 @@ import {
   InviteMemberSheet,
 } from '@/modules/members'
 import type { Member, Invitation } from '@/modules/members'
+import { RoleManagementSheet, useRoles } from '@/modules/roles'
+import type { Role } from '@/modules/roles'
 
 export const Route = createFileRoute('/_dashboard/members/')({
   component: MembersPage,
@@ -85,13 +89,31 @@ const roleConfig = {
     color: 'text-muted-foreground',
     bg: 'bg-muted/50 border-border',
   },
+  custom: {
+    label: 'Kustom',
+    icon: Shield,
+    color: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800/40',
+  },
 } as const
 
-function getRoleConfig(role: string) {
+function getRoleConfig(role: string, customRoles?: Role[]) {
   if (role in roleConfig) {
     return roleConfig[role as keyof typeof roleConfig]
   }
-  return roleConfig.member
+  // Check if it's a custom role
+  const customRole = customRoles?.find((r) => r.role === role)
+  if (customRole) {
+    return {
+      ...roleConfig.custom,
+      label: customRole.role,
+    }
+  }
+  // Default fallback for unknown custom roles
+  return {
+    ...roleConfig.custom,
+    label: role,
+  }
 }
 
 // ─── Component ────────────────────────────────────────────────
@@ -104,6 +126,9 @@ function MembersPage() {
     pageSize: 10,
   })
   const [inviteSheetOpen, setInviteSheetOpen] = React.useState(false)
+
+  // Role management sheet
+  const [roleManagementOpen, setRoleManagementOpen] = React.useState(false)
 
   // Remove member dialog
   const [removeDialogOpen, setRemoveDialogOpen] = React.useState(false)
@@ -129,6 +154,9 @@ function MembersPage() {
 
   const canInvite = memberRole === 'owner' || memberRole === 'admin'
   const canManageMembers = memberRole === 'owner' || memberRole === 'admin'
+
+  // Fetch custom roles for display and role change dialog
+  const { data: customRoles } = useRoles()
 
   const handleSearchChange = (value: string) => {
     setSearch(value)
@@ -161,7 +189,7 @@ function MembersPage() {
   // ─── Handlers ─────────────────────────────────────────────
 
   const handleInvite = React.useCallback(
-    async (values: { email: string; role: 'member' | 'admin' | 'owner' }) => {
+    async (values: { email: string; role: string }) => {
       await createInvitation.mutateAsync(values)
       setInviteSheetOpen(false)
     },
@@ -220,7 +248,7 @@ function MembersPage() {
         accessorKey: 'role',
         header: 'Peran',
         cell: ({ row }) => {
-          const config = getRoleConfig(row.original.role)
+          const config = getRoleConfig(row.original.role, customRoles)
           const Icon = config.icon
           return (
             <span
@@ -307,7 +335,7 @@ function MembersPage() {
         },
       },
     ],
-    [canManageMembers, activeMember?.id],
+    [canManageMembers, activeMember?.id, customRoles],
   )
 
   const table = useReactTable({
@@ -331,16 +359,29 @@ function MembersPage() {
               Kelola anggota tim dan undang rekan untuk bergabung.
             </p>
           </div>
-          {canInvite && (
-            <Button
-              onClick={() => setInviteSheetOpen(true)}
-              size="lg"
-              className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
-            >
-              <UserPlus className="mr-2 h-5 w-5" />
-              Undang Anggota
-            </Button>
-          )}
+          <div className="flex items-center gap-3">
+            {canManageMembers && (
+              <Button
+                onClick={() => setRoleManagementOpen(true)}
+                variant="outline"
+                size="lg"
+                className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
+              >
+                <Settings2 className="mr-2 h-5 w-5" />
+                Kelola Peran
+              </Button>
+            )}
+            {canInvite && (
+              <Button
+                onClick={() => setInviteSheetOpen(true)}
+                size="lg"
+                className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
+              >
+                <UserPlus className="mr-2 h-5 w-5" />
+                Undang Anggota
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Search */}
@@ -588,7 +629,10 @@ function MembersPage() {
               </TableHeader>
               <TableBody>
                 {invitations.map((invitation) => {
-                  const config = getRoleConfig(invitation.role ?? 'member')
+                  const config = getRoleConfig(
+                    invitation.role ?? 'member',
+                    customRoles,
+                  )
                   const Icon = config.icon
                   const date = new Date(invitation.createdAt)
                   return (
@@ -656,6 +700,12 @@ function MembersPage() {
         isPending={createInvitation.isPending}
       />
 
+      {/* Role Management Sheet */}
+      <RoleManagementSheet
+        open={roleManagementOpen}
+        onOpenChange={setRoleManagementOpen}
+      />
+
       {/* Remove Member Dialog */}
       <Dialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
         <DialogContent className="sm:max-w-md">
@@ -704,9 +754,10 @@ function MembersPage() {
               dalam organisasi ini.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col gap-2 py-2">
+          <div className="flex flex-col gap-2 py-2 max-h-[50vh] overflow-y-auto">
+            {/* System roles */}
             {(['member', 'admin', 'owner'] as const).map((role) => {
-              const config = getRoleConfig(role)
+              const config = getRoleConfig(role, customRoles)
               const Icon = config.icon
               const isSelected = newRole === role
               return (
@@ -740,6 +791,61 @@ function MembersPage() {
                 </button>
               )
             })}
+
+            {/* Custom roles */}
+            {customRoles && customRoles.length > 0 && (
+              <>
+                <div className="flex items-center gap-2 px-1 py-2">
+                  <div className="h-px flex-1 bg-border" />
+                  <span className="text-xs text-muted-foreground font-medium">
+                    Peran Kustom
+                  </span>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+                {customRoles.map((role) => {
+                  const config = getRoleConfig(role.role, customRoles)
+                  const Icon = config.icon
+                  const isSelected = newRole === role.role
+                  return (
+                    <button
+                      key={role.id}
+                      type="button"
+                      onClick={() => setNewRole(role.role)}
+                      className={cn(
+                        'flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-all',
+                        isSelected
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 ring-1 ring-purple-500/20'
+                          : 'border-border hover:border-border hover:bg-muted/50',
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          'h-5 w-5 shrink-0',
+                          isSelected
+                            ? 'text-purple-600 dark:text-purple-400'
+                            : 'text-muted-foreground',
+                        )}
+                      />
+                      <div>
+                        <p
+                          className={cn(
+                            'text-sm font-medium',
+                            isSelected
+                              ? 'text-purple-700 dark:text-purple-300'
+                              : 'text-foreground',
+                          )}
+                        >
+                          {role.role}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {role.permissions.length} izin
+                        </p>
+                      </div>
+                    </button>
+                  )
+                })}
+              </>
+            )}
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button

@@ -15,6 +15,7 @@ import { salesOrdersRoute } from "@/modules/sales-orders/sales-orders.route";
 import { apiKeysRoute } from "@/modules/api-keys/api-keys.route";
 import { membersRoute } from "@/modules/members/members.route";
 import { invitationsRoute } from "@/modules/invitations/invitations.route";
+import { rolesRoute } from "@/modules/roles/roles.route";
 
 const app = new Elysia()
   .onError(({ error }) => {
@@ -52,6 +53,7 @@ const app = new Elysia()
           { name: "API Keys", description: "API key management endpoints" },
           { name: "Members", description: "Organization member management endpoints" },
           { name: "Invitations", description: "Organization invitation management endpoints" },
+          { name: "Roles", description: "Custom role management endpoints" },
         ],
       },
       mapJsonSchema: { zod: z.toJSONSchema },
@@ -81,6 +83,7 @@ const app = new Elysia()
   .use(apiKeysRoute)
   .use(membersRoute)
   .use(invitationsRoute)
+  .use(rolesRoute)
   .get("/health", () => "ok")
   .listen(Number(process.env.PORT) || 8000);
 
