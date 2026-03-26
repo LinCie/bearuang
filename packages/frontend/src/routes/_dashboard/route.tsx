@@ -13,6 +13,7 @@ const ROUTE_PERMISSION_MAP: Record<string, string> = {
   '/purchase-orders': 'purchaseOrder',
   '/sales-orders': 'salesOrder',
   '/members': 'member',
+  '/api-keys': 'apiKey',
 }
 
 export const Route = createFileRoute('/_dashboard')({

@@ -82,8 +82,8 @@ export const apiKeysRoute = new Elysia({
   .use(authPlugin)
   .post(
     "/",
-    async ({ organization, body }) => {
-      const key = await apiKeysService.createApiKey(organization.id, body);
+    async ({ user, organization, body }) => {
+      const key = await apiKeysService.createApiKey(user.id, organization.id, body);
       return serializeWithSecret(key as unknown as ApiKey);
     },
     {
@@ -103,8 +103,8 @@ export const apiKeysRoute = new Elysia({
   )
   .get(
     "/",
-    async ({ organization }) => {
-      const keys = await apiKeysService.listApiKeys(organization.id);
+    async ({ organization, request }) => {
+      const keys = await apiKeysService.listApiKeys(request.headers, organization.id);
       return (keys as unknown as ApiKey[]).map(serialize);
     },
     {
@@ -123,8 +123,8 @@ export const apiKeysRoute = new Elysia({
   )
   .get(
     "/:id",
-    async ({ organization, params, status }) => {
-      const key = await apiKeysService.getApiKey(organization.id, params.id);
+    async ({ organization, params, status, request }) => {
+      const key = await apiKeysService.getApiKey(request.headers, organization.id, params.id);
       if (!key) return status(404, { message: "API key not found" });
       return serialize(key as unknown as ApiKey);
     },
@@ -145,13 +145,14 @@ export const apiKeysRoute = new Elysia({
   )
   .patch(
     "/:id",
-    async ({ organization, params, body, status }) => {
+    async ({ user, organization, params, body, status, request }) => {
       const existing = await apiKeysService.getApiKey(
+        request.headers,
         organization.id,
         params.id,
       );
       if (!existing) return status(404, { message: "API key not found" });
-      const updated = await apiKeysService.updateApiKey(params.id, body);
+      const updated = await apiKeysService.updateApiKey(user.id, params.id, body);
       return serialize(updated as unknown as ApiKey);
     },
     {
@@ -173,13 +174,14 @@ export const apiKeysRoute = new Elysia({
   )
   .delete(
     "/:id",
-    async ({ organization, params, status }) => {
+    async ({ organization, params, status, request }) => {
       const existing = await apiKeysService.getApiKey(
+        request.headers,
         organization.id,
         params.id,
       );
       if (!existing) return status(404, { message: "API key not found" });
-      await apiKeysService.deleteApiKey(params.id);
+      await apiKeysService.deleteApiKey(request.headers, params.id);
       return status(200, { message: "API key deleted" });
     },
     {

@@ -24,6 +24,7 @@ import { Route as DashboardPurchaseOrdersIndexRouteImport } from './routes/_dash
 import { Route as DashboardProductsIndexRouteImport } from './routes/_dashboard/products/index'
 import { Route as DashboardMembersIndexRouteImport } from './routes/_dashboard/members/index'
 import { Route as DashboardCustomersIndexRouteImport } from './routes/_dashboard/customers/index'
+import { Route as DashboardApiKeysIndexRouteImport } from './routes/_dashboard/api-keys/index'
 import { Route as DashboardWarehousesWarehouseIdRouteImport } from './routes/_dashboard/warehouses/$warehouseId'
 import { Route as DashboardSuppliersSupplierIdRouteImport } from './routes/_dashboard/suppliers/$supplierId'
 import { Route as DashboardStockMovementsMovementIdRouteImport } from './routes/_dashboard/stock-movements/$movementId'
@@ -111,6 +112,11 @@ const DashboardCustomersIndexRoute = DashboardCustomersIndexRouteImport.update({
   path: '/customers/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardApiKeysIndexRoute = DashboardApiKeysIndexRouteImport.update({
+  id: '/api-keys/',
+  path: '/api-keys/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardWarehousesWarehouseIdRoute =
   DashboardWarehousesWarehouseIdRouteImport.update({
     id: '/$warehouseId',
@@ -168,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/stock-movements/$movementId': typeof DashboardStockMovementsMovementIdRoute
   '/suppliers/$supplierId': typeof DashboardSuppliersSupplierIdRoute
   '/warehouses/$warehouseId': typeof DashboardWarehousesWarehouseIdRoute
+  '/api-keys/': typeof DashboardApiKeysIndexRoute
   '/customers/': typeof DashboardCustomersIndexRoute
   '/members/': typeof DashboardMembersIndexRoute
   '/products/': typeof DashboardProductsIndexRoute
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/stock-movements/$movementId': typeof DashboardStockMovementsMovementIdRoute
   '/suppliers/$supplierId': typeof DashboardSuppliersSupplierIdRoute
   '/warehouses/$warehouseId': typeof DashboardWarehousesWarehouseIdRoute
+  '/api-keys': typeof DashboardApiKeysIndexRoute
   '/customers': typeof DashboardCustomersIndexRoute
   '/members': typeof DashboardMembersIndexRoute
   '/products': typeof DashboardProductsIndexRoute
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/_dashboard/stock-movements/$movementId': typeof DashboardStockMovementsMovementIdRoute
   '/_dashboard/suppliers/$supplierId': typeof DashboardSuppliersSupplierIdRoute
   '/_dashboard/warehouses/$warehouseId': typeof DashboardWarehousesWarehouseIdRoute
+  '/_dashboard/api-keys/': typeof DashboardApiKeysIndexRoute
   '/_dashboard/customers/': typeof DashboardCustomersIndexRoute
   '/_dashboard/members/': typeof DashboardMembersIndexRoute
   '/_dashboard/products/': typeof DashboardProductsIndexRoute
@@ -239,6 +248,7 @@ export interface FileRouteTypes {
     | '/stock-movements/$movementId'
     | '/suppliers/$supplierId'
     | '/warehouses/$warehouseId'
+    | '/api-keys/'
     | '/customers/'
     | '/members/'
     | '/products/'
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/stock-movements/$movementId'
     | '/suppliers/$supplierId'
     | '/warehouses/$warehouseId'
+    | '/api-keys'
     | '/customers'
     | '/members'
     | '/products'
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
     | '/_dashboard/stock-movements/$movementId'
     | '/_dashboard/suppliers/$supplierId'
     | '/_dashboard/warehouses/$warehouseId'
+    | '/_dashboard/api-keys/'
     | '/_dashboard/customers/'
     | '/_dashboard/members/'
     | '/_dashboard/products/'
@@ -408,6 +420,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCustomersIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/_dashboard/api-keys/': {
+      id: '/_dashboard/api-keys/'
+      path: '/api-keys'
+      fullPath: '/api-keys/'
+      preLoaderRoute: typeof DashboardApiKeysIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/_dashboard/warehouses/$warehouseId': {
       id: '/_dashboard/warehouses/$warehouseId'
       path: '/$warehouseId'
@@ -501,6 +520,7 @@ interface DashboardRouteRouteChildren {
   DashboardSalesOrdersSalesOrderIdRoute: typeof DashboardSalesOrdersSalesOrderIdRoute
   DashboardStockMovementsMovementIdRoute: typeof DashboardStockMovementsMovementIdRoute
   DashboardSuppliersSupplierIdRoute: typeof DashboardSuppliersSupplierIdRoute
+  DashboardApiKeysIndexRoute: typeof DashboardApiKeysIndexRoute
   DashboardCustomersIndexRoute: typeof DashboardCustomersIndexRoute
   DashboardMembersIndexRoute: typeof DashboardMembersIndexRoute
   DashboardPurchaseOrdersIndexRoute: typeof DashboardPurchaseOrdersIndexRoute
@@ -520,6 +540,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardStockMovementsMovementIdRoute:
     DashboardStockMovementsMovementIdRoute,
   DashboardSuppliersSupplierIdRoute: DashboardSuppliersSupplierIdRoute,
+  DashboardApiKeysIndexRoute: DashboardApiKeysIndexRoute,
   DashboardCustomersIndexRoute: DashboardCustomersIndexRoute,
   DashboardMembersIndexRoute: DashboardMembersIndexRoute,
   DashboardPurchaseOrdersIndexRoute: DashboardPurchaseOrdersIndexRoute,

@@ -14,6 +14,7 @@ import {
   ClipboardList,
   ShoppingCart,
   UserPlus,
+  KeyRound,
 } from 'lucide-react'
 import { signOut, useSession } from '@/lib/auth-client'
 import { usePermissions } from '@/lib/use-permissions'
@@ -82,6 +83,7 @@ const MAIN_NAV: NavItem[] = [
 
 const SECONDARY_NAV: NavItem[] = [
   { icon: UserPlus, label: 'Anggota', to: '/members', permission: 'member' },
+  { icon: KeyRound, label: 'API Keys', to: '/api-keys', permission: 'apiKey' },
   { icon: Settings, label: 'Settings', to: '/settings' },
 ]
 
