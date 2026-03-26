@@ -11,6 +11,7 @@ import {
   DeleteDialog,
 } from '@/modules/warehouses'
 import type { UpdateWarehouseInput } from '@/modules/warehouses'
+import { useHasPermission } from '@/lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/warehouses/$warehouseId')({
   component: WarehouseDetailPage,
@@ -45,6 +46,8 @@ function WarehouseDetailPage() {
   // Mutations
   const updateWarehouse = useUpdateWarehouse()
   const deleteWarehouse = useDeleteWarehouse()
+
+  const canUpdate = useHasPermission('warehouse:update')
 
   // Edit sheet state
   const [sheetOpen, setSheetOpen] = React.useState(false)
@@ -126,12 +129,14 @@ function WarehouseDetailPage() {
                 <p className="text-muted-foreground text-sm">
                   Belum ada alamat tercatat untuk gudang ini.
                 </p>
-                <button
-                  onClick={handleEdit}
-                  className="text-sm text-amber-700 hover:text-amber-800 font-medium self-start transition-colors"
-                >
-                  Tambahkan alamat →
-                </button>
+                {canUpdate && (
+                  <button
+                    onClick={handleEdit}
+                    className="text-sm text-amber-700 hover:text-amber-800 font-medium self-start transition-colors"
+                  >
+                    Tambahkan alamat →
+                  </button>
+                )}
               </div>
             )}
           </div>

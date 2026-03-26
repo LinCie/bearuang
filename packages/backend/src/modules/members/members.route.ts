@@ -94,6 +94,7 @@ export const membersRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { member: ["view"] },
       query: listMembersQuery,
       response: {
         200: paginatedResponse(memberSchema),
@@ -118,6 +119,7 @@ export const membersRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { member: ["view"] },
       params: memberIdParam,
       response: {
         200: memberSchema,

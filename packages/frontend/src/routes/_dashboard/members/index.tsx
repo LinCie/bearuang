@@ -49,6 +49,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { useActiveMember } from '@/lib/auth-client'
+import { useHasPermission } from '@/lib/use-permissions'
 import { cn } from '@/lib/utils'
 import { useDebounce } from '@/hooks/use-debounce'
 import {
@@ -148,12 +149,11 @@ function MembersPage() {
   const [cancelingInvitation, setCancelingInvitation] =
     React.useState<Invitation | null>(null)
 
-  // Active member (for permission checks)
+  // Active member (for self-check in actions column)
   const { data: activeMember } = useActiveMember()
-  const memberRole = activeMember?.role ?? ''
 
-  const canInvite = memberRole === 'owner' || memberRole === 'admin'
-  const canManageMembers = memberRole === 'owner' || memberRole === 'admin'
+  const canInvite = useHasPermission('invitation:create')
+  const canManageMembers = useHasPermission('member:update')
 
   // Fetch custom roles for display and role change dialog
   const { data: customRoles } = useRoles()

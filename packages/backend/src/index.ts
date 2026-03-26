@@ -16,6 +16,7 @@ import { apiKeysRoute } from "@/modules/api-keys/api-keys.route";
 import { membersRoute } from "@/modules/members/members.route";
 import { invitationsRoute } from "@/modules/invitations/invitations.route";
 import { rolesRoute } from "@/modules/roles/roles.route";
+import { permissionsRoute } from "@/modules/permissions/permissions.route";
 
 const app = new Elysia()
   .onError(({ error }) => {
@@ -84,6 +85,7 @@ const app = new Elysia()
   .use(membersRoute)
   .use(invitationsRoute)
   .use(rolesRoute)
+  .use(permissionsRoute)
   .get("/health", () => "ok")
   .listen(Number(process.env.PORT) || 8000);
 

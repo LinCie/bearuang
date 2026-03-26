@@ -12,6 +12,7 @@ import {
   DeleteDialog,
 } from '@/modules/customers'
 import type { UpdateCustomerInput } from '@/modules/customers'
+import { useHasPermission } from '@/lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/customers/$customerId')({
   component: CustomerDetailPage,
@@ -46,6 +47,8 @@ function CustomerDetailPage() {
   // Mutations
   const updateCustomer = useUpdateCustomer()
   const deleteCustomer = useDeleteCustomer()
+
+  const canUpdate = useHasPermission('customer:update')
 
   // Edit sheet state
   const [sheetOpen, setSheetOpen] = React.useState(false)
@@ -146,12 +149,14 @@ function CustomerDetailPage() {
                       <span className="text-muted-foreground italic">
                         Belum ada email tercatat.
                       </span>
-                      <button
-                        onClick={handleEdit}
-                        className="text-sm text-amber-700 hover:text-amber-800 font-medium self-start transition-colors"
-                      >
-                        Tambahkan email →
-                      </button>
+                      {canUpdate && (
+                        <button
+                          onClick={handleEdit}
+                          className="text-sm text-amber-700 hover:text-amber-800 font-medium self-start transition-colors"
+                        >
+                          Tambahkan email →
+                        </button>
+                      )}
                     </div>
                   )}
                 </dd>
@@ -176,12 +181,14 @@ function CustomerDetailPage() {
                       <span className="text-muted-foreground italic">
                         Belum ada telepon tercatat.
                       </span>
-                      <button
-                        onClick={handleEdit}
-                        className="text-sm text-amber-700 hover:text-amber-800 font-medium self-start transition-colors"
-                      >
-                        Tambahkan telepon →
-                      </button>
+                      {canUpdate && (
+                        <button
+                          onClick={handleEdit}
+                          className="text-sm text-amber-700 hover:text-amber-800 font-medium self-start transition-colors"
+                        >
+                          Tambahkan telepon →
+                        </button>
+                      )}
                     </div>
                   )}
                 </dd>
@@ -203,12 +210,14 @@ function CustomerDetailPage() {
                 <p className="text-muted-foreground text-sm">
                   Belum ada alamat tercatat untuk pelanggan ini.
                 </p>
-                <button
-                  onClick={handleEdit}
-                  className="text-sm text-amber-700 hover:text-amber-800 font-medium self-start transition-colors"
-                >
-                  Tambahkan alamat →
-                </button>
+                {canUpdate && (
+                  <button
+                    onClick={handleEdit}
+                    className="text-sm text-amber-700 hover:text-amber-800 font-medium self-start transition-colors"
+                  >
+                    Tambahkan alamat →
+                  </button>
+                )}
               </div>
             )}
           </div>

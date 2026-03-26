@@ -12,6 +12,7 @@ import type {
   StockMovement,
   StockMovementType,
 } from '@/modules/stock-movements'
+import { useHasPermission } from '@/lib/use-permissions'
 
 interface MovementDetailHeaderProps {
   movement: StockMovement
@@ -63,6 +64,8 @@ export function MovementDetailHeader({
   onEdit,
   onDelete,
 }: MovementDetailHeaderProps) {
+  const canAdjust = useHasPermission('stock:adjust')
+
   return (
     <div className="flex items-start justify-between gap-4 lg:gap-5">
       <div className="flex items-start gap-4 lg:gap-5 min-w-0 flex-1">
@@ -114,16 +117,18 @@ export function MovementDetailHeader({
 
       {/* Edit & Delete Buttons */}
       <div className="flex items-center gap-1 shrink-0 pt-1.5">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-11 w-11 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-          onClick={onEdit}
-          title="Edit pergerakan stok"
-        >
-          <Pencil className="h-4 w-4" />
-          <span className="sr-only">Edit pergerakan stok</span>
-        </Button>
+        {canAdjust && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-11 w-11 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+            onClick={onEdit}
+            title="Edit pergerakan stok"
+          >
+            <Pencil className="h-4 w-4" />
+            <span className="sr-only">Edit pergerakan stok</span>
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon"

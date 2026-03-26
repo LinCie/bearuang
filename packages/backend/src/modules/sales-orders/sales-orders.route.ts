@@ -170,6 +170,7 @@ export const salesOrdersRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { salesOrder: ["view"] },
       query: listSalesOrdersQuery,
       response: {
         200: paginatedResponse(salesOrderSchema),
@@ -217,6 +218,7 @@ export const salesOrdersRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { salesOrder: ["view"] },
       params: salesOrderIdParam,
       response: {
         200: salesOrderSchema,

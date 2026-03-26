@@ -16,6 +16,7 @@ import {
   UserPlus,
 } from 'lucide-react'
 import { signOut, useSession } from '@/lib/auth-client'
+import { usePermissions } from '@/lib/use-permissions'
 import { cn } from '@/lib/utils'
 import {
   DropdownMenu,
@@ -45,21 +46,42 @@ interface NavItem {
   icon: React.ElementType
   label: string
   to: string
+  permission?: string
 }
 
 const MAIN_NAV: NavItem[] = [
   { icon: Home, label: 'Home', to: '/' },
-  { icon: Package, label: 'Produk', to: '/products' },
-  { icon: Warehouse, label: 'Gudang', to: '/warehouses' },
-  { icon: ArrowLeftRight, label: 'Pergerakan Stok', to: '/stock-movements' },
-  { icon: Truck, label: 'Pemasok', to: '/suppliers' },
-  { icon: ClipboardList, label: 'Pesanan Pembelian', to: '/purchase-orders' },
-  { icon: Users, label: 'Pelanggan', to: '/customers' },
-  { icon: ShoppingCart, label: 'Pesanan Penjualan', to: '/sales-orders' },
+  { icon: Package, label: 'Produk', to: '/products', permission: 'product' },
+  {
+    icon: Warehouse,
+    label: 'Gudang',
+    to: '/warehouses',
+    permission: 'warehouse',
+  },
+  {
+    icon: ArrowLeftRight,
+    label: 'Pergerakan Stok',
+    to: '/stock-movements',
+    permission: 'stock',
+  },
+  { icon: Truck, label: 'Pemasok', to: '/suppliers', permission: 'supplier' },
+  {
+    icon: ClipboardList,
+    label: 'Pesanan Pembelian',
+    to: '/purchase-orders',
+    permission: 'purchaseOrder',
+  },
+  { icon: Users, label: 'Pelanggan', to: '/customers', permission: 'customer' },
+  {
+    icon: ShoppingCart,
+    label: 'Pesanan Penjualan',
+    to: '/sales-orders',
+    permission: 'salesOrder',
+  },
 ]
 
 const SECONDARY_NAV: NavItem[] = [
-  { icon: UserPlus, label: 'Anggota', to: '/members' },
+  { icon: UserPlus, label: 'Anggota', to: '/members', permission: 'member' },
   { icon: Settings, label: 'Settings', to: '/settings' },
 ]
 
@@ -130,6 +152,16 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const currentPath = routerState.location.pathname
   const greeting = useTimeGreeting()
   const [isSigningOut, setIsSigningOut] = React.useState(false)
+  const { data: permissions } = usePermissions()
+
+  const filteredMainNav = MAIN_NAV.filter(
+    (item) =>
+      !item.permission || permissions?.viewResources.has(item.permission),
+  )
+  const filteredSecondaryNav = SECONDARY_NAV.filter(
+    (item) =>
+      !item.permission || permissions?.viewResources.has(item.permission),
+  )
 
   async function handleSignOut() {
     if (isSigningOut) return
@@ -173,7 +205,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </SidebarGroupLabel>
             <nav aria-label="Main navigation">
               <SidebarMenu>
-                {MAIN_NAV.map((item) => (
+                {filteredMainNav.map((item) => (
                   <NavItemLink
                     key={item.label}
                     item={item}
@@ -198,7 +230,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </SidebarGroupLabel>
             <nav aria-label="Secondary navigation">
               <SidebarMenu>
-                {SECONDARY_NAV.map((item) => (
+                {filteredSecondaryNav.map((item) => (
                   <NavItemLink
                     key={item.label}
                     item={item}

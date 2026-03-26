@@ -118,6 +118,7 @@ export const productsRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { product: ["view"] },
       query: listProductsQuery,
       response: {
         200: paginatedResponse(productSchema),
@@ -190,6 +191,7 @@ export const productsRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { product: ["view"] },
       params: productIdParam,
       response: {
         200: productSchema,

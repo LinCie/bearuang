@@ -25,6 +25,7 @@ import type {
   ProductVariant,
 } from '@/modules/products'
 import { Button } from '@/components/ui/button'
+import { useHasPermission } from '@/lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/products/$productId')({
   component: ProductDetailPage,
@@ -46,6 +47,9 @@ function ProductDetailPage() {
   const deleteVariant = useDeleteVariant()
   const updateProduct = useUpdateProduct()
   const deleteProduct = useDeleteProduct()
+
+  const canCreate = useHasPermission('product:create')
+  const canUpdate = useHasPermission('product:update')
 
   // Sheet state (create / edit variant)
   const [sheetOpen, setSheetOpen] = React.useState(false)
@@ -193,12 +197,14 @@ function ProductDetailPage() {
                 <p className="text-muted-foreground text-sm">
                   Belum ada deskripsi untuk produk ini.
                 </p>
-                <button
-                  onClick={handleProductEdit}
-                  className="text-sm text-amber-700 hover:text-amber-800 font-medium self-start transition-colors"
-                >
-                  Tambahkan deskripsi →
-                </button>
+                {canUpdate && (
+                  <button
+                    onClick={handleProductEdit}
+                    className="text-sm text-amber-700 hover:text-amber-800 font-medium self-start transition-colors"
+                  >
+                    Tambahkan deskripsi →
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -209,14 +215,16 @@ function ProductDetailPage() {
               <h2 className="text-base font-medium text-foreground">
                 Varian ({variants.length})
               </h2>
-              <Button
-                size="sm"
-                onClick={handleCreate}
-                className="shadow-sm hover:shadow-md transition-all active:scale-95"
-              >
-                <Plus className="mr-1.5 h-4 w-4" />
-                Tambah Varian
-              </Button>
+              {canCreate && (
+                <Button
+                  size="sm"
+                  onClick={handleCreate}
+                  className="shadow-sm hover:shadow-md transition-all active:scale-95"
+                >
+                  <Plus className="mr-1.5 h-4 w-4" />
+                  Tambah Varian
+                </Button>
+              )}
             </div>
 
             <div className="-mx-4 sm:mx-0">

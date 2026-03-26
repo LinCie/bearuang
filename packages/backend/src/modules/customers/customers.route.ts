@@ -104,6 +104,7 @@ export const customersRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { customer: ["view"] },
       query: listCustomersQuery,
       response: {
         200: paginatedResponse(customerSchema),
@@ -152,6 +153,7 @@ export const customersRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { customer: ["view"] },
       params: customerIdParam,
       response: {
         200: customerSchema,

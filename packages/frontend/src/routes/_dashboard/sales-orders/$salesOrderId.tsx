@@ -59,6 +59,7 @@ import {
 import { useStockMovementsByReference } from '@/modules/stock-movements'
 import type { SalesOrder, UpdateSalesOrderInput } from '@/modules/sales-orders'
 import type { StockMovementType } from '@/modules/stock-movements'
+import { useHasPermission } from '@/lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/sales-orders/$salesOrderId')({
   component: SalesOrderDetailPage,
@@ -124,6 +125,7 @@ function SalesOrderErrorState({ onRetry }: { onRetry: () => void }) {
 function SalesOrderDetailPage() {
   const { salesOrderId } = Route.useParams()
   const router = useRouter()
+  const canUpdate = useHasPermission('salesOrder:update')
   const {
     data: salesOrder,
     isLoading,
@@ -339,15 +341,17 @@ function SalesOrderDetailPage() {
                 Hapus
               </Button>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleEdit}
-              className="gap-2"
-            >
-              <Pencil className="h-4 w-4" />
-              Edit
-            </Button>
+            {canUpdate && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleEdit}
+                className="gap-2"
+              >
+                <Pencil className="h-4 w-4" />
+                Edit
+              </Button>
+            )}
 
             {(canConfirm || canShip || canDeliver || canComplete) && (
               <div className="w-px h-6 bg-border mx-2 hidden sm:block" />

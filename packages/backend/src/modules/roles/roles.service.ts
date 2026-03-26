@@ -8,9 +8,63 @@ export interface RoleWithPermissions {
   updatedAt: string | null;
 }
 
+/**
+ * Converts a flat permission array like ["supplier:create", "supplier:update"]
+ * to a grouped JSON object like { "supplier": ["create", "update"] }.
+ * This is the format better-auth expects in the OrganizationRole.permission column.
+ */
+function toPermissionObject(perms: string[]): Record<string, string[]> {
+  const obj: Record<string, string[]> = {};
+  for (const p of perms) {
+    const [resource, action] = p.split(":");
+    if (!resource || !action) continue;
+    if (!obj[resource]) obj[resource] = [];
+    obj[resource].push(action);
+  }
+  return obj;
+}
+
+/**
+ * Converts a JSON permission object like { "supplier": ["create", "update"] }
+ * to a flat array like ["supplier:create", "supplier:update"].
+ */
+function toPermissionArray(obj: Record<string, string[]>): string[] {
+  const perms: string[] = [];
+  for (const [resource, actions] of Object.entries(obj)) {
+    for (const action of actions) {
+      perms.push(`${resource}:${action}`);
+    }
+  }
+  return perms;
+}
+
+/**
+ * Parses the permission column value, handling both:
+ * - JSON object format: '{"supplier":["create","update"]}'
+ * - Legacy flat string format: 'supplier:create'
+ */
+function parsePermissionColumn(
+  value: string,
+): Record<string, string[]> {
+  try {
+    const parsed = JSON.parse(value);
+    if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+      return parsed as Record<string, string[]>;
+    }
+  } catch {
+    // Legacy format: "resource:action"
+    const [resource, action] = value.split(":");
+    if (resource && action) {
+      return { [resource]: [action] };
+    }
+  }
+  return {};
+}
+
 export const rolesService = {
   /**
    * List all custom roles for an organization with their aggregated permissions.
+   * Stores one row per role with permissions as a JSON object.
    */
   async listRoles(organizationId: string): Promise<RoleWithPermissions[]> {
     const rows = await prisma.organizationRole.findMany({
@@ -18,35 +72,13 @@ export const rolesService = {
       orderBy: { createdAt: "desc" },
     });
 
-    // Aggregate permissions by role name
-    const roleMap = new Map<string, RoleWithPermissions>();
-    for (const row of rows) {
-      const existing = roleMap.get(row.role);
-      if (existing) {
-        existing.permissions.push(row.permission);
-        // Use earliest createdAt, latest updatedAt
-        if (row.createdAt < new Date(existing.createdAt)) {
-          existing.createdAt = row.createdAt.toISOString();
-        }
-        if (
-          row.updatedAt &&
-          (!existing.updatedAt ||
-            row.updatedAt > new Date(existing.updatedAt))
-        ) {
-          existing.updatedAt = row.updatedAt.toISOString();
-        }
-      } else {
-        roleMap.set(row.role, {
-          id: row.id,
-          role: row.role,
-          permissions: [row.permission],
-          createdAt: row.createdAt.toISOString(),
-          updatedAt: row.updatedAt?.toISOString() ?? null,
-        });
-      }
-    }
-
-    return Array.from(roleMap.values());
+    return rows.map((row) => ({
+      id: row.id,
+      role: row.role,
+      permissions: toPermissionArray(parsePermissionColumn(row.permission)),
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt?.toISOString() ?? null,
+    }));
   },
 
   /**
@@ -56,49 +88,45 @@ export const rolesService = {
     organizationId: string,
     role: string,
   ): Promise<RoleWithPermissions | null> {
-    const rows = await prisma.organizationRole.findMany({
+    const row = await prisma.organizationRole.findFirst({
       where: { organizationId, role },
     });
 
-    if (rows.length === 0) return null;
+    if (!row) return null;
 
-    const first = rows[0];
     return {
-      id: first.role, // Use role name as identifier
-      role: first.role,
-      permissions: rows.map((r) => r.permission),
-      createdAt: first.createdAt.toISOString(),
-      updatedAt: first.updatedAt?.toISOString() ?? null,
+      id: row.id,
+      role: row.role,
+      permissions: toPermissionArray(parsePermissionColumn(row.permission)),
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt?.toISOString() ?? null,
     };
   },
 
   /**
    * Create a new custom role with permissions.
-   * Each permission is stored as a separate row with a unique ID.
-   * We use the role name as the grouping mechanism.
+   * Stores one row per role with permissions as a JSON object,
+   * matching the format better-auth expects for dynamic access control.
    */
   async createRole(
     organizationId: string,
     data: { role: string; permissions: string[] },
   ): Promise<RoleWithPermissions> {
     const now = new Date();
+    const permissionObj = toPermissionObject(data.permissions);
 
-    await prisma.$transaction(
-      data.permissions.map((permission) =>
-        prisma.organizationRole.create({
-          data: {
-            id: crypto.randomUUID(),
-            organizationId,
-            role: data.role,
-            permission,
-            createdAt: now,
-          },
-        }),
-      ),
-    );
+    await prisma.organizationRole.create({
+      data: {
+        id: crypto.randomUUID(),
+        organizationId,
+        role: data.role,
+        permission: JSON.stringify(permissionObj),
+        createdAt: now,
+      },
+    });
 
     return {
-      id: data.role, // Use role name as identifier for grouping
+      id: data.role,
       role: data.role,
       permissions: data.permissions,
       createdAt: now.toISOString(),
@@ -108,50 +136,45 @@ export const rolesService = {
 
   /**
    * Update a custom role's name and/or permissions.
-   * Deletes old permissions and creates new ones.
    */
   async updateRole(
     organizationId: string,
     roleName: string,
     data: { role?: string; permissions?: string[] },
   ): Promise<RoleWithPermissions | null> {
-    const existingRows = await prisma.organizationRole.findMany({
+    const existing = await prisma.organizationRole.findFirst({
       where: { organizationId, role: roleName },
     });
 
-    if (existingRows.length === 0) return null;
+    if (!existing) return null;
 
-    const first = existingRows[0];
     const now = new Date();
 
     if (data.permissions !== undefined) {
-      // Delete existing permissions for this role and recreate
+      const newRole = data.role ?? roleName;
+      const permissionObj = toPermissionObject(data.permissions);
+
+      // Delete existing row and create updated one
       await prisma.organizationRole.deleteMany({
         where: { organizationId, role: roleName },
       });
 
-      const newRole = data.role ?? roleName;
-
-      await prisma.$transaction(
-        data.permissions.map((permission) =>
-          prisma.organizationRole.create({
-            data: {
-              id: crypto.randomUUID(),
-              organizationId,
-              role: newRole,
-              permission,
-              createdAt: first.createdAt,
-              updatedAt: now,
-            },
-          }),
-        ),
-      );
+      await prisma.organizationRole.create({
+        data: {
+          id: crypto.randomUUID(),
+          organizationId,
+          role: newRole,
+          permission: JSON.stringify(permissionObj),
+          createdAt: existing.createdAt,
+          updatedAt: now,
+        },
+      });
 
       return {
         id: newRole,
         role: newRole,
         permissions: data.permissions,
-        createdAt: first.createdAt.toISOString(),
+        createdAt: existing.createdAt.toISOString(),
         updatedAt: now.toISOString(),
       };
     }
@@ -163,15 +186,17 @@ export const rolesService = {
         data: { role: data.role, updatedAt: now },
       });
 
-      const rows = await prisma.organizationRole.findMany({
+      const updated = await prisma.organizationRole.findFirst({
         where: { organizationId, role: data.role },
       });
 
       return {
         id: data.role,
         role: data.role,
-        permissions: rows.map((r) => r.permission),
-        createdAt: first.createdAt.toISOString(),
+        permissions: updated
+          ? toPermissionArray(parsePermissionColumn(updated.permission))
+          : [],
+        createdAt: existing.createdAt.toISOString(),
         updatedAt: now.toISOString(),
       };
     }
@@ -180,9 +205,9 @@ export const rolesService = {
     return {
       id: roleName,
       role: roleName,
-      permissions: existingRows.map((r) => r.permission),
-      createdAt: first.createdAt.toISOString(),
-      updatedAt: first.updatedAt?.toISOString() ?? null,
+      permissions: toPermissionArray(parsePermissionColumn(existing.permission)),
+      createdAt: existing.createdAt.toISOString(),
+      updatedAt: existing.updatedAt?.toISOString() ?? null,
     };
   },
 

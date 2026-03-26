@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useHasPermission } from '@/lib/use-permissions'
 
 interface SupplierDetailHeaderProps {
   supplier: {
@@ -21,6 +22,7 @@ export function SupplierDetailHeader({
   onEdit,
   onDelete,
 }: SupplierDetailHeaderProps) {
+  const canUpdate = useHasPermission('supplier:update')
   return (
     <div className="flex items-start justify-between gap-4 lg:gap-5">
       <div className="flex items-start gap-4 lg:gap-5 min-w-0 flex-1">
@@ -79,16 +81,18 @@ export function SupplierDetailHeader({
 
       {/* Edit & Delete Buttons */}
       <div className="flex items-center gap-1 shrink-0 pt-1.5">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-11 w-11 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-          onClick={onEdit}
-          title="Edit pemasok"
-        >
-          <Pencil className="h-4 w-4" />
-          <span className="sr-only">Edit pemasok</span>
-        </Button>
+        {canUpdate && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-11 w-11 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+            onClick={onEdit}
+            title="Edit pemasok"
+          >
+            <Pencil className="h-4 w-4" />
+            <span className="sr-only">Edit pemasok</span>
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon"

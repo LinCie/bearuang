@@ -103,6 +103,7 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
         {
           requireAuth: true,
           requireOrg: true,
+          requirePermission: { productVariant: ["view"] },
           params: productIdParam,
           response: {
             200: z.array(variantSchema),
@@ -178,6 +179,7 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
         {
           requireAuth: true,
           requireOrg: true,
+          requirePermission: { productVariant: ["view"] },
           query: searchVariantQuery,
           response: {
             200: paginatedResponse(variantWithProductSchema),
@@ -202,6 +204,7 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
         {
           requireAuth: true,
           requireOrg: true,
+          requirePermission: { productVariant: ["view"] },
           params: variantIdParam,
           response: {
             200: variantWithProductSchema,

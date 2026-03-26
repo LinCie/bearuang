@@ -1,11 +1,14 @@
 import { PackageOpen, Plus, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useHasPermission } from '@/lib/use-permissions'
 
 interface EmptyVariantsStateProps {
   onCreate: () => void
 }
 
 export function EmptyVariantsState({ onCreate }: EmptyVariantsStateProps) {
+  const canCreate = useHasPermission('product:create')
+
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 border-2 border-dashed border-border/40 rounded-2xl mx-4 sm:mx-0 hover:border-amber-500/30 hover:bg-amber-50/30 dark:hover:bg-amber-950/10 transition-all duration-500 group cursor-default relative overflow-hidden">
       <div className="absolute inset-0 bg-amber-500/5 rounded-full blur-3xl group-hover:bg-amber-500/10 transition-colors duration-700" />
@@ -33,16 +36,18 @@ export function EmptyVariantsState({ onCreate }: EmptyVariantsStateProps) {
         Apakah produk ini punya ukuran, rasa, atau warna yang berbeda? Yuk,
         tambahkan varian!
       </p>
-      <Button
-        onClick={onCreate}
-        className="shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group/btn bg-linear-to-r from-primary to-primary/90 hover:from-primary hover:to-primary"
-      >
-        <span className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out" />
-        <span className="relative flex items-center font-medium">
-          <Plus className="mr-2 h-4 w-4" />
-          Tambah Varian Pertama
-        </span>
-      </Button>
+      {canCreate && (
+        <Button
+          onClick={onCreate}
+          className="shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group/btn bg-linear-to-r from-primary to-primary/90 hover:from-primary hover:to-primary"
+        >
+          <span className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out" />
+          <span className="relative flex items-center font-medium">
+            <Plus className="mr-2 h-4 w-4" />
+            Tambah Varian Pertama
+          </span>
+        </Button>
+      )}
     </div>
   )
 }

@@ -61,6 +61,7 @@ import type {
   UpdatePurchaseOrderInput,
 } from '@/modules/purchase-orders'
 import type { StockMovementType } from '@/modules/stock-movements'
+import { useHasPermission } from '@/lib/use-permissions'
 
 export const Route = createFileRoute(
   '/_dashboard/purchase-orders/$purchaseOrderId',
@@ -128,6 +129,7 @@ function PurchaseOrderErrorState({ onRetry }: { onRetry: () => void }) {
 function PurchaseOrderDetailPage() {
   const { purchaseOrderId } = Route.useParams()
   const router = useRouter()
+  const canUpdate = useHasPermission('purchaseOrder:update')
   const {
     data: purchaseOrder,
     isLoading,
@@ -357,15 +359,17 @@ function PurchaseOrderDetailPage() {
                 Hapus
               </Button>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleEdit}
-              className="gap-2"
-            >
-              <Pencil className="h-4 w-4" />
-              Edit
-            </Button>
+            {canUpdate && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleEdit}
+                className="gap-2"
+              >
+                <Pencil className="h-4 w-4" />
+                Edit
+              </Button>
+            )}
 
             {(canConfirm || canReceive || canComplete) && (
               <div className="w-px h-6 bg-border mx-2 hidden sm:block" />

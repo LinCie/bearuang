@@ -25,6 +25,7 @@ import type { Role } from '../hooks/use-roles'
 import { RoleFormSheet } from './role-form-sheet'
 import { cn } from '@/lib/utils'
 import { Plus, Pencil, Trash2, Shield, Loader2 } from 'lucide-react'
+import { useHasPermission } from '@/lib/use-permissions'
 
 // Local form type to avoid strict template literal types from backend
 interface RoleFormData {
@@ -67,6 +68,7 @@ export function RoleManagementSheet({
   const createRole = useCreateRole()
   const updateRole = useUpdateRole()
   const deleteRole = useDeleteRole()
+  const canUpdateMembers = useHasPermission('member:update')
 
   const handleCreateNew = () => {
     setEditingRole(null)
@@ -125,14 +127,16 @@ export function RoleManagementSheet({
           </SheetHead>
 
           <div className="px-4 space-y-4">
-            <Button
-              onClick={handleCreateNew}
-              className="w-full shadow-sm"
-              size="lg"
-            >
-              <Plus className="mr-2 h-5 w-5" />
-              Buat Peran Baru
-            </Button>
+            {canUpdateMembers && (
+              <Button
+                onClick={handleCreateNew}
+                className="w-full shadow-sm"
+                size="lg"
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Buat Peran Baru
+              </Button>
+            )}
 
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
@@ -162,14 +166,16 @@ export function RoleManagementSheet({
                           </div>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            onClick={() => handleEdit(role)}
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
+                          {canUpdateMembers && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() => handleEdit(role)}
+                              className="text-muted-foreground hover:text-foreground"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon-sm"

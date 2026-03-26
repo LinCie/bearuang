@@ -59,6 +59,7 @@ import type {
   CreatePurchaseOrderInput,
   PurchaseOrder,
 } from '@/modules/purchase-orders'
+import { useHasPermission } from '@/lib/use-permissions'
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -93,6 +94,7 @@ export const Route = createFileRoute('/_dashboard/purchase-orders/')({
 function PurchaseOrdersPage() {
   const navigate = useNavigate({ from: '/purchase-orders/' })
   const searchParams = Route.useSearch()
+  const canCreate = useHasPermission('purchaseOrder:create')
 
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: 'createdAt', desc: true },
@@ -381,14 +383,16 @@ function PurchaseOrdersPage() {
               Kelola pesanan pembelian barang dari pemasok Anda.
             </p>
           </div>
-          <Button
-            onClick={handleCreate}
-            size="lg"
-            className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
-          >
-            <Plus className="mr-2 h-5 w-5" />
-            Buat Pesanan
-          </Button>
+          {canCreate && (
+            <Button
+              onClick={handleCreate}
+              size="lg"
+              className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Buat Pesanan
+            </Button>
+          )}
         </div>
 
         {/* Filters */}
@@ -626,17 +630,19 @@ function PurchaseOrdersPage() {
                         Saatnya membuat pesanan pembelian pertama Anda. Kelola
                         pengadaan barang dari pemasok dengan lebih terstruktur.
                       </p>
-                      <Button
-                        onClick={handleCreate}
-                        size="lg"
-                        className="px-8 h-12 text-base shadow-sm hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group/btn bg-linear-to-r from-primary to-primary/90 hover:from-primary hover:to-primary"
-                      >
-                        <span className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out" />
-                        <span className="relative flex items-center font-medium">
-                          <Plus className="mr-2 h-5 w-5" />
-                          Buat Pesanan Pertama
-                        </span>
-                      </Button>
+                      {canCreate && (
+                        <Button
+                          onClick={handleCreate}
+                          size="lg"
+                          className="px-8 h-12 text-base shadow-sm hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group/btn bg-linear-to-r from-primary to-primary/90 hover:from-primary hover:to-primary"
+                        >
+                          <span className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out" />
+                          <span className="relative flex items-center font-medium">
+                            <Plus className="mr-2 h-5 w-5" />
+                            Buat Pesanan Pertama
+                          </span>
+                        </Button>
+                      )}
                     </div>
                   )}
                 </TableCell>

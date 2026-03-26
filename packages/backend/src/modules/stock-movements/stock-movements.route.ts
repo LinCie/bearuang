@@ -132,6 +132,7 @@ export const stockMovementRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { stock: ["view"] },
       query: listMovementsQuery,
       response: {
         200: paginatedResponse(stockMovementWithRelationsSchema),
@@ -181,6 +182,7 @@ export const stockMovementRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { stock: ["view"] },
       params: movementIdParam,
       response: {
         200: stockMovementWithRelationsSchema,

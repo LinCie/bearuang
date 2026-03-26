@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useHasPermission } from '@/lib/use-permissions'
 
 interface WarehouseDetailHeaderProps {
   warehouse: {
@@ -20,6 +21,8 @@ export function WarehouseDetailHeader({
   onEdit,
   onDelete,
 }: WarehouseDetailHeaderProps) {
+  const canUpdate = useHasPermission('warehouse:update')
+
   return (
     <div className="flex items-start justify-between gap-4 lg:gap-5">
       <div className="flex items-start gap-4 lg:gap-5 min-w-0 flex-1">
@@ -78,16 +81,18 @@ export function WarehouseDetailHeader({
 
       {/* Edit & Delete Buttons */}
       <div className="flex items-center gap-1 shrink-0 pt-1.5">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-11 w-11 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-          onClick={onEdit}
-          title="Edit gudang"
-        >
-          <Pencil className="h-4 w-4" />
-          <span className="sr-only">Edit gudang</span>
-        </Button>
+        {canUpdate && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-11 w-11 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+            onClick={onEdit}
+            title="Edit gudang"
+          >
+            <Pencil className="h-4 w-4" />
+            <span className="sr-only">Edit gudang</span>
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon"

@@ -91,6 +91,7 @@ export const warehousesRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { warehouse: ["view"] },
       query: listWarehousesQuery,
       response: {
         200: paginatedResponse(warehouseSchema),
@@ -139,6 +140,7 @@ export const warehousesRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { warehouse: ["view"] },
       params: warehouseIdParam,
       response: {
         200: warehouseSchema,

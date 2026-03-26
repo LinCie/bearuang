@@ -51,6 +51,7 @@ import type {
   UpdateProductInput,
 } from '@/modules/products'
 import { useDebounce } from '@/hooks/use-debounce'
+import { useHasPermission } from '@/lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/products/')({
   component: ProductsPage,
@@ -118,6 +119,9 @@ function ProductsPage() {
   const createProduct = useCreateProduct()
   const updateProduct = useUpdateProduct()
   const deleteProduct = useDeleteProduct()
+
+  const canCreate = useHasPermission('product:create')
+  const canUpdate = useHasPermission('product:update')
 
   const products = data?.data ?? []
   const meta = data?.meta
@@ -287,16 +291,18 @@ function ProductsPage() {
                 <span className="sr-only">Lihat detail produk</span>
               </Button>
             </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-              onClick={() => handleEdit(row.original)}
-              title="Edit produk"
-            >
-              <Pencil className="h-4 w-4" />
-              <span className="sr-only">Edit produk</span>
-            </Button>
+            {canUpdate && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                onClick={() => handleEdit(row.original)}
+                title="Edit produk"
+              >
+                <Pencil className="h-4 w-4" />
+                <span className="sr-only">Edit produk</span>
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -339,14 +345,16 @@ function ProductsPage() {
               Kelola daftar barang dan layanan yang ditawarkan toko Anda.
             </p>
           </div>
-          <Button
-            onClick={handleCreate}
-            size="lg"
-            className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
-          >
-            <Plus className="mr-2 h-5 w-5" />
-            Tambah Produk
-          </Button>
+          {canCreate && (
+            <Button
+              onClick={handleCreate}
+              size="lg"
+              className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Tambah Produk
+            </Button>
+          )}
         </div>
 
         {/* Search Bar */}
@@ -555,17 +563,19 @@ function ProductsPage() {
                         pertama Anda. Pelanggan di luar sana pasti sudah tidak
                         sabar menunggunya!
                       </p>
-                      <Button
-                        onClick={handleCreate}
-                        size="lg"
-                        className="px-8 h-12 text-base shadow-sm hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group/btn bg-linear-to-r from-primary to-primary/90 hover:from-primary hover:to-primary"
-                      >
-                        <span className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out" />
-                        <span className="relative flex items-center font-medium">
-                          <Plus className="mr-2 h-5 w-5" />
-                          Pajang Produk Pertama
-                        </span>
-                      </Button>
+                      {canCreate && (
+                        <Button
+                          onClick={handleCreate}
+                          size="lg"
+                          className="px-8 h-12 text-base shadow-sm hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group/btn bg-linear-to-r from-primary to-primary/90 hover:from-primary hover:to-primary"
+                        >
+                          <span className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out" />
+                          <span className="relative flex items-center font-medium">
+                            <Plus className="mr-2 h-5 w-5" />
+                            Pajang Produk Pertama
+                          </span>
+                        </Button>
+                      )}
                     </div>
                   )}
                 </TableCell>

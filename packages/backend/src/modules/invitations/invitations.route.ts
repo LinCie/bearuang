@@ -90,6 +90,7 @@ export const invitationsRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { invitation: ["view"] },
       query: listInvitationsQuery,
       response: {
         200: paginatedResponse(invitationSchema),
@@ -114,6 +115,7 @@ export const invitationsRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { invitation: ["view"] },
       params: invitationIdParam,
       response: {
         200: invitationSchema,

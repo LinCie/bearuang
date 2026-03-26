@@ -1,5 +1,6 @@
 import { Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useHasPermission } from '@/lib/use-permissions'
 import {
   Table,
   TableBody,
@@ -21,6 +22,8 @@ export function VariantsTable({
   onEdit,
   onDelete,
 }: VariantsTableProps) {
+  const canUpdate = useHasPermission('product:update')
+
   return (
     <div className="bg-card border border-border/40 rounded-xl shadow-sm overflow-hidden ring-1 ring-black/5 dark:ring-white/5">
       <Table className="w-full min-w-[700px]">
@@ -89,16 +92,18 @@ export function VariantsTable({
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-end gap-1 sm:opacity-40 transition-opacity group-hover:opacity-100">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                    onClick={() => onEdit(v)}
-                    title="Edit varian"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                    <span className="sr-only">Edit varian</span>
-                  </Button>
+                  {canUpdate && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                      onClick={() => onEdit(v)}
+                      title="Edit varian"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      <span className="sr-only">Edit varian</span>
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"

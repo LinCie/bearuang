@@ -23,6 +23,7 @@ import { useWarehouses } from '@/modules/warehouses'
 import { useVariants } from '@/modules/products'
 import type { StockMovementType } from '@/modules/stock-movements'
 import { useDebounce } from '@/hooks/use-debounce'
+import { useHasPermission } from '@/lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/stock-movements/')({
   component: StockMovementsPage,
@@ -37,6 +38,7 @@ export const Route = createFileRoute('/_dashboard/stock-movements/')({
 
 function StockMovementsPage() {
   const navigate = useNavigate({ from: '/stock-movements/' })
+  const canAdjust = useHasPermission('stock:adjust')
   const search = useSearch({
     from: '/_dashboard/stock-movements/',
   })
@@ -177,14 +179,16 @@ function StockMovementsPage() {
               seluruh gudang.
             </p>
           </div>
-          <Button
-            onClick={handleCreate}
-            size="lg"
-            className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
-          >
-            <Plus className="mr-2 h-5 w-5" />
-            Catat Pergerakan
-          </Button>
+          {canAdjust && (
+            <Button
+              onClick={handleCreate}
+              size="lg"
+              className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Catat Pergerakan
+            </Button>
+          )}
         </div>
 
         {/* Filters */}
@@ -353,17 +357,19 @@ function StockMovementsPage() {
                   pergerakan barang masuk, keluar, dan penyesuaian stok dengan
                   mudah.
                 </p>
-                <Button
-                  onClick={handleCreate}
-                  size="lg"
-                  className="px-8 h-12 text-base shadow-sm hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group/btn bg-linear-to-r from-primary to-primary/90 hover:from-primary hover:to-primary"
-                >
-                  <span className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out" />
-                  <span className="relative flex items-center font-medium">
-                    <Plus className="mr-2 h-5 w-5" />
-                    Catat Pergerakan Pertama
-                  </span>
-                </Button>
+                {canAdjust && (
+                  <Button
+                    onClick={handleCreate}
+                    size="lg"
+                    className="px-8 h-12 text-base shadow-sm hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group/btn bg-linear-to-r from-primary to-primary/90 hover:from-primary hover:to-primary"
+                  >
+                    <span className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out" />
+                    <span className="relative flex items-center font-medium">
+                      <Plus className="mr-2 h-5 w-5" />
+                      Catat Pergerakan Pertama
+                    </span>
+                  </Button>
+                )}
               </div>
             )}
           </div>

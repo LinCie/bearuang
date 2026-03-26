@@ -104,6 +104,7 @@ export const suppliersRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { supplier: ["view"] },
       query: listSuppliersQuery,
       response: {
         200: paginatedResponse(supplierSchema),
@@ -152,6 +153,7 @@ export const suppliersRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
+      requirePermission: { supplier: ["view"] },
       params: supplierIdParam,
       response: {
         200: supplierSchema,
