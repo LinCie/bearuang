@@ -297,7 +297,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link to="/" className="cursor-pointer">
+                <Link to="/settings" className="cursor-pointer">
                   <Settings className="w-4 h-4" aria-hidden="true" />
                   Pengaturan
                 </Link>
