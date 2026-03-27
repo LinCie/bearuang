@@ -125,8 +125,7 @@ export const dashboardService = {
       )
       return {
         id: order.id,
-        customerName:
-          order.customer?.name ?? order.guestName ?? 'Tanpa Nama',
+        customerName: order.customer?.name ?? order.guestName ?? 'Tanpa Nama',
         firstItemName: order.items[0]?.variant.name ?? '-',
         status: order.status,
         totalPrice: total,

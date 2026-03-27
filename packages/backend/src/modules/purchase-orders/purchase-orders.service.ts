@@ -1,16 +1,19 @@
-import { prisma } from "@/integrations/prisma"
-import { PurchaseOrderStatus, PurchaseOrderPaymentStatus } from "@/generated/prisma/client"
+import { prisma } from '@/integrations/prisma'
+import {
+  PurchaseOrderStatus,
+  PurchaseOrderPaymentStatus,
+} from '@/generated/prisma/client'
 
 const STATUS_TRANSITIONS: Record<PurchaseOrderStatus, PurchaseOrderStatus[]> = {
-  PENDING: ["CONFIRMED", "CANCELLED"],
-  CONFIRMED: ["SHIPPED", "CANCELLED"],
-  SHIPPED: ["CANCELLED"],
-  RECEIVED: ["COMPLETED", "CANCELLED"],
+  PENDING: ['CONFIRMED', 'CANCELLED'],
+  CONFIRMED: ['SHIPPED', 'CANCELLED'],
+  SHIPPED: ['CANCELLED'],
+  RECEIVED: ['COMPLETED', 'CANCELLED'],
   COMPLETED: [],
   CANCELLED: [],
 }
 
-const TERMINAL_STATUSES: PurchaseOrderStatus[] = ["COMPLETED", "CANCELLED"]
+const TERMINAL_STATUSES: PurchaseOrderStatus[] = ['COMPLETED', 'CANCELLED']
 
 export const purchaseOrdersService = {
   async listPurchaseOrders(
@@ -22,7 +25,10 @@ export const purchaseOrdersService = {
       paymentStatus?: PurchaseOrderPaymentStatus
       supplierId?: string
       warehouseId?: string
-      orderBy?: { field: "createdAt" | "updatedAt" | "orderedAt"; order: "asc" | "desc" }
+      orderBy?: {
+        field: 'createdAt' | 'updatedAt' | 'orderedAt'
+        order: 'asc' | 'desc'
+      }
     },
   ) {
     const where = {
@@ -39,7 +45,7 @@ export const purchaseOrdersService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: "desc" },
+          : { createdAt: 'desc' },
         include: {
           supplier: { select: { id: true, name: true } },
           warehouse: { select: { id: true, name: true } },
@@ -127,10 +133,12 @@ export const purchaseOrdersService = {
       where: { id, organizationId },
       include: { items: true },
     })
-    if (!existing) return { error: "not_found" as const }
+    if (!existing) return { error: 'not_found' as const }
 
     if (TERMINAL_STATUSES.includes(existing.status)) {
-      return { error: `Cannot modify a ${existing.status.toLowerCase()} purchase order` }
+      return {
+        error: `Cannot modify a ${existing.status.toLowerCase()} purchase order`,
+      }
     }
 
     if (data.status) {
@@ -141,10 +149,15 @@ export const purchaseOrdersService = {
         }
       }
 
-      if (data.status === "COMPLETED") {
-        const allReceived = existing.items.every((item) => item.receivedQty >= item.quantity)
+      if (data.status === 'COMPLETED') {
+        const allReceived = existing.items.every(
+          (item) => item.receivedQty >= item.quantity,
+        )
         if (!allReceived) {
-          return { error: "Cannot complete order: not all items have been fully received" }
+          return {
+            error:
+              'Cannot complete order: not all items have been fully received',
+          }
         }
       }
     }
@@ -173,10 +186,12 @@ export const purchaseOrdersService = {
       where: { id, organizationId },
       include: { items: true },
     })
-    if (!order) return { error: "not_found" as const }
+    if (!order) return { error: 'not_found' as const }
 
-    if (!["CONFIRMED", "SHIPPED"].includes(order.status)) {
-      return { error: `Cannot receive items on a ${order.status.toLowerCase()} purchase order` }
+    if (!['CONFIRMED', 'SHIPPED'].includes(order.status)) {
+      return {
+        error: `Cannot receive items on a ${order.status.toLowerCase()} purchase order`,
+      }
     }
 
     await prisma.$transaction(async (tx) => {
@@ -195,10 +210,10 @@ export const purchaseOrdersService = {
               organizationId,
               warehouseId: order.warehouseId,
               variantId: item.variantId,
-              type: "IN",
+              type: 'IN',
               quantity: received.receivedQty,
               referenceId: order.id,
-              referenceType: "purchase_order",
+              referenceType: 'purchase_order',
             },
           })
 
@@ -212,7 +227,7 @@ export const purchaseOrdersService = {
       await tx.purchaseOrder.update({
         where: { id },
         data: {
-          status: "RECEIVED",
+          status: 'RECEIVED',
           receivedAt: new Date(),
         },
       })
@@ -236,10 +251,12 @@ export const purchaseOrdersService = {
     const existing = await prisma.purchaseOrder.findFirst({
       where: { id, organizationId },
     })
-    if (!existing) return { error: "not_found" as const }
+    if (!existing) return { error: 'not_found' as const }
 
-    if (existing.status !== "PENDING") {
-      return { error: `Cannot delete a ${existing.status.toLowerCase()} purchase order` }
+    if (existing.status !== 'PENDING') {
+      return {
+        error: `Cannot delete a ${existing.status.toLowerCase()} purchase order`,
+      }
     }
 
     return prisma.purchaseOrder.delete({ where: { id } })

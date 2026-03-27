@@ -1,35 +1,35 @@
-import { describe, it, expect, mock, beforeAll } from "bun:test"
-import { Elysia } from "elysia"
+import { describe, it, expect, mock, beforeAll } from 'bun:test'
+import { Elysia } from 'elysia'
 
-const MOCK_ORG_ID = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
-const MOCK_SO_ID = "b1ffb0aa-0d1c-4ef8-bb7e-7cc0ce491b22"
-const MOCK_CUSTOMER_ID = "c2edf9b7-8f2b-4a6e-b4d3-9f8e2c3d4e5f"
-const MOCK_WAREHOUSE_ID = "d3fee8c8-9a3c-4fb7-ae4e-af9f3d4e5f60"
-const MOCK_VARIANT_ID = "e4aff9d9-ab4d-4c8a-b6f5-ba0a4e5f6a71"
-const MOCK_ITEM_ID = "f5baa0ea-bc5e-4d9b-a7a6-cb1b5f6a7b82"
-const UNKNOWN_ID = "99999999-9999-4999-a999-999999999999"
+const MOCK_ORG_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'
+const MOCK_SO_ID = 'b1ffb0aa-0d1c-4ef8-bb7e-7cc0ce491b22'
+const MOCK_CUSTOMER_ID = 'c2edf9b7-8f2b-4a6e-b4d3-9f8e2c3d4e5f'
+const MOCK_WAREHOUSE_ID = 'd3fee8c8-9a3c-4fb7-ae4e-af9f3d4e5f60'
+const MOCK_VARIANT_ID = 'e4aff9d9-ab4d-4c8a-b6f5-ba0a4e5f6a71'
+const MOCK_ITEM_ID = 'f5baa0ea-bc5e-4d9b-a7a6-cb1b5f6a7b82'
+const UNKNOWN_ID = '99999999-9999-4999-a999-999999999999'
 
 const mockItem = {
   id: MOCK_ITEM_ID,
   salesOrderId: MOCK_SO_ID,
   variantId: MOCK_VARIANT_ID,
-  variant: { id: MOCK_VARIANT_ID, sku: "SKU-001", name: "Widget Blue" },
+  variant: { id: MOCK_VARIANT_ID, sku: 'SKU-001', name: 'Widget Blue' },
   quantity: 2,
-  unitPrice: { toString: () => "25.00" },
+  unitPrice: { toString: () => '25.00' },
 }
 
 const mockSalesOrder = {
   id: MOCK_SO_ID,
   organizationId: MOCK_ORG_ID,
   customerId: MOCK_CUSTOMER_ID,
-  customer: { id: MOCK_CUSTOMER_ID, name: "John Doe" },
+  customer: { id: MOCK_CUSTOMER_ID, name: 'John Doe' },
   warehouseId: MOCK_WAREHOUSE_ID,
-  warehouse: { id: MOCK_WAREHOUSE_ID, name: "Main Warehouse" },
+  warehouse: { id: MOCK_WAREHOUSE_ID, name: 'Main Warehouse' },
   guestName: null,
   guestEmail: null,
   shippingAddress: {},
-  status: "PENDING" as const,
-  paymentStatus: "UNPAID" as const,
+  status: 'PENDING' as const,
+  paymentStatus: 'UNPAID' as const,
   orderedAt: null,
   shippedAt: null,
   note: null,
@@ -42,8 +42,8 @@ const mockSalesOrderGuest = {
   ...mockSalesOrder,
   customerId: null,
   customer: null,
-  guestName: "Jane Guest",
-  guestEmail: "jane@example.com",
+  guestName: 'Jane Guest',
+  guestEmail: 'jane@example.com',
 }
 
 const mockService = {
@@ -55,13 +55,17 @@ const mockService = {
   ),
   createSalesOrder: mock((orgId: string, data: any) => {
     if (data.warehouseId === UNKNOWN_ID) {
-      return Promise.resolve({ error: "Warehouse not found" })
+      return Promise.resolve({ error: 'Warehouse not found' })
     }
     if (data.items?.some((i: any) => i.variantId === UNKNOWN_ID)) {
-      return Promise.resolve({ error: "One or more product variants not found" })
+      return Promise.resolve({
+        error: 'One or more product variants not found',
+      })
     }
     if (!data.customerId && !data.guestName) {
-      return Promise.resolve({ error: "Either customerId or guestName must be provided" })
+      return Promise.resolve({
+        error: 'Either customerId or guestName must be provided',
+      })
     }
     if (data.customerId) {
       return Promise.resolve(mockSalesOrder)
@@ -69,48 +73,46 @@ const mockService = {
     return Promise.resolve(mockSalesOrderGuest)
   }),
   updateSalesOrder: mock((orgId: string, id: string, data: any) => {
-    if (id !== MOCK_SO_ID) return Promise.resolve({ error: "not_found" })
+    if (id !== MOCK_SO_ID) return Promise.resolve({ error: 'not_found' })
     return Promise.resolve({ ...mockSalesOrder, ...data })
   }),
   deleteSalesOrder: mock((orgId: string, id: string) => {
-    if (id !== MOCK_SO_ID) return Promise.resolve({ error: "not_found" })
+    if (id !== MOCK_SO_ID) return Promise.resolve({ error: 'not_found' })
     return Promise.resolve(mockSalesOrder)
   }),
 }
 
-mock.module("@/plugins/auth.plugin", () => ({
-  authPlugin: new Elysia({ name: "auth" }).macro({
+mock.module('@/plugins/auth.plugin', () => ({
+  authPlugin: new Elysia({ name: 'auth' }).macro({
     requireAuth: {
       resolve: () => ({
-        user: { id: "user-1", name: "Test User", email: "test@test.com" },
-        session: { id: "session-1" },
+        user: { id: 'user-1', name: 'Test User', email: 'test@test.com' },
+        session: { id: 'session-1' },
       }),
     },
     requireOrg: {
       resolve: () => ({
-        organization: { id: MOCK_ORG_ID, name: "Test Org" },
+        organization: { id: MOCK_ORG_ID, name: 'Test Org' },
       }),
     },
   }),
 }))
 
-mock.module("./sales-orders.service", () => ({
+mock.module('./sales-orders.service', () => ({
   salesOrdersService: mockService,
 }))
 
 let app: any
 
 beforeAll(async () => {
-  const { salesOrdersRoute } = await import("./sales-orders.route")
+  const { salesOrdersRoute } = await import('./sales-orders.route')
   app = new Elysia().use(salesOrdersRoute)
 })
 
-describe("Sales Orders", () => {
-  describe("GET /sales-orders", () => {
-    it("returns a paginated list of sales orders", async () => {
-      const res = await app.handle(
-        new Request("http://localhost/sales-orders"),
-      )
+describe('Sales Orders', () => {
+  describe('GET /sales-orders', () => {
+    it('returns a paginated list of sales orders', async () => {
+      const res = await app.handle(new Request('http://localhost/sales-orders'))
 
       expect(res.status).toBe(200)
       const body = await res.json()
@@ -120,23 +122,23 @@ describe("Sales Orders", () => {
       expect(body.meta.total).toBe(1)
     })
 
-    it("accepts status filter", async () => {
+    it('accepts status filter', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders?status=PENDING"),
+        new Request('http://localhost/sales-orders?status=PENDING'),
       )
 
       expect(res.status).toBe(200)
     })
 
-    it("accepts paymentStatus filter", async () => {
+    it('accepts paymentStatus filter', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders?paymentStatus=UNPAID"),
+        new Request('http://localhost/sales-orders?paymentStatus=UNPAID'),
       )
 
       expect(res.status).toBe(200)
     })
 
-    it("accepts customerId filter", async () => {
+    it('accepts customerId filter', async () => {
       const res = await app.handle(
         new Request(
           `http://localhost/sales-orders?customerId=${MOCK_CUSTOMER_ID}`,
@@ -146,55 +148,55 @@ describe("Sales Orders", () => {
       expect(res.status).toBe(200)
     })
 
-    it("accepts search filter", async () => {
+    it('accepts search filter', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders?search=test"),
+        new Request('http://localhost/sales-orders?search=test'),
       )
 
       expect(res.status).toBe(200)
     })
 
-    it("accepts sort params", async () => {
+    it('accepts sort params', async () => {
       const res = await app.handle(
         new Request(
-          "http://localhost/sales-orders?sortBy=createdAt&sortOrder=asc",
+          'http://localhost/sales-orders?sortBy=createdAt&sortOrder=asc',
         ),
       )
 
       expect(res.status).toBe(200)
     })
 
-    it("returns 422 for invalid status value", async () => {
+    it('returns 422 for invalid status value', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders?status=INVALID"),
+        new Request('http://localhost/sales-orders?status=INVALID'),
       )
 
       expect(res.status).toBe(422)
     })
 
-    it("returns 422 for invalid paymentStatus value", async () => {
+    it('returns 422 for invalid paymentStatus value', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders?paymentStatus=INVALID"),
+        new Request('http://localhost/sales-orders?paymentStatus=INVALID'),
       )
 
       expect(res.status).toBe(422)
     })
 
-    it("returns 422 for invalid sortBy value", async () => {
+    it('returns 422 for invalid sortBy value', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders?sortBy=invalidField"),
+        new Request('http://localhost/sales-orders?sortBy=invalidField'),
       )
 
       expect(res.status).toBe(422)
     })
   })
 
-  describe("POST /sales-orders", () => {
-    it("creates a sales order with customerId and returns 201", async () => {
+  describe('POST /sales-orders', () => {
+    it('creates a sales order with customerId and returns 201', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
+        new Request('http://localhost/sales-orders', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             customerId: MOCK_CUSTOMER_ID,
             warehouseId: MOCK_WAREHOUSE_ID,
@@ -213,15 +215,15 @@ describe("Sales Orders", () => {
       expect(Array.isArray(data.items)).toBe(true)
     })
 
-    it("creates a sales order with guest info and returns 201", async () => {
+    it('creates a sales order with guest info and returns 201', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
+        new Request('http://localhost/sales-orders', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             warehouseId: MOCK_WAREHOUSE_ID,
-            guestName: "Jane Guest",
-            guestEmail: "jane@example.com",
+            guestName: 'Jane Guest',
+            guestEmail: 'jane@example.com',
             items: [
               { variantId: MOCK_VARIANT_ID, quantity: 1, unitPrice: 10.0 },
             ],
@@ -232,17 +234,17 @@ describe("Sales Orders", () => {
       expect(res.status).toBe(201)
     })
 
-    it("accepts optional orderedAt, note, and shippingAddress", async () => {
+    it('accepts optional orderedAt, note, and shippingAddress', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
+        new Request('http://localhost/sales-orders', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             customerId: MOCK_CUSTOMER_ID,
             warehouseId: MOCK_WAREHOUSE_ID,
             orderedAt: new Date().toISOString(),
-            note: "Express shipping",
-            shippingAddress: { street: "123 Main St", city: "Jakarta" },
+            note: 'Express shipping',
+            shippingAddress: { street: '123 Main St', city: 'Jakarta' },
             items: [
               { variantId: MOCK_VARIANT_ID, quantity: 5, unitPrice: 10.0 },
             ],
@@ -253,11 +255,11 @@ describe("Sales Orders", () => {
       expect(res.status).toBe(201)
     })
 
-    it("returns 400 when neither customerId nor guestName is provided", async () => {
+    it('returns 400 when neither customerId nor guestName is provided', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
+        new Request('http://localhost/sales-orders', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             warehouseId: MOCK_WAREHOUSE_ID,
             items: [
@@ -269,14 +271,14 @@ describe("Sales Orders", () => {
 
       expect(res.status).toBe(400)
       const data = await res.json()
-      expect(data.message).toContain("customerId or guestName")
+      expect(data.message).toContain('customerId or guestName')
     })
 
-    it("returns 400 when warehouse not found", async () => {
+    it('returns 400 when warehouse not found', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
+        new Request('http://localhost/sales-orders', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             customerId: MOCK_CUSTOMER_ID,
             warehouseId: UNKNOWN_ID,
@@ -289,34 +291,32 @@ describe("Sales Orders", () => {
 
       expect(res.status).toBe(400)
       const data = await res.json()
-      expect(data.message).toContain("Warehouse not found")
+      expect(data.message).toContain('Warehouse not found')
     })
 
-    it("returns 400 when variant not found", async () => {
+    it('returns 400 when variant not found', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
+        new Request('http://localhost/sales-orders', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             customerId: MOCK_CUSTOMER_ID,
             warehouseId: MOCK_WAREHOUSE_ID,
-            items: [
-              { variantId: UNKNOWN_ID, quantity: 1, unitPrice: 25.0 },
-            ],
+            items: [{ variantId: UNKNOWN_ID, quantity: 1, unitPrice: 25.0 }],
           }),
         }),
       )
 
       expect(res.status).toBe(400)
       const data = await res.json()
-      expect(data.message).toContain("variants not found")
+      expect(data.message).toContain('variants not found')
     })
 
-    it("returns 422 when warehouseId is missing", async () => {
+    it('returns 422 when warehouseId is missing', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
+        new Request('http://localhost/sales-orders', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             customerId: MOCK_CUSTOMER_ID,
             items: [
@@ -329,11 +329,11 @@ describe("Sales Orders", () => {
       expect(res.status).toBe(422)
     })
 
-    it("returns 422 when items array is empty", async () => {
+    it('returns 422 when items array is empty', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
+        new Request('http://localhost/sales-orders', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             customerId: MOCK_CUSTOMER_ID,
             warehouseId: MOCK_WAREHOUSE_ID,
@@ -345,15 +345,17 @@ describe("Sales Orders", () => {
       expect(res.status).toBe(422)
     })
 
-    it("returns 422 when item quantity is zero", async () => {
+    it('returns 422 when item quantity is zero', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
+        new Request('http://localhost/sales-orders', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             customerId: MOCK_CUSTOMER_ID,
             warehouseId: MOCK_WAREHOUSE_ID,
-            items: [{ variantId: MOCK_VARIANT_ID, quantity: 0, unitPrice: 5.0 }],
+            items: [
+              { variantId: MOCK_VARIANT_ID, quantity: 0, unitPrice: 5.0 },
+            ],
           }),
         }),
       )
@@ -361,13 +363,13 @@ describe("Sales Orders", () => {
       expect(res.status).toBe(422)
     })
 
-    it("returns 422 when customerId is not a UUID", async () => {
+    it('returns 422 when customerId is not a UUID', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
+        new Request('http://localhost/sales-orders', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
-            customerId: "not-a-uuid",
+            customerId: 'not-a-uuid',
             warehouseId: MOCK_WAREHOUSE_ID,
             items: [
               { variantId: MOCK_VARIANT_ID, quantity: 1, unitPrice: 10.0 },
@@ -380,8 +382,8 @@ describe("Sales Orders", () => {
     })
   })
 
-  describe("GET /sales-orders/:id", () => {
-    it("returns a sales order when it exists", async () => {
+  describe('GET /sales-orders/:id', () => {
+    it('returns a sales order when it exists', async () => {
       const res = await app.handle(
         new Request(`http://localhost/sales-orders/${MOCK_SO_ID}`),
       )
@@ -394,7 +396,7 @@ describe("Sales Orders", () => {
       expect(Array.isArray(data.items)).toBe(true)
     })
 
-    it("returns 404 when sales order does not exist", async () => {
+    it('returns 404 when sales order does not exist', async () => {
       const res = await app.handle(
         new Request(`http://localhost/sales-orders/${UNKNOWN_ID}`),
       )
@@ -402,22 +404,22 @@ describe("Sales Orders", () => {
       expect(res.status).toBe(404)
     })
 
-    it("returns 422 for invalid UUID", async () => {
+    it('returns 422 for invalid UUID', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders/not-a-uuid"),
+        new Request('http://localhost/sales-orders/not-a-uuid'),
       )
 
       expect(res.status).toBe(422)
     })
   })
 
-  describe("PATCH /sales-orders/:id", () => {
-    it("updates a sales order and returns 200", async () => {
+  describe('PATCH /sales-orders/:id', () => {
+    it('updates a sales order and returns 200', async () => {
       const res = await app.handle(
         new Request(`http://localhost/sales-orders/${MOCK_SO_ID}`, {
-          method: "PATCH",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ status: "CONFIRMED" }),
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ status: 'CONFIRMED' }),
         }),
       )
 
@@ -426,25 +428,25 @@ describe("Sales Orders", () => {
       expect(data.id).toBe(MOCK_SO_ID)
     })
 
-    it("updates paymentStatus", async () => {
+    it('updates paymentStatus', async () => {
       const res = await app.handle(
         new Request(`http://localhost/sales-orders/${MOCK_SO_ID}`, {
-          method: "PATCH",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ paymentStatus: "PAID" }),
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ paymentStatus: 'PAID' }),
         }),
       )
 
       expect(res.status).toBe(200)
     })
 
-    it("updates shippingAddress", async () => {
+    it('updates shippingAddress', async () => {
       const res = await app.handle(
         new Request(`http://localhost/sales-orders/${MOCK_SO_ID}`, {
-          method: "PATCH",
-          headers: { "content-type": "application/json" },
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
-            shippingAddress: { street: "456 Oak Ave", city: "Bandung" },
+            shippingAddress: { street: '456 Oak Ave', city: 'Bandung' },
           }),
         }),
       )
@@ -452,36 +454,36 @@ describe("Sales Orders", () => {
       expect(res.status).toBe(200)
     })
 
-    it("returns 404 when sales order does not exist", async () => {
+    it('returns 404 when sales order does not exist', async () => {
       const res = await app.handle(
         new Request(`http://localhost/sales-orders/${UNKNOWN_ID}`, {
-          method: "PATCH",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ status: "CONFIRMED" }),
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ status: 'CONFIRMED' }),
         }),
       )
 
       expect(res.status).toBe(404)
     })
 
-    it("returns 422 for invalid status value", async () => {
+    it('returns 422 for invalid status value', async () => {
       const res = await app.handle(
         new Request(`http://localhost/sales-orders/${MOCK_SO_ID}`, {
-          method: "PATCH",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ status: "INVALID_STATUS" }),
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ status: 'INVALID_STATUS' }),
         }),
       )
 
       expect(res.status).toBe(422)
     })
 
-    it("returns 422 for invalid UUID", async () => {
+    it('returns 422 for invalid UUID', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders/not-a-uuid", {
-          method: "PATCH",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ status: "CONFIRMED" }),
+        new Request('http://localhost/sales-orders/not-a-uuid', {
+          method: 'PATCH',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ status: 'CONFIRMED' }),
         }),
       )
 
@@ -489,49 +491,49 @@ describe("Sales Orders", () => {
     })
   })
 
-  describe("DELETE /sales-orders/:id", () => {
-    it("deletes a sales order and returns 200", async () => {
+  describe('DELETE /sales-orders/:id', () => {
+    it('deletes a sales order and returns 200', async () => {
       const res = await app.handle(
         new Request(`http://localhost/sales-orders/${MOCK_SO_ID}`, {
-          method: "DELETE",
+          method: 'DELETE',
         }),
       )
 
       expect(res.status).toBe(200)
       const data = await res.json()
-      expect(data.message).toBe("Sales order deleted")
+      expect(data.message).toBe('Sales order deleted')
     })
 
-    it("returns 400 when order is not deletable", async () => {
+    it('returns 400 when order is not deletable', async () => {
       mockService.deleteSalesOrder.mockImplementationOnce(() =>
-        Promise.resolve({ error: "Cannot delete a confirmed sales order" }),
+        Promise.resolve({ error: 'Cannot delete a confirmed sales order' }),
       )
 
       const res = await app.handle(
         new Request(`http://localhost/sales-orders/${MOCK_SO_ID}`, {
-          method: "DELETE",
+          method: 'DELETE',
         }),
       )
 
       expect(res.status).toBe(400)
       const data = await res.json()
-      expect(data.message).toContain("Cannot delete")
+      expect(data.message).toContain('Cannot delete')
     })
 
-    it("returns 404 when sales order does not exist", async () => {
+    it('returns 404 when sales order does not exist', async () => {
       const res = await app.handle(
         new Request(`http://localhost/sales-orders/${UNKNOWN_ID}`, {
-          method: "DELETE",
+          method: 'DELETE',
         }),
       )
 
       expect(res.status).toBe(404)
     })
 
-    it("returns 422 for invalid UUID", async () => {
+    it('returns 422 for invalid UUID', async () => {
       const res = await app.handle(
-        new Request("http://localhost/sales-orders/not-a-uuid", {
-          method: "DELETE",
+        new Request('http://localhost/sales-orders/not-a-uuid', {
+          method: 'DELETE',
         }),
       )
 

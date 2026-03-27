@@ -1,4 +1,4 @@
-import { auth } from "@/integrations/auth";
+import { auth } from '@/integrations/auth'
 
 /**
  * API Keys service — wraps better-auth's api-key plugin endpoints.
@@ -21,7 +21,7 @@ export const apiKeysService = {
   ) {
     const result = await auth.api.createApiKey({
       body: {
-        configId: "default",
+        configId: 'default',
         userId,
         organizationId,
         name: data.name,
@@ -31,24 +31,24 @@ export const apiKeysService = {
         rateLimitTimeWindow: data.rateLimitTimeWindow,
         metadata: data.metadata,
       },
-    });
-    return result;
+    })
+    return result
   },
 
   async listApiKeys(headers: Headers, organizationId: string) {
     const result = await auth.api.listApiKeys({
       headers,
       query: { organizationId },
-    });
-    return result.apiKeys;
+    })
+    return result.apiKeys
   },
 
   async getApiKey(headers: Headers, organizationId: string, keyId: string) {
     const result = await auth.api.listApiKeys({
       headers,
       query: { organizationId },
-    });
-    return result.apiKeys.find((k) => k.id === keyId) ?? null;
+    })
+    return result.apiKeys.find((k) => k.id === keyId) ?? null
   },
 
   async updateApiKey(
@@ -65,15 +65,15 @@ export const apiKeysService = {
   ) {
     const result = await auth.api.updateApiKey({
       body: { keyId, userId, ...data },
-    });
-    return result;
+    })
+    return result
   },
 
   async deleteApiKey(headers: Headers, keyId: string) {
     const result = await auth.api.deleteApiKey({
       headers,
       body: { keyId },
-    });
-    return result;
+    })
+    return result
   },
-};
+}

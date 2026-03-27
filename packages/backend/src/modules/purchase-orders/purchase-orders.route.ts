@@ -1,15 +1,15 @@
-import { Elysia } from "elysia"
-import { z } from "zod"
-import { authPlugin } from "@/plugins/auth.plugin"
-import { purchaseOrdersService } from "./purchase-orders.service"
-import { errorResponse } from "@/common/error.response"
+import { Elysia } from 'elysia'
+import { z } from 'zod'
+import { authPlugin } from '@/plugins/auth.plugin'
+import { purchaseOrdersService } from './purchase-orders.service'
+import { errorResponse } from '@/common/error.response'
 import {
   paginationQuery,
   paginatedResponse,
   buildPaginationMeta,
   paginationToSkipTake,
   sortQuery,
-} from "@/common/pagination"
+} from '@/common/pagination'
 
 const purchaseOrderItemSchema = z.object({
   id: z.string(),
@@ -38,8 +38,15 @@ const purchaseOrderSchema = z.object({
     id: z.string(),
     name: z.string(),
   }),
-  status: z.enum(["PENDING", "CONFIRMED", "SHIPPED", "RECEIVED", "COMPLETED", "CANCELLED"]),
-  paymentStatus: z.enum(["UNPAID", "PARTIALLY_PAID", "PAID"]),
+  status: z.enum([
+    'PENDING',
+    'CONFIRMED',
+    'SHIPPED',
+    'RECEIVED',
+    'COMPLETED',
+    'CANCELLED',
+  ]),
+  paymentStatus: z.enum(['UNPAID', 'PARTIALLY_PAID', 'PAID']),
   orderedAt: z.iso.datetime().nullable(),
   receivedAt: z.iso.datetime().nullable(),
   note: z.string().nullable(),
@@ -64,9 +71,9 @@ const createPurchaseOrderDto = z.object({
 
 const updatePurchaseOrderDto = z.object({
   status: z
-    .enum(["PENDING", "CONFIRMED", "SHIPPED", "COMPLETED", "CANCELLED"])
+    .enum(['PENDING', 'CONFIRMED', 'SHIPPED', 'COMPLETED', 'CANCELLED'])
     .optional(),
-  paymentStatus: z.enum(["UNPAID", "PARTIALLY_PAID", "PAID"]).optional(),
+  paymentStatus: z.enum(['UNPAID', 'PARTIALLY_PAID', 'PAID']).optional(),
   supplierId: z.string().uuid().optional(),
   warehouseId: z.string().uuid().optional(),
   orderedAt: z.iso.datetime().nullable().optional(),
@@ -83,12 +90,19 @@ const receivePurchaseOrderDto = z.object({
 })
 
 const listPurchaseOrdersQuery = paginationQuery
-  .extend(sortQuery(["createdAt", "updatedAt", "orderedAt"]).shape)
+  .extend(sortQuery(['createdAt', 'updatedAt', 'orderedAt']).shape)
   .extend({
     status: z
-      .enum(["PENDING", "CONFIRMED", "SHIPPED", "RECEIVED", "COMPLETED", "CANCELLED"])
+      .enum([
+        'PENDING',
+        'CONFIRMED',
+        'SHIPPED',
+        'RECEIVED',
+        'COMPLETED',
+        'CANCELLED',
+      ])
       .optional(),
-    paymentStatus: z.enum(["UNPAID", "PARTIALLY_PAID", "PAID"]).optional(),
+    paymentStatus: z.enum(['UNPAID', 'PARTIALLY_PAID', 'PAID']).optional(),
     supplierId: z.string().uuid().optional(),
     warehouseId: z.string().uuid().optional(),
   })
@@ -110,8 +124,14 @@ const serializePurchaseOrder = (po: {
   supplier: { id: string; name: string }
   warehouseId: string
   warehouse: { id: string; name: string }
-  status: "PENDING" | "CONFIRMED" | "SHIPPED" | "RECEIVED" | "COMPLETED" | "CANCELLED"
-  paymentStatus: "UNPAID" | "PARTIALLY_PAID" | "PAID"
+  status:
+    | 'PENDING'
+    | 'CONFIRMED'
+    | 'SHIPPED'
+    | 'RECEIVED'
+    | 'COMPLETED'
+    | 'CANCELLED'
+  paymentStatus: 'UNPAID' | 'PARTIALLY_PAID' | 'PAID'
   orderedAt: Date | null
   receivedAt: Date | null
   note: string | null
@@ -139,25 +159,38 @@ const serializePurchaseOrder = (po: {
 })
 
 export const purchaseOrdersRoute = new Elysia({
-  prefix: "/purchase-orders",
-  tags: ["Purchase Orders"],
+  prefix: '/purchase-orders',
+  tags: ['Purchase Orders'],
 })
   .use(authPlugin)
   .get(
-    "/",
+    '/',
     async ({ organization, query }) => {
-      const { page, pageSize, sortBy, sortOrder, status, paymentStatus, supplierId, warehouseId } =
-        query
-      const { skip, take } = paginationToSkipTake(page, pageSize)
-      const { data, total } = await purchaseOrdersService.listPurchaseOrders(organization.id, {
-        skip,
-        take,
+      const {
+        page,
+        pageSize,
+        sortBy,
+        sortOrder,
         status,
         paymentStatus,
         supplierId,
         warehouseId,
-        orderBy: sortBy ? { field: sortBy, order: sortOrder ?? "desc" } : undefined,
-      })
+      } = query
+      const { skip, take } = paginationToSkipTake(page, pageSize)
+      const { data, total } = await purchaseOrdersService.listPurchaseOrders(
+        organization.id,
+        {
+          skip,
+          take,
+          status,
+          paymentStatus,
+          supplierId,
+          warehouseId,
+          orderBy: sortBy
+            ? { field: sortBy, order: sortOrder ?? 'desc' }
+            : undefined,
+        },
+      )
       return {
         data: data.map(serializePurchaseOrder),
         meta: buildPaginationMeta(total, page, pageSize),
@@ -166,77 +199,90 @@ export const purchaseOrdersRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { purchaseOrder: ["view"] },
+      requirePermission: { purchaseOrder: ['view'] },
       query: listPurchaseOrdersQuery,
       response: {
         200: paginatedResponse(purchaseOrderSchema),
       },
       detail: {
-        summary: "List purchase orders",
+        summary: 'List purchase orders',
         description:
-          "Retrieves a paginated list of purchase orders for the authenticated organization. Supports filtering by status, payment status, supplier, and warehouse.",
+          'Retrieves a paginated list of purchase orders for the authenticated organization. Supports filtering by status, payment status, supplier, and warehouse.',
       },
     },
   )
   .post(
-    "/",
+    '/',
     async ({ organization, body, status }) => {
-      const order = await purchaseOrdersService.createPurchaseOrder(organization.id, {
-        ...body,
-        orderedAt: body.orderedAt ? new Date(body.orderedAt) : undefined,
-      })
+      const order = await purchaseOrdersService.createPurchaseOrder(
+        organization.id,
+        {
+          ...body,
+          orderedAt: body.orderedAt ? new Date(body.orderedAt) : undefined,
+        },
+      )
       return status(201, serializePurchaseOrder(order))
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { purchaseOrder: ["create"] },
+      requirePermission: { purchaseOrder: ['create'] },
       body: createPurchaseOrderDto,
       response: {
         201: purchaseOrderSchema,
       },
       detail: {
-        summary: "Create a purchase order",
+        summary: 'Create a purchase order',
         description:
-          "Creates a new purchase order with line items for the authenticated organization.",
+          'Creates a new purchase order with line items for the authenticated organization.',
       },
     },
   )
   .get(
-    "/:id",
+    '/:id',
     async ({ organization, params, status }) => {
-      const order = await purchaseOrdersService.getPurchaseOrder(organization.id, params.id)
-      if (!order) return status(404, { message: "Purchase order not found" })
+      const order = await purchaseOrdersService.getPurchaseOrder(
+        organization.id,
+        params.id,
+      )
+      if (!order) return status(404, { message: 'Purchase order not found' })
       return serializePurchaseOrder(order)
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { purchaseOrder: ["view"] },
+      requirePermission: { purchaseOrder: ['view'] },
       params: purchaseOrderIdParam,
       response: {
         200: purchaseOrderSchema,
         404: errorResponse,
       },
       detail: {
-        summary: "Get a purchase order",
-        description: "Retrieves the details of a specific purchase order by its ID, including all line items.",
+        summary: 'Get a purchase order',
+        description:
+          'Retrieves the details of a specific purchase order by its ID, including all line items.',
       },
     },
   )
   .patch(
-    "/:id",
+    '/:id',
     async ({ organization, params, body, status }) => {
       const result = await purchaseOrdersService.updatePurchaseOrder(
         organization.id,
         params.id,
         {
           ...body,
-          orderedAt: body.orderedAt !== undefined ? (body.orderedAt ? new Date(body.orderedAt) : null) : undefined,
+          orderedAt:
+            body.orderedAt !== undefined
+              ? body.orderedAt
+                ? new Date(body.orderedAt)
+                : null
+              : undefined,
         },
       )
-      if ("error" in result) {
-        if (result.error === "not_found") return status(404, { message: "Purchase order not found" })
+      if ('error' in result) {
+        if (result.error === 'not_found')
+          return status(404, { message: 'Purchase order not found' })
         return status(400, { message: result.error })
       }
       return serializePurchaseOrder(result)
@@ -244,7 +290,7 @@ export const purchaseOrdersRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { purchaseOrder: ["update"] },
+      requirePermission: { purchaseOrder: ['update'] },
       params: purchaseOrderIdParam,
       body: updatePurchaseOrderDto,
       response: {
@@ -253,31 +299,32 @@ export const purchaseOrdersRoute = new Elysia({
         404: errorResponse,
       },
       detail: {
-        summary: "Update a purchase order",
+        summary: 'Update a purchase order',
         description:
-          "Updates the status, payment status, or other fields of an existing purchase order. RECEIVED status cannot be set here — use the /receive endpoint. COMPLETED requires all items to be fully received.",
+          'Updates the status, payment status, or other fields of an existing purchase order. RECEIVED status cannot be set here — use the /receive endpoint. COMPLETED requires all items to be fully received.',
       },
     },
   )
   .post(
-    "/:id/receive",
+    '/:id/receive',
     async ({ organization, params, body, status }) => {
       const result = await purchaseOrdersService.receivePurchaseOrder(
         organization.id,
         params.id,
         body.items,
       )
-      if (result && "error" in result) {
-        if (result.error === "not_found") return status(404, { message: "Purchase order not found" })
+      if (result && 'error' in result) {
+        if (result.error === 'not_found')
+          return status(404, { message: 'Purchase order not found' })
         return status(400, { message: result.error })
       }
-      if (!result) return status(404, { message: "Purchase order not found" })
+      if (!result) return status(404, { message: 'Purchase order not found' })
       return serializePurchaseOrder(result)
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { purchaseOrder: ["receive"] },
+      requirePermission: { purchaseOrder: ['receive'] },
       params: purchaseOrderIdParam,
       body: receivePurchaseOrderDto,
       response: {
@@ -286,26 +333,30 @@ export const purchaseOrdersRoute = new Elysia({
         404: errorResponse,
       },
       detail: {
-        summary: "Receive a purchase order",
+        summary: 'Receive a purchase order',
         description:
-          "Marks items as received on a purchase order. Only allowed when status is CONFIRMED or SHIPPED. Updates received quantities and creates stock-in movements.",
+          'Marks items as received on a purchase order. Only allowed when status is CONFIRMED or SHIPPED. Updates received quantities and creates stock-in movements.',
       },
     },
   )
   .delete(
-    "/:id",
+    '/:id',
     async ({ organization, params, status }) => {
-      const result = await purchaseOrdersService.deletePurchaseOrder(organization.id, params.id)
-      if ("error" in result) {
-        if (result.error === "not_found") return status(404, { message: "Purchase order not found" })
+      const result = await purchaseOrdersService.deletePurchaseOrder(
+        organization.id,
+        params.id,
+      )
+      if ('error' in result) {
+        if (result.error === 'not_found')
+          return status(404, { message: 'Purchase order not found' })
         return status(400, { message: result.error })
       }
-      return status(200, { message: "Purchase order deleted" })
+      return status(200, { message: 'Purchase order deleted' })
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { purchaseOrder: ["delete"] },
+      requirePermission: { purchaseOrder: ['delete'] },
       params: purchaseOrderIdParam,
       response: {
         200: errorResponse,
@@ -313,8 +364,9 @@ export const purchaseOrdersRoute = new Elysia({
         404: errorResponse,
       },
       detail: {
-        summary: "Delete a purchase order",
-        description: "Permanently deletes a purchase order. Only allowed when status is PENDING.",
+        summary: 'Delete a purchase order',
+        description:
+          'Permanently deletes a purchase order. Only allowed when status is PENDING.',
       },
     },
   )

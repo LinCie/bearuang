@@ -1,15 +1,15 @@
-import { betterAuth } from "better-auth";
-import { organization } from "better-auth/plugins";
-import { apiKey } from "@better-auth/api-key";
+import { betterAuth } from 'better-auth'
+import { organization } from 'better-auth/plugins'
+import { apiKey } from '@better-auth/api-key'
 
-import { prisma } from "./prisma";
-import { prismaAdapter } from "better-auth/adapters/prisma";
-import { ac, owner, admin, member } from "@/libraries/permissions";
+import { prisma } from './prisma'
+import { prismaAdapter } from 'better-auth/adapters/prisma'
+import { ac, owner, admin, member } from '@/libraries/permissions'
 
 export const auth = betterAuth({
-  basePath: "/auth",
-  database: prismaAdapter(prisma, { provider: "postgresql" }),
-  trustedOrigins: ["*"],
+  basePath: '/auth',
+  database: prismaAdapter(prisma, { provider: 'postgresql' }),
+  trustedOrigins: ['*'],
   emailAndPassword: { enabled: true },
   plugins: [
     organization({
@@ -18,9 +18,9 @@ export const auth = betterAuth({
       dynamicAccessControl: { enabled: true },
     }),
     apiKey({
-      references: "organization",
+      references: 'organization',
       enableSessionForAPIKeys: true,
-      defaultPrefix: "bk_",
+      defaultPrefix: 'bk_',
       rateLimit: {
         enabled: true,
         timeWindow: 1000 * 60 * 60,
@@ -28,4 +28,4 @@ export const auth = betterAuth({
       },
     }),
   ],
-});
+})

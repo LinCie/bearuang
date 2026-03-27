@@ -1,4 +1,4 @@
-import { prisma } from "@/integrations/prisma"
+import { prisma } from '@/integrations/prisma'
 
 export const warehousesService = {
   async listWarehouses(
@@ -7,15 +7,20 @@ export const warehousesService = {
       skip?: number
       take?: number
       search?: string
-      orderBy?: { field: "name" | "createdAt" | "updatedAt"; order: "asc" | "desc" }
+      orderBy?: {
+        field: 'name' | 'createdAt' | 'updatedAt'
+        order: 'asc' | 'desc'
+      }
     },
   ) {
     const where = {
       organizationId,
       ...(params?.search && {
         OR: [
-          { name: { contains: params.search, mode: "insensitive" as const } },
-          { address: { contains: params.search, mode: "insensitive" as const } },
+          { name: { contains: params.search, mode: 'insensitive' as const } },
+          {
+            address: { contains: params.search, mode: 'insensitive' as const },
+          },
         ],
       }),
     }
@@ -26,7 +31,7 @@ export const warehousesService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: "desc" },
+          : { createdAt: 'desc' },
       }),
       prisma.warehouse.count({ where }),
     ])

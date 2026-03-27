@@ -26,9 +26,7 @@ const mockService = {
   confirmUpload: mock((orgId: string, id: string) =>
     Promise.resolve(id === MOCK_MEDIA_ID ? mockMedia : null),
   ),
-  listMedia: mock(() =>
-    Promise.resolve({ data: [mockMedia], total: 1 }),
-  ),
+  listMedia: mock(() => Promise.resolve({ data: [mockMedia], total: 1 })),
   getMedia: mock((orgId: string, id: string) =>
     Promise.resolve(id === MOCK_MEDIA_ID ? mockMedia : null),
   ),

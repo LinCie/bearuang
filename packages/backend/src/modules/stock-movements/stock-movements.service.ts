@@ -1,5 +1,5 @@
-import { prisma } from "@/integrations/prisma"
-import { StockMovementType } from "@/generated/prisma/client"
+import { prisma } from '@/integrations/prisma'
+import { StockMovementType } from '@/generated/prisma/client'
 
 export const stockMovementService = {
   async listMovements(
@@ -13,7 +13,10 @@ export const stockMovementService = {
       type?: StockMovementType
       referenceId?: string
       referenceType?: string
-      orderBy?: { field: "createdAt" | "quantity" | "type"; order: "asc" | "desc" }
+      orderBy?: {
+        field: 'createdAt' | 'quantity' | 'type'
+        order: 'asc' | 'desc'
+      }
     },
   ) {
     const where = {
@@ -25,9 +28,17 @@ export const stockMovementService = {
       ...(params?.referenceType && { referenceType: params.referenceType }),
       ...(params?.search && {
         OR: [
-          { note: { contains: params.search, mode: "insensitive" as const } },
-          { variant: { name: { contains: params.search, mode: "insensitive" as const } } },
-          { variant: { sku: { contains: params.search, mode: "insensitive" as const } } },
+          { note: { contains: params.search, mode: 'insensitive' as const } },
+          {
+            variant: {
+              name: { contains: params.search, mode: 'insensitive' as const },
+            },
+          },
+          {
+            variant: {
+              sku: { contains: params.search, mode: 'insensitive' as const },
+            },
+          },
         ],
       }),
     }
@@ -53,7 +64,7 @@ export const stockMovementService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: "desc" },
+          : { createdAt: 'desc' },
       }),
       prisma.stockMovement.count({ where }),
     ])

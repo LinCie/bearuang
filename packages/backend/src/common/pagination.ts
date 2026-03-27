@@ -1,6 +1,6 @@
-import { z } from "zod"
+import { z } from 'zod'
 
-export const sortOrder = z.enum(["asc", "desc"]).default("desc")
+export const sortOrder = z.enum(['asc', 'desc']).default('desc')
 
 export type SortOrder = z.infer<typeof sortOrder>
 

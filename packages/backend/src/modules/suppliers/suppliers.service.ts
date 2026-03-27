@@ -1,4 +1,4 @@
-import { prisma } from "@/integrations/prisma"
+import { prisma } from '@/integrations/prisma'
 
 export const suppliersService = {
   async listSuppliers(
@@ -8,7 +8,10 @@ export const suppliersService = {
       take?: number
       search?: string
       isActive?: boolean
-      orderBy?: { field: "name" | "createdAt" | "updatedAt"; order: "asc" | "desc" }
+      orderBy?: {
+        field: 'name' | 'createdAt' | 'updatedAt'
+        order: 'asc' | 'desc'
+      }
     },
   ) {
     const where = {
@@ -16,10 +19,12 @@ export const suppliersService = {
       ...(params?.isActive !== undefined && { isActive: params.isActive }),
       ...(params?.search && {
         OR: [
-          { name: { contains: params.search, mode: "insensitive" as const } },
-          { email: { contains: params.search, mode: "insensitive" as const } },
-          { phone: { contains: params.search, mode: "insensitive" as const } },
-          { address: { contains: params.search, mode: "insensitive" as const } },
+          { name: { contains: params.search, mode: 'insensitive' as const } },
+          { email: { contains: params.search, mode: 'insensitive' as const } },
+          { phone: { contains: params.search, mode: 'insensitive' as const } },
+          {
+            address: { contains: params.search, mode: 'insensitive' as const },
+          },
         ],
       }),
     }
@@ -30,7 +35,7 @@ export const suppliersService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: "desc" },
+          : { createdAt: 'desc' },
       }),
       prisma.supplier.count({ where }),
     ])

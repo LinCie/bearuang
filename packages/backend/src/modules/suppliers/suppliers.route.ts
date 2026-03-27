@@ -1,15 +1,15 @@
-import { Elysia } from "elysia";
-import { z } from "zod";
-import { authPlugin } from "@/plugins/auth.plugin";
-import { suppliersService } from "./suppliers.service";
-import { errorResponse } from "@/common/error.response";
+import { Elysia } from 'elysia'
+import { z } from 'zod'
+import { authPlugin } from '@/plugins/auth.plugin'
+import { suppliersService } from './suppliers.service'
+import { errorResponse } from '@/common/error.response'
 import {
   paginationQuery,
   paginatedResponse,
   buildPaginationMeta,
   paginationToSkipTake,
   sortQuery,
-} from "@/common/pagination";
+} from '@/common/pagination'
 
 export const supplierSchema = z.object({
   id: z.string(),
@@ -21,14 +21,14 @@ export const supplierSchema = z.object({
   isActive: z.boolean(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
-});
+})
 
 export const createSupplierDto = z.object({
   name: z.string().min(1),
   email: z.string().email().optional(),
   phone: z.string().optional(),
   address: z.string().optional(),
-});
+})
 
 export const updateSupplierDto = z.object({
   name: z.string().min(1).optional(),
@@ -36,18 +36,18 @@ export const updateSupplierDto = z.object({
   phone: z.string().nullable().optional(),
   address: z.string().nullable().optional(),
   isActive: z.boolean().optional(),
-});
+})
 
 export const listSuppliersQuery = paginationQuery
-  .extend(sortQuery(["name", "createdAt", "updatedAt"]).shape)
+  .extend(sortQuery(['name', 'createdAt', 'updatedAt']).shape)
   .extend({
     search: z.string().optional(),
     isActive: z
       .string()
-      .transform((v) => v === "true")
+      .transform((v) => v === 'true')
       .pipe(z.boolean())
       .optional(),
-  });
+  })
 
 export type Supplier = z.infer<typeof supplierSchema>
 export type CreateSupplierInput = z.infer<typeof createSupplierDto>
@@ -56,34 +56,34 @@ export type ListSuppliersQuery = z.infer<typeof listSuppliersQuery>
 
 const supplierIdParam = z.object({
   id: z.string().uuid(),
-});
+})
 
 const serializeSupplier = (s: {
-  id: string;
-  organizationId: string;
-  name: string;
-  email: string | null;
-  phone: string | null;
-  address: string | null;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  organizationId: string
+  name: string
+  email: string | null
+  phone: string | null
+  address: string | null
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
 }) => ({
   ...s,
   createdAt: s.createdAt.toISOString(),
   updatedAt: s.updatedAt.toISOString(),
-});
+})
 
 export const suppliersRoute = new Elysia({
-  prefix: "/suppliers",
-  tags: ["Suppliers"],
+  prefix: '/suppliers',
+  tags: ['Suppliers'],
 })
   .use(authPlugin)
   .get(
-    "/",
+    '/',
     async ({ organization, query }) => {
-      const { page, pageSize, search, isActive, sortBy, sortOrder } = query;
-      const { skip, take } = paginationToSkipTake(page, pageSize);
+      const { page, pageSize, search, isActive, sortBy, sortOrder } = query
+      const { skip, take } = paginationToSkipTake(page, pageSize)
       const { data, total } = await suppliersService.listSuppliers(
         organization.id,
         {
@@ -92,94 +92,94 @@ export const suppliersRoute = new Elysia({
           search,
           isActive,
           orderBy: sortBy
-            ? { field: sortBy, order: sortOrder ?? "desc" }
+            ? { field: sortBy, order: sortOrder ?? 'desc' }
             : undefined,
         },
-      );
+      )
       return {
         data: data.map(serializeSupplier),
         meta: buildPaginationMeta(total, page, pageSize),
-      };
+      }
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { supplier: ["view"] },
+      requirePermission: { supplier: ['view'] },
       query: listSuppliersQuery,
       response: {
         200: paginatedResponse(supplierSchema),
       },
       detail: {
-        summary: "List suppliers",
+        summary: 'List suppliers',
         description:
-          "Retrieves a paginated list of suppliers for the authenticated organization. Supports filtering by active status and sorting.",
+          'Retrieves a paginated list of suppliers for the authenticated organization. Supports filtering by active status and sorting.',
       },
     },
   )
   .post(
-    "/",
+    '/',
     async ({ organization, body, status }) => {
       const supplier = await suppliersService.createSupplier(
         organization.id,
         body,
-      );
-      return status(201, serializeSupplier(supplier));
+      )
+      return status(201, serializeSupplier(supplier))
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { supplier: ["create"] },
+      requirePermission: { supplier: ['create'] },
       body: createSupplierDto,
       response: {
         201: supplierSchema,
       },
       detail: {
-        summary: "Create a supplier",
+        summary: 'Create a supplier',
         description:
-          "Creates a new supplier for the authenticated organization.",
+          'Creates a new supplier for the authenticated organization.',
       },
     },
   )
   .get(
-    "/:id",
+    '/:id',
     async ({ organization, params, status }) => {
       const supplier = await suppliersService.getSupplier(
         organization.id,
         params.id,
-      );
-      if (!supplier) return status(404, { message: "Supplier not found" });
-      return serializeSupplier(supplier);
+      )
+      if (!supplier) return status(404, { message: 'Supplier not found' })
+      return serializeSupplier(supplier)
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { supplier: ["view"] },
+      requirePermission: { supplier: ['view'] },
       params: supplierIdParam,
       response: {
         200: supplierSchema,
         404: errorResponse,
       },
       detail: {
-        summary: "Get a supplier",
-        description: "Retrieves the details of a specific supplier by its ID.",
+        summary: 'Get a supplier',
+        description: 'Retrieves the details of a specific supplier by its ID.',
       },
     },
   )
   .patch(
-    "/:id",
+    '/:id',
     async ({ organization, params, body, status }) => {
       const supplier = await suppliersService.updateSupplier(
         organization.id,
         params.id,
         body,
-      );
-      if (!supplier) return status(404, { message: "Supplier not found" });
-      return serializeSupplier(supplier);
+      )
+      if (!supplier) return status(404, { message: 'Supplier not found' })
+      return serializeSupplier(supplier)
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { supplier: ["update"] },
+      requirePermission: { supplier: ['update'] },
       params: supplierIdParam,
       body: updateSupplierDto,
       response: {
@@ -187,33 +187,33 @@ export const suppliersRoute = new Elysia({
         404: errorResponse,
       },
       detail: {
-        summary: "Update a supplier",
+        summary: 'Update a supplier',
         description: "Updates an existing supplier's details.",
       },
     },
   )
   .delete(
-    "/:id",
+    '/:id',
     async ({ organization, params, status }) => {
       const deleted = await suppliersService.deleteSupplier(
         organization.id,
         params.id,
-      );
-      if (!deleted) return status(404, { message: "Supplier not found" });
-      return status(200, { message: "Supplier deleted" });
+      )
+      if (!deleted) return status(404, { message: 'Supplier not found' })
+      return status(200, { message: 'Supplier deleted' })
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { supplier: ["delete"] },
+      requirePermission: { supplier: ['delete'] },
       params: supplierIdParam,
       response: {
         200: errorResponse,
         404: errorResponse,
       },
       detail: {
-        summary: "Delete a supplier",
-        description: "Permanently deletes a supplier by its ID.",
+        summary: 'Delete a supplier',
+        description: 'Permanently deletes a supplier by its ID.',
       },
     },
-  );
+  )

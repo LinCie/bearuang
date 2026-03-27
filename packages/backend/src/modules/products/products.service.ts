@@ -1,4 +1,4 @@
-import { prisma } from "@/integrations/prisma";
+import { prisma } from '@/integrations/prisma'
 
 export const productsService = {
   async listProducts(
@@ -7,7 +7,10 @@ export const productsService = {
       skip?: number
       take?: number
       search?: string
-      orderBy?: { field: "name" | "createdAt" | "updatedAt"; order: "asc" | "desc" }
+      orderBy?: {
+        field: 'name' | 'createdAt' | 'updatedAt'
+        order: 'asc' | 'desc'
+      }
     },
   ) {
     const where = {
@@ -15,8 +18,13 @@ export const productsService = {
       deletedAt: null,
       ...(params?.search && {
         OR: [
-          { name: { contains: params.search, mode: "insensitive" as const } },
-          { description: { contains: params.search, mode: "insensitive" as const } },
+          { name: { contains: params.search, mode: 'insensitive' as const } },
+          {
+            description: {
+              contains: params.search,
+              mode: 'insensitive' as const,
+            },
+          },
         ],
       }),
     }
@@ -28,7 +36,7 @@ export const productsService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: "desc" },
+          : { createdAt: 'desc' },
       }),
       prisma.product.count({ where }),
     ])
@@ -41,7 +49,10 @@ export const productsService = {
       skip?: number
       take?: number
       search?: string
-      orderBy?: { field: "name" | "createdAt" | "updatedAt"; order: "asc" | "desc" }
+      orderBy?: {
+        field: 'name' | 'createdAt' | 'updatedAt'
+        order: 'asc' | 'desc'
+      }
     },
   ) {
     const where = {
@@ -49,8 +60,13 @@ export const productsService = {
       deletedAt: { not: null },
       ...(params?.search && {
         OR: [
-          { name: { contains: params.search, mode: "insensitive" as const } },
-          { description: { contains: params.search, mode: "insensitive" as const } },
+          { name: { contains: params.search, mode: 'insensitive' as const } },
+          {
+            description: {
+              contains: params.search,
+              mode: 'insensitive' as const,
+            },
+          },
         ],
       }),
     }
@@ -62,7 +78,7 @@ export const productsService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: "desc" },
+          : { createdAt: 'desc' },
       }),
       prisma.product.count({ where }),
     ])
@@ -73,32 +89,42 @@ export const productsService = {
     return prisma.product.findFirst({
       where: { id, organizationId, deletedAt: null },
       include: { variants: { where: { deletedAt: null } } },
-    });
+    })
   },
 
   async createProduct(
     organizationId: string,
-    data: { name: string; slug: string; description?: string; isActive?: boolean },
+    data: {
+      name: string
+      slug: string
+      description?: string
+      isActive?: boolean
+    },
   ) {
     return prisma.product.create({
       data: { ...data, organizationId },
       include: { variants: true },
-    });
+    })
   },
 
   async updateProduct(
     organizationId: string,
     id: string,
-    data: { name?: string; slug?: string; description?: string; isActive?: boolean },
+    data: {
+      name?: string
+      slug?: string
+      description?: string
+      isActive?: boolean
+    },
   ) {
     return prisma.product.updateMany({
       where: { id, organizationId, deletedAt: null },
       data,
-    });
+    })
   },
 
   async deleteProduct(organizationId: string, id: string) {
-    const now = new Date();
+    const now = new Date()
 
     await prisma.$transaction([
       prisma.productVariant.updateMany({
@@ -109,7 +135,7 @@ export const productsService = {
         where: { id, organizationId, deletedAt: null },
         data: { deletedAt: now },
       }),
-    ]);
+    ])
   },
 
   async restoreProduct(organizationId: string, id: string) {
@@ -122,6 +148,6 @@ export const productsService = {
         where: { productId: id, organizationId, deletedAt: { not: null } },
         data: { deletedAt: null },
       }),
-    ]);
+    ])
   },
-};
+}

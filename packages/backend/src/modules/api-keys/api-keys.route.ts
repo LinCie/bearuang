@@ -1,8 +1,8 @@
-import { Elysia } from "elysia";
-import { z } from "zod";
-import { authPlugin } from "@/plugins/auth.plugin";
-import { apiKeysService } from "./api-keys.service";
-import { errorResponse } from "@/common/error.response";
+import { Elysia } from 'elysia'
+import { z } from 'zod'
+import { authPlugin } from '@/plugins/auth.plugin'
+import { apiKeysService } from './api-keys.service'
+import { errorResponse } from '@/common/error.response'
 
 const apiKeySchema = z.object({
   id: z.string(),
@@ -19,11 +19,11 @@ const apiKeySchema = z.object({
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
   metadata: z.record(z.string(), z.unknown()).nullable(),
-});
+})
 
 const apiKeyWithSecretSchema = apiKeySchema.extend({
   key: z.string(),
-});
+})
 
 const createApiKeyDto = z.object({
   name: z.string().min(1).max(64),
@@ -32,7 +32,7 @@ const createApiKeyDto = z.object({
   rateLimitMax: z.number().positive().optional(),
   rateLimitTimeWindow: z.number().positive().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
-});
+})
 
 const updateApiKeyDto = z.object({
   name: z.string().min(1).max(64).optional(),
@@ -41,13 +41,13 @@ const updateApiKeyDto = z.object({
   rateLimitMax: z.number().positive().optional(),
   rateLimitTimeWindow: z.number().positive().optional(),
   metadata: z.record(z.string(), z.unknown()).nullable().optional(),
-});
+})
 
 const apiKeyIdParam = z.object({
   id: z.string(),
-});
+})
 
-type ApiKey = Record<string, unknown>;
+type ApiKey = Record<string, unknown>
 
 const serialize = (key: ApiKey) => ({
   id: key.id as string,
@@ -68,97 +68,112 @@ const serialize = (key: ApiKey) => ({
   createdAt: new Date(key.createdAt as string | number).toISOString(),
   updatedAt: new Date(key.updatedAt as string | number).toISOString(),
   metadata: (key.metadata as Record<string, unknown> | null) ?? null,
-});
+})
 
 const serializeWithSecret = (key: ApiKey) => ({
   ...serialize(key),
   key: key.key as string,
-});
+})
 
 export const apiKeysRoute = new Elysia({
-  prefix: "/api-keys",
-  tags: ["API Keys"],
+  prefix: '/api-keys',
+  tags: ['API Keys'],
 })
   .use(authPlugin)
   .post(
-    "/",
+    '/',
     async ({ user, organization, body }) => {
-      const key = await apiKeysService.createApiKey(user.id, organization.id, body);
-      return serializeWithSecret(key as unknown as ApiKey);
+      const key = await apiKeysService.createApiKey(
+        user.id,
+        organization.id,
+        body,
+      )
+      return serializeWithSecret(key as unknown as ApiKey)
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { apiKey: ["create"] },
+      requirePermission: { apiKey: ['create'] },
       body: createApiKeyDto,
       response: {
         200: apiKeyWithSecretSchema,
       },
       detail: {
-        summary: "Create an API key",
+        summary: 'Create an API key',
         description:
-          "Creates a new API key for the authenticated organization with scoped permissions.",
+          'Creates a new API key for the authenticated organization with scoped permissions.',
       },
     },
   )
   .get(
-    "/",
+    '/',
     async ({ organization, request }) => {
-      const keys = await apiKeysService.listApiKeys(request.headers, organization.id);
-      return (keys as unknown as ApiKey[]).map(serialize);
+      const keys = await apiKeysService.listApiKeys(
+        request.headers,
+        organization.id,
+      )
+      return (keys as unknown as ApiKey[]).map(serialize)
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { apiKey: ["read"] },
+      requirePermission: { apiKey: ['read'] },
       response: {
         200: z.array(apiKeySchema),
       },
       detail: {
-        summary: "List API keys",
+        summary: 'List API keys',
         description:
-          "Retrieves all API keys belonging to the authenticated organization.",
+          'Retrieves all API keys belonging to the authenticated organization.',
       },
     },
   )
   .get(
-    "/:id",
+    '/:id',
     async ({ organization, params, status, request }) => {
-      const key = await apiKeysService.getApiKey(request.headers, organization.id, params.id);
-      if (!key) return status(404, { message: "API key not found" });
-      return serialize(key as unknown as ApiKey);
+      const key = await apiKeysService.getApiKey(
+        request.headers,
+        organization.id,
+        params.id,
+      )
+      if (!key) return status(404, { message: 'API key not found' })
+      return serialize(key as unknown as ApiKey)
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { apiKey: ["read"] },
+      requirePermission: { apiKey: ['read'] },
       params: apiKeyIdParam,
       response: {
         200: apiKeySchema,
         404: errorResponse,
       },
       detail: {
-        summary: "Get an API key",
-        description: "Retrieves the details of a specific API key by its ID.",
+        summary: 'Get an API key',
+        description: 'Retrieves the details of a specific API key by its ID.',
       },
     },
   )
   .patch(
-    "/:id",
+    '/:id',
     async ({ user, organization, params, body, status, request }) => {
       const existing = await apiKeysService.getApiKey(
         request.headers,
         organization.id,
         params.id,
-      );
-      if (!existing) return status(404, { message: "API key not found" });
-      const updated = await apiKeysService.updateApiKey(user.id, params.id, body);
-      return serialize(updated as unknown as ApiKey);
+      )
+      if (!existing) return status(404, { message: 'API key not found' })
+      const updated = await apiKeysService.updateApiKey(
+        user.id,
+        params.id,
+        body,
+      )
+      return serialize(updated as unknown as ApiKey)
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { apiKey: ["update"] },
+      requirePermission: { apiKey: ['update'] },
       params: apiKeyIdParam,
       body: updateApiKeyDto,
       response: {
@@ -166,36 +181,36 @@ export const apiKeysRoute = new Elysia({
         404: errorResponse,
       },
       detail: {
-        summary: "Update an API key",
+        summary: 'Update an API key',
         description:
-          "Updates the details of an existing API key (name, enabled, permissions, rate limit).",
+          'Updates the details of an existing API key (name, enabled, permissions, rate limit).',
       },
     },
   )
   .delete(
-    "/:id",
+    '/:id',
     async ({ organization, params, status, request }) => {
       const existing = await apiKeysService.getApiKey(
         request.headers,
         organization.id,
         params.id,
-      );
-      if (!existing) return status(404, { message: "API key not found" });
-      await apiKeysService.deleteApiKey(request.headers, params.id);
-      return status(200, { message: "API key deleted" });
+      )
+      if (!existing) return status(404, { message: 'API key not found' })
+      await apiKeysService.deleteApiKey(request.headers, params.id)
+      return status(200, { message: 'API key deleted' })
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { apiKey: ["delete"] },
+      requirePermission: { apiKey: ['delete'] },
       params: apiKeyIdParam,
       response: {
         200: errorResponse,
         404: errorResponse,
       },
       detail: {
-        summary: "Delete an API key",
-        description: "Revokes and deletes an API key by its ID.",
+        summary: 'Delete an API key',
+        description: 'Revokes and deletes an API key by its ID.',
       },
     },
-  );
+  )

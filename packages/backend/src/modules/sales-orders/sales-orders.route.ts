@@ -1,15 +1,15 @@
-import { Elysia } from "elysia"
-import { z } from "zod"
-import { authPlugin } from "@/plugins/auth.plugin"
-import { salesOrdersService } from "./sales-orders.service"
-import { errorResponse } from "@/common/error.response"
+import { Elysia } from 'elysia'
+import { z } from 'zod'
+import { authPlugin } from '@/plugins/auth.plugin'
+import { salesOrdersService } from './sales-orders.service'
+import { errorResponse } from '@/common/error.response'
 import {
   paginationQuery,
   paginatedResponse,
   buildPaginationMeta,
   paginationToSkipTake,
   sortQuery,
-} from "@/common/pagination"
+} from '@/common/pagination'
 
 const salesOrderItemSchema = z.object({
   id: z.string(),
@@ -42,8 +42,15 @@ const salesOrderSchema = z.object({
   guestName: z.string().nullable(),
   guestEmail: z.string().nullable(),
   shippingAddress: z.any(),
-  status: z.enum(["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "COMPLETED", "CANCELLED"]),
-  paymentStatus: z.enum(["UNPAID", "PARTIALLY_PAID", "PAID"]),
+  status: z.enum([
+    'PENDING',
+    'CONFIRMED',
+    'SHIPPED',
+    'DELIVERED',
+    'COMPLETED',
+    'CANCELLED',
+  ]),
+  paymentStatus: z.enum(['UNPAID', 'PARTIALLY_PAID', 'PAID']),
   orderedAt: z.iso.datetime().nullable(),
   shippedAt: z.iso.datetime().nullable(),
   note: z.string().nullable(),
@@ -70,8 +77,17 @@ const createSalesOrderDto = z.object({
 })
 
 const updateSalesOrderDto = z.object({
-  status: z.enum(["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "COMPLETED", "CANCELLED"]).optional(),
-  paymentStatus: z.enum(["UNPAID", "PARTIALLY_PAID", "PAID"]).optional(),
+  status: z
+    .enum([
+      'PENDING',
+      'CONFIRMED',
+      'SHIPPED',
+      'DELIVERED',
+      'COMPLETED',
+      'CANCELLED',
+    ])
+    .optional(),
+  paymentStatus: z.enum(['UNPAID', 'PARTIALLY_PAID', 'PAID']).optional(),
   customerId: z.string().uuid().nullable().optional(),
   warehouseId: z.string().uuid().optional(),
   guestName: z.string().nullable().optional(),
@@ -83,10 +99,19 @@ const updateSalesOrderDto = z.object({
 })
 
 const listSalesOrdersQuery = paginationQuery
-  .extend(sortQuery(["createdAt", "updatedAt", "orderedAt"]).shape)
+  .extend(sortQuery(['createdAt', 'updatedAt', 'orderedAt']).shape)
   .extend({
-    status: z.enum(["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "COMPLETED", "CANCELLED"]).optional(),
-    paymentStatus: z.enum(["UNPAID", "PARTIALLY_PAID", "PAID"]).optional(),
+    status: z
+      .enum([
+        'PENDING',
+        'CONFIRMED',
+        'SHIPPED',
+        'DELIVERED',
+        'COMPLETED',
+        'CANCELLED',
+      ])
+      .optional(),
+    paymentStatus: z.enum(['UNPAID', 'PARTIALLY_PAID', 'PAID']).optional(),
     customerId: z.string().uuid().optional(),
     warehouseId: z.string().uuid().optional(),
     search: z.string().optional(),
@@ -106,8 +131,14 @@ const serializeSalesOrder = (so: {
   guestName: string | null
   guestEmail: string | null
   shippingAddress: unknown
-  status: "PENDING" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "COMPLETED" | "CANCELLED"
-  paymentStatus: "UNPAID" | "PARTIALLY_PAID" | "PAID"
+  status:
+    | 'PENDING'
+    | 'CONFIRMED'
+    | 'SHIPPED'
+    | 'DELIVERED'
+    | 'COMPLETED'
+    | 'CANCELLED'
+  paymentStatus: 'UNPAID' | 'PARTIALLY_PAID' | 'PAID'
   orderedAt: Date | null
   shippedAt: Date | null
   note: string | null
@@ -144,24 +175,38 @@ export type UpdateSalesOrderInput = z.infer<typeof updateSalesOrderDto>
 export type ListSalesOrdersQuery = z.infer<typeof listSalesOrdersQuery>
 
 export const salesOrdersRoute = new Elysia({
-  prefix: "/sales-orders",
-  tags: ["Sales Orders"],
+  prefix: '/sales-orders',
+  tags: ['Sales Orders'],
 })
   .use(authPlugin)
   .get(
-    "/",
+    '/',
     async ({ organization, query }) => {
-      const { page, pageSize, sortBy, sortOrder, status, paymentStatus, customerId, search } = query
-      const { skip, take } = paginationToSkipTake(page, pageSize)
-      const { data, total } = await salesOrdersService.listSalesOrders(organization.id, {
-        skip,
-        take,
+      const {
+        page,
+        pageSize,
+        sortBy,
+        sortOrder,
         status,
         paymentStatus,
         customerId,
         search,
-        orderBy: sortBy ? { field: sortBy, order: sortOrder ?? "desc" } : undefined,
-      })
+      } = query
+      const { skip, take } = paginationToSkipTake(page, pageSize)
+      const { data, total } = await salesOrdersService.listSalesOrders(
+        organization.id,
+        {
+          skip,
+          take,
+          status,
+          paymentStatus,
+          customerId,
+          search,
+          orderBy: sortBy
+            ? { field: sortBy, order: sortOrder ?? 'desc' }
+            : undefined,
+        },
+      )
       return {
         data: data.map(serializeSalesOrder),
         meta: buildPaginationMeta(total, page, pageSize),
@@ -170,84 +215,113 @@ export const salesOrdersRoute = new Elysia({
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { salesOrder: ["view"] },
+      requirePermission: { salesOrder: ['view'] },
       query: listSalesOrdersQuery,
       response: {
         200: paginatedResponse(salesOrderSchema),
       },
       detail: {
-        summary: "List sales orders",
+        summary: 'List sales orders',
         description:
-          "Retrieves a paginated list of sales orders for the authenticated organization. Supports filtering by status, payment status, customer, and search by note, guest email, or guest name.",
+          'Retrieves a paginated list of sales orders for the authenticated organization. Supports filtering by status, payment status, customer, and search by note, guest email, or guest name.',
       },
     },
   )
   .post(
-    "/",
+    '/',
     async ({ organization, body, status }) => {
-      const result = await salesOrdersService.createSalesOrder(organization.id, {
-        ...body,
-        orderedAt: body.orderedAt ? new Date(body.orderedAt) : undefined,
-      })
-      if ("error" in result) return status(400, { message: result.error })
-      return status(201, serializeSalesOrder(result as Parameters<typeof serializeSalesOrder>[0]))
+      const result = await salesOrdersService.createSalesOrder(
+        organization.id,
+        {
+          ...body,
+          orderedAt: body.orderedAt ? new Date(body.orderedAt) : undefined,
+        },
+      )
+      if ('error' in result) return status(400, { message: result.error })
+      return status(
+        201,
+        serializeSalesOrder(
+          result as Parameters<typeof serializeSalesOrder>[0],
+        ),
+      )
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { salesOrder: ["create"] },
+      requirePermission: { salesOrder: ['create'] },
       body: createSalesOrderDto,
       response: {
         201: salesOrderSchema,
         400: errorResponse,
       },
       detail: {
-        summary: "Create a sales order",
+        summary: 'Create a sales order',
         description:
-          "Creates a new sales order with line items for the authenticated organization. Either customerId or guestName must be provided.",
+          'Creates a new sales order with line items for the authenticated organization. Either customerId or guestName must be provided.',
       },
     },
   )
   .get(
-    "/:id",
+    '/:id',
     async ({ organization, params, status }) => {
-      const order = await salesOrdersService.getSalesOrder(organization.id, params.id)
-      if (!order) return status(404, { message: "Sales order not found" })
+      const order = await salesOrdersService.getSalesOrder(
+        organization.id,
+        params.id,
+      )
+      if (!order) return status(404, { message: 'Sales order not found' })
       return serializeSalesOrder(order)
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { salesOrder: ["view"] },
+      requirePermission: { salesOrder: ['view'] },
       params: salesOrderIdParam,
       response: {
         200: salesOrderSchema,
         404: errorResponse,
       },
       detail: {
-        summary: "Get a sales order",
-        description: "Retrieves the details of a specific sales order by its ID, including all line items with variant details.",
+        summary: 'Get a sales order',
+        description:
+          'Retrieves the details of a specific sales order by its ID, including all line items with variant details.',
       },
     },
   )
   .patch(
-    "/:id",
+    '/:id',
     async ({ organization, params, body, status }) => {
-      const result = await salesOrdersService.updateSalesOrder(organization.id, params.id, {
-        ...body,
-        orderedAt: body.orderedAt !== undefined ? (body.orderedAt ? new Date(body.orderedAt) : null) : undefined,
-        shippedAt: body.shippedAt !== undefined ? (body.shippedAt ? new Date(body.shippedAt) : null) : undefined,
-      })
-      if ("error" in result) {
-        if (result.error === "not_found") return status(404, { message: "Sales order not found" })
+      const result = await salesOrdersService.updateSalesOrder(
+        organization.id,
+        params.id,
+        {
+          ...body,
+          orderedAt:
+            body.orderedAt !== undefined
+              ? body.orderedAt
+                ? new Date(body.orderedAt)
+                : null
+              : undefined,
+          shippedAt:
+            body.shippedAt !== undefined
+              ? body.shippedAt
+                ? new Date(body.shippedAt)
+                : null
+              : undefined,
+        },
+      )
+      if ('error' in result) {
+        if (result.error === 'not_found')
+          return status(404, { message: 'Sales order not found' })
         return status(400, { message: result.error })
       }
-      return serializeSalesOrder(result as Parameters<typeof serializeSalesOrder>[0])
+      return serializeSalesOrder(
+        result as Parameters<typeof serializeSalesOrder>[0],
+      )
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { salesOrder: ["update"] },
+      requirePermission: { salesOrder: ['update'] },
       params: salesOrderIdParam,
       body: updateSalesOrderDto,
       response: {
@@ -256,25 +330,30 @@ export const salesOrdersRoute = new Elysia({
         404: errorResponse,
       },
       detail: {
-        summary: "Update a sales order",
-        description: "Updates header fields of an existing sales order. Items cannot be modified after creation.",
+        summary: 'Update a sales order',
+        description:
+          'Updates header fields of an existing sales order. Items cannot be modified after creation.',
       },
     },
   )
   .delete(
-    "/:id",
+    '/:id',
     async ({ organization, params, status }) => {
-      const result = await salesOrdersService.deleteSalesOrder(organization.id, params.id)
-      if ("error" in result) {
-        if (result.error === "not_found") return status(404, { message: "Sales order not found" })
+      const result = await salesOrdersService.deleteSalesOrder(
+        organization.id,
+        params.id,
+      )
+      if ('error' in result) {
+        if (result.error === 'not_found')
+          return status(404, { message: 'Sales order not found' })
         return status(400, { message: result.error })
       }
-      return status(200, { message: "Sales order deleted" })
+      return status(200, { message: 'Sales order deleted' })
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { salesOrder: ["delete"] },
+      requirePermission: { salesOrder: ['delete'] },
       params: salesOrderIdParam,
       response: {
         200: errorResponse,
@@ -282,8 +361,9 @@ export const salesOrdersRoute = new Elysia({
         404: errorResponse,
       },
       detail: {
-        summary: "Delete a sales order",
-        description: "Permanently deletes a sales order. Only allowed when status is PENDING or CANCELLED.",
+        summary: 'Delete a sales order',
+        description:
+          'Permanently deletes a sales order. Only allowed when status is PENDING or CANCELLED.',
       },
     },
   )

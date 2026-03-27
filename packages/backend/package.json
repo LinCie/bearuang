@@ -16,7 +16,10 @@
     "db:studio": "bunx --bun prisma studio",
     "db:seed": "bunx --bun prisma db seed",
     "db:reset": "bunx --bun prisma migrate reset",
-    "db:validate": "bunx --bun prisma validate"
+    "db:validate": "bunx --bun prisma validate",
+    "lint": "eslint",
+    "format": "prettier --check .",
+    "check": "prettier --write . && eslint --fix && tsc --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1018.0",
@@ -32,8 +35,13 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "bun-types": "latest",
-    "prisma": "^7.5.0"
+    "eslint": "^10.1.0",
+    "prettier": "^3.8.1",
+    "prisma": "^7.5.0",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.57.2"
   },
   "module": "src/index.js",
   "types": "src/index.ts",

@@ -155,10 +155,7 @@ export const uploadsRoute = new Elysia({
   .get(
     '/:id',
     async ({ organization, params, status }) => {
-      const media = await uploadsService.getMedia(
-        organization.id,
-        params.id,
-      )
+      const media = await uploadsService.getMedia(organization.id, params.id)
       if (!media) return status(404, { message: 'Media not found' })
       return serializeMedia(media)
     },

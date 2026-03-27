@@ -1,15 +1,15 @@
-import { Elysia } from "elysia";
-import { z } from "zod";
-import { authPlugin } from "@/plugins/auth.plugin";
-import { productsService } from "./products.service";
-import { errorResponse } from "@/common/error.response";
+import { Elysia } from 'elysia'
+import { z } from 'zod'
+import { authPlugin } from '@/plugins/auth.plugin'
+import { productsService } from './products.service'
+import { errorResponse } from '@/common/error.response'
 import {
   paginationQuery,
   paginatedResponse,
   buildPaginationMeta,
   paginationToSkipTake,
   sortQuery,
-} from "@/common/pagination";
+} from '@/common/pagination'
 
 export const variantSchema = z.object({
   id: z.string(),
@@ -25,7 +25,7 @@ export const variantSchema = z.object({
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
   deletedAt: z.iso.datetime().nullable(),
-});
+})
 
 export const productSchema = z.object({
   id: z.string(),
@@ -38,36 +38,42 @@ export const productSchema = z.object({
   updatedAt: z.iso.datetime(),
   deletedAt: z.iso.datetime().nullable(),
   variants: z.array(variantSchema),
-});
+})
 
-const slugRegex = /^[a-z0-9_-]+$/;
+const slugRegex = /^[a-z0-9_-]+$/
 
 export const createProductDto = z.object({
   name: z.string().min(1),
   slug: z
     .string()
     .min(1)
-    .regex(slugRegex, 'Slug hanya boleh berisi huruf kecil, angka, strip, dan garis bawah'),
+    .regex(
+      slugRegex,
+      'Slug hanya boleh berisi huruf kecil, angka, strip, dan garis bawah',
+    ),
   description: z.string().optional(),
   isActive: z.boolean().optional(),
-});
+})
 
 export const updateProductDto = z.object({
   name: z.string().min(1).optional(),
   slug: z
     .string()
     .min(1)
-    .regex(slugRegex, 'Slug hanya boleh berisi huruf kecil, angka, strip, dan garis bawah')
+    .regex(
+      slugRegex,
+      'Slug hanya boleh berisi huruf kecil, angka, strip, dan garis bawah',
+    )
     .optional(),
   description: z.string().optional(),
   isActive: z.boolean().optional(),
-});
+})
 
 export const listProductsQuery = paginationQuery
-  .merge(sortQuery(["name", "createdAt", "updatedAt"]))
+  .merge(sortQuery(['name', 'createdAt', 'updatedAt']))
   .extend({
     search: z.string().optional(),
-  });
+  })
 
 export type Product = z.infer<typeof productSchema>
 export type ProductVariant = z.infer<typeof variantSchema>
@@ -77,27 +83,29 @@ export type ListProductsQuery = z.infer<typeof listProductsQuery>
 
 const productIdParam = z.object({
   id: z.string().uuid(),
-});
+})
 
 export const productsRoute = new Elysia({
-  prefix: "/products",
-  tags: ["Products"],
+  prefix: '/products',
+  tags: ['Products'],
 })
   .use(authPlugin)
   .get(
-    "/",
+    '/',
     async ({ organization, query }) => {
-      const { page, pageSize, search, sortBy, sortOrder } = query;
-      const { skip, take } = paginationToSkipTake(page, pageSize);
+      const { page, pageSize, search, sortBy, sortOrder } = query
+      const { skip, take } = paginationToSkipTake(page, pageSize)
       const { data, total } = await productsService.listProducts(
         organization.id,
         {
           skip,
           take,
           search,
-          orderBy: sortBy ? { field: sortBy, order: sortOrder ?? "desc" } : undefined,
+          orderBy: sortBy
+            ? { field: sortBy, order: sortOrder ?? 'desc' }
+            : undefined,
         },
-      );
+      )
       return {
         data: data.map((p) => ({
           ...p,
@@ -113,30 +121,27 @@ export const productsRoute = new Elysia({
           })),
         })),
         meta: buildPaginationMeta(total, page, pageSize),
-      };
+      }
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { product: ["view"] },
+      requirePermission: { product: ['view'] },
       query: listProductsQuery,
       response: {
         200: paginatedResponse(productSchema),
       },
       detail: {
-        summary: "List products",
+        summary: 'List products',
         description:
-          "Retrieves a paginated list of all products belonging to the authenticated organization.",
+          'Retrieves a paginated list of all products belonging to the authenticated organization.',
       },
     },
   )
   .post(
-    "/",
+    '/',
     async ({ organization, body, status }) => {
-      const product = await productsService.createProduct(
-        organization.id,
-        body,
-      );
+      const product = await productsService.createProduct(organization.id, body)
       return status(201, {
         ...product,
         createdAt: product.createdAt.toISOString(),
@@ -149,37 +154,39 @@ export const productsRoute = new Elysia({
           updatedAt: v.updatedAt.toISOString(),
           deletedAt: v.deletedAt?.toISOString() ?? null,
         })),
-      });
+      })
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { product: ["create"] },
+      requirePermission: { product: ['create'] },
       body: createProductDto,
       response: {
         201: productSchema,
       },
       detail: {
-        summary: "Create a product",
+        summary: 'Create a product',
         description:
-          "Creates a new product for the authenticated organization.",
+          'Creates a new product for the authenticated organization.',
       },
     },
   )
   .get(
-    "/trashed",
+    '/trashed',
     async ({ organization, query }) => {
-      const { page, pageSize, search, sortBy, sortOrder } = query;
-      const { skip, take } = paginationToSkipTake(page, pageSize);
+      const { page, pageSize, search, sortBy, sortOrder } = query
+      const { skip, take } = paginationToSkipTake(page, pageSize)
       const { data, total } = await productsService.listTrashedProducts(
         organization.id,
         {
           skip,
           take,
           search,
-          orderBy: sortBy ? { field: sortBy, order: sortOrder ?? "desc" } : undefined,
+          orderBy: sortBy
+            ? { field: sortBy, order: sortOrder ?? 'desc' }
+            : undefined,
         },
-      );
+      )
       return {
         data: data.map((p) => ({
           ...p,
@@ -195,51 +202,51 @@ export const productsRoute = new Elysia({
           })),
         })),
         meta: buildPaginationMeta(total, page, pageSize),
-      };
+      }
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { product: ["view"] },
+      requirePermission: { product: ['view'] },
       query: listProductsQuery,
       response: {
         200: paginatedResponse(productSchema),
       },
       detail: {
-        summary: "List trashed products",
+        summary: 'List trashed products',
         description:
-          "Retrieves a paginated list of all soft-deleted products belonging to the authenticated organization.",
+          'Retrieves a paginated list of all soft-deleted products belonging to the authenticated organization.',
       },
     },
   )
   .post(
-    "/:id/restore",
+    '/:id/restore',
     async ({ organization, params, status }) => {
-      await productsService.restoreProduct(organization.id, params.id);
-      return status(200, { message: "Product restored" });
+      await productsService.restoreProduct(organization.id, params.id)
+      return status(200, { message: 'Product restored' })
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { product: ["delete"] },
+      requirePermission: { product: ['delete'] },
       params: productIdParam,
       response: {
         200: errorResponse,
       },
       detail: {
-        summary: "Restore a product",
-        description: "Restores a soft-deleted product by its ID.",
+        summary: 'Restore a product',
+        description: 'Restores a soft-deleted product by its ID.',
       },
     },
   )
   .get(
-    "/:id",
+    '/:id',
     async ({ organization, params, status }) => {
       const product = await productsService.getProduct(
         organization.id,
         params.id,
-      );
-      if (!product) return status(404, { message: "Product not found" });
+      )
+      if (!product) return status(404, { message: 'Product not found' })
       return {
         ...product,
         createdAt: product.createdAt.toISOString(),
@@ -252,39 +259,39 @@ export const productsRoute = new Elysia({
           updatedAt: v.updatedAt.toISOString(),
           deletedAt: v.deletedAt?.toISOString() ?? null,
         })),
-      };
+      }
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { product: ["view"] },
+      requirePermission: { product: ['view'] },
       params: productIdParam,
       response: {
         200: productSchema,
         404: errorResponse,
       },
       detail: {
-        summary: "Get a product",
-        description: "Retrieves the details of a specific product by its ID.",
+        summary: 'Get a product',
+        description: 'Retrieves the details of a specific product by its ID.',
       },
     },
   )
   .patch(
-    "/:id",
+    '/:id',
     async ({ organization, params, body, status }) => {
       const count = await productsService.updateProduct(
         organization.id,
         params.id,
         body,
-      );
+      )
       if (count.count === 0)
-        return status(404, { message: "Product not found" });
-      return status(200, { message: "Product updated" });
+        return status(404, { message: 'Product not found' })
+      return status(200, { message: 'Product updated' })
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { product: ["update"] },
+      requirePermission: { product: ['update'] },
       params: productIdParam,
       body: updateProductDto,
       response: {
@@ -292,28 +299,28 @@ export const productsRoute = new Elysia({
         404: errorResponse,
       },
       detail: {
-        summary: "Update a product",
-        description: "Updates the details of an existing product.",
+        summary: 'Update a product',
+        description: 'Updates the details of an existing product.',
       },
     },
   )
   .delete(
-    "/:id",
+    '/:id',
     async ({ organization, params, status }) => {
-      await productsService.deleteProduct(organization.id, params.id);
-      return status(200, { message: "Product deleted" });
+      await productsService.deleteProduct(organization.id, params.id)
+      return status(200, { message: 'Product deleted' })
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { product: ["delete"] },
+      requirePermission: { product: ['delete'] },
       params: productIdParam,
       response: {
         200: errorResponse,
       },
       detail: {
-        summary: "Delete a product",
-        description: "Soft-deletes a product by its ID.",
+        summary: 'Delete a product',
+        description: 'Soft-deletes a product by its ID.',
       },
     },
-  );
+  )

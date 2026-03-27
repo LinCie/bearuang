@@ -1,4 +1,4 @@
-import { prisma } from "@/integrations/prisma"
+import { prisma } from '@/integrations/prisma'
 
 export const customersService = {
   async listCustomers(
@@ -8,7 +8,10 @@ export const customersService = {
       take?: number
       search?: string
       isActive?: boolean
-      orderBy?: { field: "name" | "createdAt" | "updatedAt"; order: "asc" | "desc" }
+      orderBy?: {
+        field: 'name' | 'createdAt' | 'updatedAt'
+        order: 'asc' | 'desc'
+      }
     },
   ) {
     const where = {
@@ -16,8 +19,8 @@ export const customersService = {
       isActive: params?.isActive ?? true,
       ...(params?.search && {
         OR: [
-          { name: { contains: params.search, mode: "insensitive" as const } },
-          { email: { contains: params.search, mode: "insensitive" as const } },
+          { name: { contains: params.search, mode: 'insensitive' as const } },
+          { email: { contains: params.search, mode: 'insensitive' as const } },
         ],
       }),
     }
@@ -28,7 +31,7 @@ export const customersService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: "desc" },
+          : { createdAt: 'desc' },
       }),
       prisma.customer.count({ where }),
     ])
@@ -41,7 +44,10 @@ export const customersService = {
       skip?: number
       take?: number
       search?: string
-      orderBy?: { field: "name" | "createdAt" | "updatedAt"; order: "asc" | "desc" }
+      orderBy?: {
+        field: 'name' | 'createdAt' | 'updatedAt'
+        order: 'asc' | 'desc'
+      }
     },
   ) {
     const where = {
@@ -49,8 +55,8 @@ export const customersService = {
       isActive: false,
       ...(params?.search && {
         OR: [
-          { name: { contains: params.search, mode: "insensitive" as const } },
-          { email: { contains: params.search, mode: "insensitive" as const } },
+          { name: { contains: params.search, mode: 'insensitive' as const } },
+          { email: { contains: params.search, mode: 'insensitive' as const } },
         ],
       }),
     }
@@ -61,7 +67,7 @@ export const customersService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: "desc" },
+          : { createdAt: 'desc' },
       }),
       prisma.customer.count({ where }),
     ])

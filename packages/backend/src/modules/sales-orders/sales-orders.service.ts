@@ -1,16 +1,19 @@
-import { prisma } from "@/integrations/prisma"
-import { SalesOrderStatus, SalesOrderPaymentStatus } from "@/generated/prisma/client"
+import { prisma } from '@/integrations/prisma'
+import {
+  SalesOrderStatus,
+  SalesOrderPaymentStatus,
+} from '@/generated/prisma/client'
 
 const STATUS_TRANSITIONS: Record<SalesOrderStatus, SalesOrderStatus[]> = {
-  PENDING: ["CONFIRMED", "CANCELLED"],
-  CONFIRMED: ["SHIPPED", "CANCELLED"],
-  SHIPPED: ["DELIVERED", "CANCELLED"],
-  DELIVERED: ["COMPLETED"],
+  PENDING: ['CONFIRMED', 'CANCELLED'],
+  CONFIRMED: ['SHIPPED', 'CANCELLED'],
+  SHIPPED: ['DELIVERED', 'CANCELLED'],
+  DELIVERED: ['COMPLETED'],
   COMPLETED: [],
   CANCELLED: [],
 }
 
-const TERMINAL_STATUSES: SalesOrderStatus[] = ["COMPLETED", "CANCELLED"]
+const TERMINAL_STATUSES: SalesOrderStatus[] = ['COMPLETED', 'CANCELLED']
 
 function buildUpdateData(data: {
   status?: SalesOrderStatus
@@ -26,12 +29,14 @@ function buildUpdateData(data: {
 }) {
   const updateData: Record<string, unknown> = {}
   if (data.status !== undefined) updateData.status = data.status
-  if (data.paymentStatus !== undefined) updateData.paymentStatus = data.paymentStatus
+  if (data.paymentStatus !== undefined)
+    updateData.paymentStatus = data.paymentStatus
   if (data.customerId !== undefined) updateData.customerId = data.customerId
   if (data.warehouseId !== undefined) updateData.warehouseId = data.warehouseId
   if (data.guestName !== undefined) updateData.guestName = data.guestName
   if (data.guestEmail !== undefined) updateData.guestEmail = data.guestEmail
-  if (data.shippingAddress !== undefined) updateData.shippingAddress = data.shippingAddress
+  if (data.shippingAddress !== undefined)
+    updateData.shippingAddress = data.shippingAddress
   if (data.orderedAt !== undefined) updateData.orderedAt = data.orderedAt
   if (data.shippedAt !== undefined) updateData.shippedAt = data.shippedAt
   if (data.note !== undefined) updateData.note = data.note
@@ -48,7 +53,10 @@ export const salesOrdersService = {
       paymentStatus?: SalesOrderPaymentStatus
       customerId?: string
       search?: string
-      orderBy?: { field: "createdAt" | "updatedAt" | "orderedAt"; order: "asc" | "desc" }
+      orderBy?: {
+        field: 'createdAt' | 'updatedAt' | 'orderedAt'
+        order: 'asc' | 'desc'
+      }
     },
   ) {
     const where = {
@@ -58,9 +66,19 @@ export const salesOrdersService = {
       ...(params?.customerId && { customerId: params.customerId }),
       ...(params?.search && {
         OR: [
-          { note: { contains: params.search, mode: "insensitive" as const } },
-          { guestEmail: { contains: params.search, mode: "insensitive" as const } },
-          { guestName: { contains: params.search, mode: "insensitive" as const } },
+          { note: { contains: params.search, mode: 'insensitive' as const } },
+          {
+            guestEmail: {
+              contains: params.search,
+              mode: 'insensitive' as const,
+            },
+          },
+          {
+            guestName: {
+              contains: params.search,
+              mode: 'insensitive' as const,
+            },
+          },
         ],
       }),
     }
@@ -71,7 +89,7 @@ export const salesOrdersService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: "desc" },
+          : { createdAt: 'desc' },
         include: {
           customer: { select: { id: true, name: true } },
           warehouse: { select: { id: true, name: true } },
@@ -120,19 +138,19 @@ export const salesOrdersService = {
     },
   ) {
     if (!data.customerId && !data.guestName) {
-      return { error: "Either customerId or guestName must be provided" }
+      return { error: 'Either customerId or guestName must be provided' }
     }
 
     const warehouse = await prisma.warehouse.findFirst({
       where: { id: data.warehouseId, organizationId },
     })
-    if (!warehouse) return { error: "Warehouse not found" }
+    if (!warehouse) return { error: 'Warehouse not found' }
 
     if (data.customerId) {
       const customer = await prisma.customer.findFirst({
         where: { id: data.customerId, organizationId },
       })
-      if (!customer) return { error: "Customer not found" }
+      if (!customer) return { error: 'Customer not found' }
     }
 
     const variantIds = [...new Set(data.items.map((i) => i.variantId))]
@@ -141,7 +159,7 @@ export const salesOrdersService = {
       select: { id: true },
     })
     if (variants.length !== variantIds.length) {
-      return { error: "One or more product variants not found" }
+      return { error: 'One or more product variants not found' }
     }
 
     return prisma.salesOrder.create({
@@ -194,40 +212,46 @@ export const salesOrdersService = {
       where: { id, organizationId },
       include: { items: true },
     })
-    if (!existing) return { error: "not_found" as const }
+    if (!existing) return { error: 'not_found' as const }
 
     if (TERMINAL_STATUSES.includes(existing.status)) {
-      return { error: `Cannot modify a ${existing.status.toLowerCase()} sales order` }
+      return {
+        error: `Cannot modify a ${existing.status.toLowerCase()} sales order`,
+      }
     }
 
     if (data.status) {
       const allowed = STATUS_TRANSITIONS[existing.status]
       if (!allowed.includes(data.status)) {
-        return { error: `Cannot transition from ${existing.status} to ${data.status}` }
+        return {
+          error: `Cannot transition from ${existing.status} to ${data.status}`,
+        }
       }
     }
 
-    const resultCustomerId = data.customerId !== undefined ? data.customerId : existing.customerId
-    const resultGuestName = data.guestName !== undefined ? data.guestName : existing.guestName
+    const resultCustomerId =
+      data.customerId !== undefined ? data.customerId : existing.customerId
+    const resultGuestName =
+      data.guestName !== undefined ? data.guestName : existing.guestName
     if (!resultCustomerId && !resultGuestName) {
-      return { error: "Either customerId or guestName must be provided" }
+      return { error: 'Either customerId or guestName must be provided' }
     }
 
     if (data.warehouseId) {
       const warehouse = await prisma.warehouse.findFirst({
         where: { id: data.warehouseId, organizationId },
       })
-      if (!warehouse) return { error: "Warehouse not found" }
+      if (!warehouse) return { error: 'Warehouse not found' }
     }
 
     if (data.customerId) {
       const customer = await prisma.customer.findFirst({
         where: { id: data.customerId, organizationId },
       })
-      if (!customer) return { error: "Customer not found" }
+      if (!customer) return { error: 'Customer not found' }
     }
 
-    if (data.status === "SHIPPED") {
+    if (data.status === 'SHIPPED') {
       return prisma.$transaction(async (tx) => {
         for (const item of existing.items) {
           await tx.stockMovement.create({
@@ -235,10 +259,10 @@ export const salesOrdersService = {
               organizationId,
               warehouseId: existing.warehouseId,
               variantId: item.variantId,
-              type: "OUT",
+              type: 'OUT',
               quantity: item.quantity,
               referenceId: id,
-              referenceType: "sales_order",
+              referenceType: 'sales_order',
             },
           })
 
@@ -264,7 +288,7 @@ export const salesOrdersService = {
       })
     }
 
-    if (data.status === "CANCELLED" && existing.status === "SHIPPED") {
+    if (data.status === 'CANCELLED' && existing.status === 'SHIPPED') {
       return prisma.$transaction(async (tx) => {
         for (const item of existing.items) {
           await tx.stockMovement.create({
@@ -272,10 +296,10 @@ export const salesOrdersService = {
               organizationId,
               warehouseId: existing.warehouseId,
               variantId: item.variantId,
-              type: "IN",
+              type: 'IN',
               quantity: item.quantity,
               referenceId: id,
-              referenceType: "sales_order",
+              referenceType: 'sales_order',
             },
           })
 
@@ -320,10 +344,12 @@ export const salesOrdersService = {
     const existing = await prisma.salesOrder.findFirst({
       where: { id, organizationId },
     })
-    if (!existing) return { error: "not_found" as const }
+    if (!existing) return { error: 'not_found' as const }
 
-    if (existing.status !== "PENDING" && existing.status !== "CANCELLED") {
-      return { error: `Cannot delete a ${existing.status.toLowerCase()} sales order` }
+    if (existing.status !== 'PENDING' && existing.status !== 'CANCELLED') {
+      return {
+        error: `Cannot delete a ${existing.status.toLowerCase()} sales order`,
+      }
     }
 
     return prisma.salesOrder.delete({ where: { id } })

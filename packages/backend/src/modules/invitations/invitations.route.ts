@@ -1,15 +1,15 @@
-import { Elysia } from "elysia";
-import { z } from "zod";
-import { authPlugin } from "@/plugins/auth.plugin";
-import { invitationsService } from "./invitations.service";
-import { errorResponse } from "@/common/error.response";
+import { Elysia } from 'elysia'
+import { z } from 'zod'
+import { authPlugin } from '@/plugins/auth.plugin'
+import { invitationsService } from './invitations.service'
+import { errorResponse } from '@/common/error.response'
 import {
   paginationQuery,
   paginatedResponse,
   buildPaginationMeta,
   paginationToSkipTake,
   sortQuery,
-} from "@/common/pagination";
+} from '@/common/pagination'
 
 export const invitationSchema = z.object({
   id: z.string(),
@@ -20,56 +20,56 @@ export const invitationSchema = z.object({
   inviterId: z.string(),
   expiresAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
-});
+})
 
 export const createInvitationDto = z.object({
   email: z.string().email(),
   role: z.string().min(1),
-});
+})
 
 export const invitationIdParam = z.object({
   id: z.string(),
-});
+})
 
 export const listInvitationsQuery = paginationQuery
-  .extend(sortQuery(["status", "createdAt", "email"]).shape)
+  .extend(sortQuery(['status', 'createdAt', 'email']).shape)
   .extend({
     search: z.string().optional(),
     status: z.string().optional(),
-  });
+  })
 
-export type Invitation = z.infer<typeof invitationSchema>;
-export type CreateInvitationInput = z.infer<typeof createInvitationDto>;
-export type ListInvitationsQuery = z.infer<typeof listInvitationsQuery>;
+export type Invitation = z.infer<typeof invitationSchema>
+export type CreateInvitationInput = z.infer<typeof createInvitationDto>
+export type ListInvitationsQuery = z.infer<typeof listInvitationsQuery>
 
 type InvitationData = {
-  id: string;
-  organizationId: string;
-  email: string;
-  role: string | null;
-  status: string;
-  inviterId: string;
-  expiresAt: Date;
-  createdAt: Date;
-};
+  id: string
+  organizationId: string
+  email: string
+  role: string | null
+  status: string
+  inviterId: string
+  expiresAt: Date
+  createdAt: Date
+}
 
 const serializeInvitation = (inv: InvitationData) => ({
   ...inv,
   role: inv.role ?? null,
   expiresAt: inv.expiresAt.toISOString(),
   createdAt: inv.createdAt.toISOString(),
-});
+})
 
 export const invitationsRoute = new Elysia({
-  prefix: "/invitations",
-  tags: ["Invitations"],
+  prefix: '/invitations',
+  tags: ['Invitations'],
 })
   .use(authPlugin)
   .get(
-    "/",
+    '/',
     async ({ organization, query }) => {
-      const { page, pageSize, search, status, sortBy, sortOrder } = query;
-      const { skip, take } = paginationToSkipTake(page, pageSize);
+      const { page, pageSize, search, status, sortBy, sortOrder } = query
+      const { skip, take } = paginationToSkipTake(page, pageSize)
       const { data, total } = await invitationsService.listInvitations(
         organization.id,
         {
@@ -78,108 +78,108 @@ export const invitationsRoute = new Elysia({
           search,
           status,
           orderBy: sortBy
-            ? { field: sortBy, order: sortOrder ?? "desc" }
+            ? { field: sortBy, order: sortOrder ?? 'desc' }
             : undefined,
         },
-      );
+      )
       return {
         data: (data as InvitationData[]).map(serializeInvitation),
         meta: buildPaginationMeta(total, page, pageSize),
-      };
+      }
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { invitation: ["view"] },
+      requirePermission: { invitation: ['view'] },
       query: listInvitationsQuery,
       response: {
         200: paginatedResponse(invitationSchema),
       },
       detail: {
-        summary: "List invitations",
+        summary: 'List invitations',
         description:
-          "Retrieves a paginated list of invitations for the authenticated organization.",
+          'Retrieves a paginated list of invitations for the authenticated organization.',
       },
     },
   )
   .get(
-    "/:id",
+    '/:id',
     async ({ organization, params, status }) => {
       const invitation = await invitationsService.getInvitation(
         organization.id,
         params.id,
-      );
-      if (!invitation) return status(404, { message: "Invitation not found" });
-      return serializeInvitation(invitation as InvitationData);
+      )
+      if (!invitation) return status(404, { message: 'Invitation not found' })
+      return serializeInvitation(invitation as InvitationData)
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { invitation: ["view"] },
+      requirePermission: { invitation: ['view'] },
       params: invitationIdParam,
       response: {
         200: invitationSchema,
         404: errorResponse,
       },
       detail: {
-        summary: "Get an invitation",
+        summary: 'Get an invitation',
         description:
-          "Retrieves the details of a specific invitation by its ID.",
+          'Retrieves the details of a specific invitation by its ID.',
       },
     },
   )
   .post(
-    "/",
+    '/',
     async ({ request, body, status }) => {
       try {
         const invitation = await invitationsService.createInvitation(
           request.headers,
           body,
-        );
+        )
         return status(
           201,
           serializeInvitation(invitation as unknown as InvitationData),
-        );
+        )
       } catch (e) {
         const message =
-          e instanceof Error ? e.message : "Failed to create invitation";
-        return status(400, { message });
+          e instanceof Error ? e.message : 'Failed to create invitation'
+        return status(400, { message })
       }
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { invitation: ["create"] },
+      requirePermission: { invitation: ['create'] },
       body: createInvitationDto,
       response: {
         201: invitationSchema,
         400: errorResponse,
       },
       detail: {
-        summary: "Create an invitation",
+        summary: 'Create an invitation',
         description:
-          "Sends an invitation to join the authenticated organization with the specified role.",
+          'Sends an invitation to join the authenticated organization with the specified role.',
       },
     },
   )
   .post(
-    "/:id/accept",
+    '/:id/accept',
     async ({ request, params, status }) => {
       try {
         const result = await invitationsService.acceptInvitation(
           request.headers,
           params.id,
-        );
+        )
         const typedResult = result as unknown as {
-          invitation: InvitationData | null;
+          invitation: InvitationData | null
           member: {
-            id: string;
-            organizationId: string;
-            userId: string;
-            role: string;
-            createdAt: Date;
-          } | null;
-        };
+            id: string
+            organizationId: string
+            userId: string
+            role: string
+            createdAt: Date
+          } | null
+        }
         return {
           invitation: typedResult.invitation
             ? serializeInvitation(typedResult.invitation)
@@ -193,11 +193,11 @@ export const invitationsRoute = new Elysia({
                 createdAt: typedResult.member.createdAt.toISOString(),
               }
             : null,
-        };
+        }
       } catch (e) {
         const message =
-          e instanceof Error ? e.message : "Failed to accept invitation";
-        return status(400, { message });
+          e instanceof Error ? e.message : 'Failed to accept invitation'
+        return status(400, { message })
       }
     },
     {
@@ -219,33 +219,33 @@ export const invitationsRoute = new Elysia({
         400: errorResponse,
       },
       detail: {
-        summary: "Accept an invitation",
+        summary: 'Accept an invitation',
         description:
-          "Accepts a pending invitation and adds the user as a member of the organization.",
+          'Accepts a pending invitation and adds the user as a member of the organization.',
       },
     },
   )
   .post(
-    "/:id/reject",
+    '/:id/reject',
     async ({ request, params, status }) => {
       try {
         const result = await invitationsService.rejectInvitation(
           request.headers,
           params.id,
-        );
+        )
         const typedResult = result as unknown as {
-          invitation: InvitationData | null;
-          member: null;
-        };
+          invitation: InvitationData | null
+          member: null
+        }
         return {
           invitation: typedResult.invitation
             ? serializeInvitation(typedResult.invitation)
             : null,
-        };
+        }
       } catch (e) {
         const message =
-          e instanceof Error ? e.message : "Failed to reject invitation";
-        return status(400, { message });
+          e instanceof Error ? e.message : 'Failed to reject invitation'
+        return status(400, { message })
       }
     },
     {
@@ -258,38 +258,37 @@ export const invitationsRoute = new Elysia({
         400: errorResponse,
       },
       detail: {
-        summary: "Reject an invitation",
-        description: "Rejects a pending invitation to join the organization.",
+        summary: 'Reject an invitation',
+        description: 'Rejects a pending invitation to join the organization.',
       },
     },
   )
   .delete(
-    "/:id",
+    '/:id',
     async ({ request, params, status }) => {
       try {
         const invitation = await invitationsService.cancelInvitation(
           request.headers,
           params.id,
-        );
-        if (!invitation)
-          return status(404, { message: "Invitation not found" });
-        return status(200, { message: "Invitation cancelled" });
-      } catch (e) {
-        return status(404, { message: "Invitation not found" });
+        )
+        if (!invitation) return status(404, { message: 'Invitation not found' })
+        return status(200, { message: 'Invitation cancelled' })
+      } catch {
+        return status(404, { message: 'Invitation not found' })
       }
     },
     {
       requireAuth: true,
       requireOrg: true,
-      requirePermission: { invitation: ["delete"] },
+      requirePermission: { invitation: ['delete'] },
       params: invitationIdParam,
       response: {
         200: errorResponse,
         404: errorResponse,
       },
       detail: {
-        summary: "Cancel an invitation",
-        description: "Cancels a pending invitation to the organization.",
+        summary: 'Cancel an invitation',
+        description: 'Cancels a pending invitation to the organization.',
       },
     },
-  );
+  )
