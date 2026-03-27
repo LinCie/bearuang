@@ -40,5 +40,6 @@ yarn-error.log*
 **/*.log
 package-lock.json
 **/*.bun
+/dist
 
 src/generated
