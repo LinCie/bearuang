@@ -21,6 +21,7 @@ const statement = {
   apiKey: ["create", "read", "update", "delete", "view"],
   invitation: ["create", "delete", "view"],
   member: ["update", "delete", "view"],
+  media: ["create", "delete", "view"],
 } as const;
 
 export const ac = createAccessControl(statement);
@@ -40,6 +41,7 @@ export const owner = ac.newRole({
   apiKey: ["create", "read", "update", "delete", "view"],
   invitation: ["create", "delete", "view"],
   member: ["update", "delete", "view"],
+  media: ["create", "delete", "view"],
 });
 
 export const admin = ac.newRole({
@@ -57,6 +59,7 @@ export const admin = ac.newRole({
   apiKey: ["create", "read", "update", "delete", "view"],
   invitation: ["create", "delete", "view"],
   member: ["update", "delete", "view"],
+  media: ["create", "delete", "view"],
 });
 
 export const member = ac.newRole({
@@ -74,6 +77,7 @@ export const member = ac.newRole({
   apiKey: ["read", "view"],
   invitation: ["view"],
   member: ["view"],
+  media: ["create", "view"],
 });
 
 export type PermissionStatement = typeof statement;
@@ -94,6 +98,7 @@ export const permissionResources = [
   "apiKey",
   "invitation",
   "member",
+  "media",
 ] as const;
 
 export const permissionActions: Record<
@@ -113,6 +118,7 @@ export const permissionActions: Record<
   apiKey: ["create", "read", "update", "delete", "view"],
   invitation: ["create", "delete", "view"],
   member: ["update", "delete", "view"],
+  media: ["create", "delete", "view"],
 };
 
 /**

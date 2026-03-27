@@ -19,6 +19,8 @@
     "db:validate": "bunx --bun prisma validate"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1018.0",
+    "@aws-sdk/s3-request-presigner": "^3.1018.0",
     "@better-auth/api-key": "^1.5.5",
     "@elysiajs/cors": "^1.4.1",
     "@elysiajs/openapi": "^1.4.14",

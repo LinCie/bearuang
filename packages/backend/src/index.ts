@@ -18,6 +18,7 @@ import { invitationsRoute } from "@/modules/invitations/invitations.route";
 import { rolesRoute } from "@/modules/roles/roles.route";
 import { permissionsRoute } from "@/modules/permissions/permissions.route";
 import { dashboardRoute } from "@/modules/dashboard/dashboard.route";
+import { uploadsRoute } from "@/modules/uploads/uploads.route";
 
 const app = new Elysia()
   .onError(({ error }) => {
@@ -57,6 +58,7 @@ const app = new Elysia()
           { name: "Invitations", description: "Organization invitation management endpoints" },
           { name: "Roles", description: "Custom role management endpoints" },
           { name: "Dashboard", description: "Dashboard summary and metrics endpoints" },
+          { name: "Uploads", description: "File upload and media management endpoints" },
         ],
       },
       mapJsonSchema: { zod: z.toJSONSchema },
@@ -89,6 +91,7 @@ const app = new Elysia()
   .use(rolesRoute)
   .use(permissionsRoute)
   .use(dashboardRoute)
+  .use(uploadsRoute)
   .get("/health", () => "ok")
   .listen(Number(process.env.PORT) || 8000);
 

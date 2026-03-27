@@ -58,7 +58,10 @@ export const Route = createFileRoute('/_dashboard/products/trashed/')({
 })
 
 interface SortableHeaderProps {
-  column: { toggleSorting: (desc: boolean) => void; getIsSorted: () => false | 'asc' | 'desc' }
+  column: {
+    toggleSorting: (desc: boolean) => void
+    getIsSorted: () => false | 'asc' | 'desc'
+  }
   children: React.ReactNode
 }
 
@@ -82,7 +85,13 @@ function SortableHeader({ column, children }: SortableHeaderProps) {
   )
 }
 
-function TableSkeletonRows({ rows = 5, cols = 3 }: { rows?: number; cols?: number }) {
+function TableSkeletonRows({
+  rows = 5,
+  cols = 3,
+}: {
+  rows?: number
+  cols?: number
+}) {
   return Array.from({ length: rows }, (__, i) => (
     <TableRow key={i} className="border-b border-border/40">
       {Array.from({ length: cols }, (___, j) => (
@@ -134,9 +143,8 @@ function TrashedProductsPage() {
   const canDelete = useHasPermission('product:delete')
 
   const [restoreDialogOpen, setRestoreDialogOpen] = React.useState(false)
-  const [restoringProduct, setRestoringProduct] = React.useState<Product | null>(
-    null,
-  )
+  const [restoringProduct, setRestoringProduct] =
+    React.useState<Product | null>(null)
 
   const products = data?.data ?? []
   const meta = data?.meta
@@ -157,13 +165,10 @@ function TrashedProductsPage() {
     [restoreProduct],
   )
 
-  const openRestoreDialog = React.useCallback(
-    (product: Product) => {
-      setRestoringProduct(product)
-      setRestoreDialogOpen(true)
-    },
-    [],
-  )
+  const openRestoreDialog = React.useCallback((product: Product) => {
+    setRestoringProduct(product)
+    setRestoreDialogOpen(true)
+  }, [])
 
   const columns = React.useMemo<ColumnDef<Product>[]>(
     () => [
@@ -311,11 +316,7 @@ function TrashedProductsPage() {
                   <p className="text-destructive font-medium text-lg mb-4">
                     Gagal memuat data terhapus.
                   </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => refetch()}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => refetch()}>
                     Coba lagi
                   </Button>
                 </TableCell>
@@ -401,7 +402,9 @@ function TrashedProductsPage() {
             </AlertDialogCancel>
             <AlertDialogAction
               variant="default"
-              onClick={() => restoringProduct && handleRestore(restoringProduct)}
+              onClick={() =>
+                restoringProduct && handleRestore(restoringProduct)
+              }
               disabled={restoreProduct.isPending}
             >
               {restoreProduct.isPending ? 'Memulihkan...' : 'Pulihkan'}

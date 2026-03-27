@@ -89,6 +89,8 @@ model Organization {
 
   organizationroles OrganizationRole[]
 
+  media Media[]
+
   @@unique([slug])
   @@map("organization")
 }
@@ -408,4 +410,20 @@ model OrganizationRole {
   @@index([organizationId])
   @@index([role])
   @@map("organizationRole")
+}
+
+model Media {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  key            String       @unique
+  filename       String
+  contentType    String
+  size           Int
+  purpose        String?
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([purpose])
+  @@map("media")
 }

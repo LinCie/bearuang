@@ -36,7 +36,11 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-import { useTrashedCustomers, useRestoreCustomer, customerKeys } from '@/modules/customers'
+import {
+  useTrashedCustomers,
+  useRestoreCustomer,
+  customerKeys,
+} from '@/modules/customers'
 import type { Customer } from '@/modules/customers'
 import { useDebounce } from '@/hooks/use-debounce'
 import { useHasPermission } from '@/lib/use-permissions'
@@ -81,9 +85,7 @@ function TrashedCustomersPage() {
   const customers = data?.data ?? []
   const meta = data?.meta
 
-  const [restoringIds, setRestoringIds] = React.useState<Set<string>>(
-    new Set(),
-  )
+  const [restoringIds, setRestoringIds] = React.useState<Set<string>>(new Set())
   const [exitingIds, setExitingIds] = React.useState<Set<string>>(new Set())
   const [enteringIds, setEnteringIds] = React.useState<Set<string>>(new Set())
 
@@ -96,9 +98,9 @@ function TrashedCustomersPage() {
 
   const EXIT_DURATION = prefersReducedMotion ? 0 : 280
 
-  const [rowSelection, setRowSelection] = React.useState<Record<string, boolean>>(
-    {},
-  )
+  const [rowSelection, setRowSelection] = React.useState<
+    Record<string, boolean>
+  >({})
   const [isBatchRestoring, setIsBatchRestoring] = React.useState(false)
 
   const selectedCount = Object.keys(rowSelection).length
@@ -115,9 +117,10 @@ function TrashedCustomersPage() {
       setExitingIds(new Set(selectedIds))
     }
 
-    const previousData = queryClient.getQueryData<
-      { data: Customer[]; meta?: { totalPages: number; total: number } }
-    >(customerKeys.trashed())
+    const previousData = queryClient.getQueryData<{
+      data: Customer[]
+      meta?: { totalPages: number; total: number }
+    }>(customerKeys.trashed())
 
     const animationTimer = setTimeout(() => {
       queryClient.setQueryData(
@@ -136,12 +139,9 @@ function TrashedCustomersPage() {
       const results = await Promise.allSettled(
         selectedIds.map((id) => restoreCustomer.mutateAsync(id)),
       )
-      const restored = previousData?.data.filter((c) =>
-        selectedIds.includes(c.id),
-      ) ?? []
-      const failedCount = results.filter(
-        (r) => r.status === 'rejected',
-      ).length
+      const restored =
+        previousData?.data.filter((c) => selectedIds.includes(c.id)) ?? []
+      const failedCount = results.filter((r) => r.status === 'rejected').length
       if (failedCount > 0) {
         clearTimeout(animationTimer)
         toast.error(
@@ -149,9 +149,7 @@ function TrashedCustomersPage() {
         )
         queryClient.invalidateQueries({ queryKey: customerKeys.trashed() })
       } else {
-        toast.success(
-          `${restored.length} pelanggan telah dipulihkan`,
-        )
+        toast.success(`${restored.length} pelanggan telah dipulihkan`)
       }
       setExitingIds(new Set())
       setRowSelection({})
@@ -159,7 +157,13 @@ function TrashedCustomersPage() {
       setIsBatchRestoring(false)
       setRestoringIds(new Set())
     }
-  }, [rowSelection, queryClient, prefersReducedMotion, EXIT_DURATION, restoreCustomer])
+  }, [
+    rowSelection,
+    queryClient,
+    prefersReducedMotion,
+    EXIT_DURATION,
+    restoreCustomer,
+  ])
 
   const handleRestore = React.useCallback(
     async (customer: Customer) => {
@@ -170,9 +174,10 @@ function TrashedCustomersPage() {
         setExitingIds((prev) => new Set(prev).add(customerId))
       }
 
-      const previousData = queryClient.getQueryData<
-        { data: Customer[]; meta?: { totalPages: number; total: number } }
-      >(customerKeys.trashed())
+      const previousData = queryClient.getQueryData<{
+        data: Customer[]
+        meta?: { totalPages: number; total: number }
+      }>(customerKeys.trashed())
 
       const animationTimer = setTimeout(() => {
         queryClient.setQueryData(
@@ -237,9 +242,7 @@ function TrashedCustomersPage() {
               t.getIsAllPageRowsSelected() ||
               (t.getIsSomePageRowsSelected() && 'indeterminate')
             }
-            onCheckedChange={(value) =>
-              t.toggleAllPageRowsSelected(!!value)
-            }
+            onCheckedChange={(value) => t.toggleAllPageRowsSelected(!!value)}
             aria-label="Pilih semua pelanggan"
             disabled={!canDelete || isBatchRestoring}
           />
