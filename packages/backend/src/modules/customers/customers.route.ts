@@ -141,6 +141,67 @@ export const customersRoute = new Elysia({
     },
   )
   .get(
+    "/trashed",
+    async ({ organization, query }) => {
+      const { page, pageSize, search, sortBy, sortOrder } = query;
+      const { skip, take } = paginationToSkipTake(page, pageSize);
+      const { data, total } = await customersService.listTrashedCustomers(
+        organization.id,
+        {
+          skip,
+          take,
+          search,
+          orderBy: sortBy
+            ? { field: sortBy, order: sortOrder ?? "desc" }
+            : undefined,
+        },
+      );
+      return {
+        data: data.map(serializeCustomer),
+        meta: buildPaginationMeta(total, page, pageSize),
+      };
+    },
+    {
+      requireAuth: true,
+      requireOrg: true,
+      requirePermission: { customer: ["view"] },
+      query: listCustomersQuery,
+      response: {
+        200: paginatedResponse(customerSchema),
+      },
+      detail: {
+        summary: "List trashed customers",
+        description:
+          "Retrieves a paginated list of soft-deleted customers for the authenticated organization.",
+      },
+    },
+  )
+  .post(
+    "/:id/restore",
+    async ({ organization, params, status }) => {
+      const restored = await customersService.restoreCustomer(
+        organization.id,
+        params.id,
+      );
+      if (!restored) return status(404, { message: "Customer not found" });
+      return status(200, { message: "Customer restored" });
+    },
+    {
+      requireAuth: true,
+      requireOrg: true,
+      requirePermission: { customer: ["delete"] },
+      params: customerIdParam,
+      response: {
+        200: errorResponse,
+        404: errorResponse,
+      },
+      detail: {
+        summary: "Restore a customer",
+        description: "Restores a soft-deleted customer by setting isActive to true.",
+      },
+    },
+  )
+  .get(
     "/:id",
     async ({ organization, params, status }) => {
       const customer = await customersService.getCustomer(

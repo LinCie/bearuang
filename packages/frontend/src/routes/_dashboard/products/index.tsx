@@ -345,16 +345,28 @@ function ProductsPage() {
               Kelola daftar barang dan layanan yang ditawarkan toko Anda.
             </p>
           </div>
-          {canCreate && (
-            <Button
-              onClick={handleCreate}
-              size="lg"
-              className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
-            >
-              <Plus className="mr-2 h-5 w-5" />
-              Tambah Produk
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            <Link to="/products/trashed">
+              <Button
+                variant="outline"
+                size="lg"
+                className="active:scale-95 shadow-sm"
+              >
+                <Trash2 className="mr-2 h-5 w-5" />
+                Produk Terhapus
+              </Button>
+            </Link>
+            {canCreate && (
+              <Button
+                onClick={handleCreate}
+                size="lg"
+                className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Tambah Produk
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Search Bar */}
@@ -675,7 +687,8 @@ function ProductsPage() {
             <span className="font-medium text-foreground">
               {deletingProduct?.name}
             </span>
-            . Produk ini akan hilang selamanya dan tidak bisa dikembalikan.
+            . Produk ini akan dipindahkan ke tempat sampah dan dapat dipulihkan
+            nanti.
           </>
         }
         onConfirm={handleDeleteConfirm}

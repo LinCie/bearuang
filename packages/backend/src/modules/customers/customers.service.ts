@@ -13,7 +13,7 @@ export const customersService = {
   ) {
     const where = {
       organizationId,
-      ...(params?.isActive !== undefined && { isActive: params.isActive }),
+      isActive: params?.isActive ?? true,
       ...(params?.search && {
         OR: [
           { name: { contains: params.search, mode: "insensitive" as const } },
@@ -33,6 +33,50 @@ export const customersService = {
       prisma.customer.count({ where }),
     ])
     return { data, total }
+  },
+
+  async listTrashedCustomers(
+    organizationId: string,
+    params?: {
+      skip?: number
+      take?: number
+      search?: string
+      orderBy?: { field: "name" | "createdAt" | "updatedAt"; order: "asc" | "desc" }
+    },
+  ) {
+    const where = {
+      organizationId,
+      isActive: false,
+      ...(params?.search && {
+        OR: [
+          { name: { contains: params.search, mode: "insensitive" as const } },
+          { email: { contains: params.search, mode: "insensitive" as const } },
+        ],
+      }),
+    }
+    const [data, total] = await prisma.$transaction([
+      prisma.customer.findMany({
+        where,
+        skip: params?.skip,
+        take: params?.take ?? 50,
+        orderBy: params?.orderBy
+          ? { [params.orderBy.field]: params.orderBy.order }
+          : { createdAt: "desc" },
+      }),
+      prisma.customer.count({ where }),
+    ])
+    return { data, total }
+  },
+
+  async restoreCustomer(organizationId: string, id: string) {
+    const existing = await prisma.customer.findFirst({
+      where: { id, organizationId, isActive: false },
+    })
+    if (!existing) return null
+    return prisma.customer.update({
+      where: { id },
+      data: { isActive: true },
+    })
   },
 
   async getCustomer(organizationId: string, id: string) {

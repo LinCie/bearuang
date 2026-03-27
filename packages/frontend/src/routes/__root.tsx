@@ -5,6 +5,7 @@ import {
 } from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { Toaster } from 'sonner'
 
 import appCss from '../styles.css?url'
 
@@ -38,12 +39,13 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="id">
       <head>
         <HeadContent />
       </head>
       <body>
         <TooltipProvider>{children}</TooltipProvider>
+        <Toaster position="top-center" richColors />
         <Scripts />
       </body>
     </html>

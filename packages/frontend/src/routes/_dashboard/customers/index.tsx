@@ -367,16 +367,28 @@ function CustomersPage() {
               Anda.
             </p>
           </div>
-          {canCreate && (
-            <Button
-              onClick={handleCreate}
-              size="lg"
-              className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
-            >
-              <Plus className="mr-2 h-5 w-5" />
-              Tambah Pelanggan
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            <Link to="/customers/trashed">
+              <Button
+                variant="outline"
+                size="lg"
+                className="active:scale-95 shadow-sm"
+              >
+                <Trash2 className="mr-2 h-5 w-5" />
+                Pelanggan Terhapus
+              </Button>
+            </Link>
+            {canCreate && (
+              <Button
+                onClick={handleCreate}
+                size="lg"
+                className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Tambah Pelanggan
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Search Bar */}
@@ -697,8 +709,8 @@ function CustomersPage() {
             <span className="font-medium text-foreground">
               {deletingCustomer?.name}
             </span>
-            . Pelanggan ini akan dihapus secara permanen dan tidak bisa
-            dikembalikan.
+            . Pelanggan ini akan dipindahkan ke tempat sampah dan dapat
+            dipulihkan nanti.
           </>
         }
         onConfirm={handleDeleteConfirm}

@@ -192,6 +192,67 @@ export const variantsRoute = new Elysia({ tags: ["Variants"] })
         },
       )
       .get(
+        "/trashed",
+        async ({ organization, query }) => {
+          const { page, pageSize, search, sortBy, sortOrder } = query;
+          const { skip, take } = paginationToSkipTake(page, pageSize);
+          const { data, total } = await variantsService.listTrashedVariants(
+            organization.id,
+            {
+              search,
+              skip,
+              take,
+              orderBy: sortBy
+                ? { field: sortBy, order: sortOrder ?? "desc" }
+                : undefined,
+            },
+          );
+          return {
+            data: data.map(serializeVariantWithProduct),
+            meta: buildPaginationMeta(total, page, pageSize),
+          };
+        },
+        {
+          requireAuth: true,
+          requireOrg: true,
+          requirePermission: { productVariant: ["view"] },
+          query: searchVariantQuery,
+          response: {
+            200: paginatedResponse(variantWithProductSchema),
+          },
+          detail: {
+            summary: "List trashed variants",
+            description: "Retrieves a paginated list of all soft-deleted variants.",
+          },
+        },
+      )
+      .post(
+        "/:id/restore",
+        async ({ organization, params, status }) => {
+          const count = await variantsService.restoreVariant(
+            organization.id,
+            params.id,
+          );
+          if (count.count === 0)
+            return status(404, { message: "Variant not found" });
+          return status(200, { message: "Variant restored" });
+        },
+        {
+          requireAuth: true,
+          requireOrg: true,
+          requirePermission: { productVariant: ["delete"] },
+          params: variantIdParam,
+          response: {
+            200: errorResponse,
+            404: errorResponse,
+          },
+          detail: {
+            summary: "Restore a variant",
+            description: "Restores a soft-deleted variant by its ID.",
+          },
+        },
+      )
+      .get(
         "/:id",
         async ({ organization, params, status }) => {
           const variant = await variantsService.getVariant(

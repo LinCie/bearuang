@@ -33,6 +33,8 @@ import { Route as DashboardSalesOrdersSalesOrderIdRouteImport } from './routes/_
 import { Route as DashboardPurchaseOrdersPurchaseOrderIdRouteImport } from './routes/_dashboard/purchase-orders/$purchaseOrderId'
 import { Route as DashboardProductsProductIdRouteImport } from './routes/_dashboard/products/$productId'
 import { Route as DashboardCustomersCustomerIdRouteImport } from './routes/_dashboard/customers/$customerId'
+import { Route as DashboardProductsTrashedIndexRouteImport } from './routes/_dashboard/products/trashed/index'
+import { Route as DashboardCustomersTrashedIndexRouteImport } from './routes/_dashboard/customers/trashed/index'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -165,6 +167,18 @@ const DashboardCustomersCustomerIdRoute =
     path: '/customers/$customerId',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
+const DashboardProductsTrashedIndexRoute =
+  DashboardProductsTrashedIndexRouteImport.update({
+    id: '/trashed/',
+    path: '/trashed/',
+    getParentRoute: () => DashboardProductsRouteRoute,
+  } as any)
+const DashboardCustomersTrashedIndexRoute =
+  DashboardCustomersTrashedIndexRouteImport.update({
+    id: '/customers/trashed/',
+    path: '/customers/trashed/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof DashboardIndexRoute
@@ -190,6 +204,8 @@ export interface FileRoutesByFullPath {
   '/stock-movements/': typeof DashboardStockMovementsIndexRoute
   '/suppliers/': typeof DashboardSuppliersIndexRoute
   '/warehouses/': typeof DashboardWarehousesIndexRoute
+  '/customers/trashed/': typeof DashboardCustomersTrashedIndexRoute
+  '/products/trashed/': typeof DashboardProductsTrashedIndexRoute
 }
 export interface FileRoutesByTo {
   '/organizations': typeof OrganizationsRoute
@@ -213,6 +229,8 @@ export interface FileRoutesByTo {
   '/stock-movements': typeof DashboardStockMovementsIndexRoute
   '/suppliers': typeof DashboardSuppliersIndexRoute
   '/warehouses': typeof DashboardWarehousesIndexRoute
+  '/customers/trashed': typeof DashboardCustomersTrashedIndexRoute
+  '/products/trashed': typeof DashboardProductsTrashedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -240,6 +258,8 @@ export interface FileRoutesById {
   '/_dashboard/stock-movements/': typeof DashboardStockMovementsIndexRoute
   '/_dashboard/suppliers/': typeof DashboardSuppliersIndexRoute
   '/_dashboard/warehouses/': typeof DashboardWarehousesIndexRoute
+  '/_dashboard/customers/trashed/': typeof DashboardCustomersTrashedIndexRoute
+  '/_dashboard/products/trashed/': typeof DashboardProductsTrashedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -267,6 +287,8 @@ export interface FileRouteTypes {
     | '/stock-movements/'
     | '/suppliers/'
     | '/warehouses/'
+    | '/customers/trashed/'
+    | '/products/trashed/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/organizations'
@@ -290,6 +312,8 @@ export interface FileRouteTypes {
     | '/stock-movements'
     | '/suppliers'
     | '/warehouses'
+    | '/customers/trashed'
+    | '/products/trashed'
   id:
     | '__root__'
     | '/_dashboard'
@@ -316,6 +340,8 @@ export interface FileRouteTypes {
     | '/_dashboard/stock-movements/'
     | '/_dashboard/suppliers/'
     | '/_dashboard/warehouses/'
+    | '/_dashboard/customers/trashed/'
+    | '/_dashboard/products/trashed/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -495,18 +521,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCustomersCustomerIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/_dashboard/products/trashed/': {
+      id: '/_dashboard/products/trashed/'
+      path: '/trashed'
+      fullPath: '/products/trashed/'
+      preLoaderRoute: typeof DashboardProductsTrashedIndexRouteImport
+      parentRoute: typeof DashboardProductsRouteRoute
+    }
+    '/_dashboard/customers/trashed/': {
+      id: '/_dashboard/customers/trashed/'
+      path: '/customers/trashed'
+      fullPath: '/customers/trashed/'
+      preLoaderRoute: typeof DashboardCustomersTrashedIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
   }
 }
 
 interface DashboardProductsRouteRouteChildren {
   DashboardProductsProductIdRoute: typeof DashboardProductsProductIdRoute
   DashboardProductsIndexRoute: typeof DashboardProductsIndexRoute
+  DashboardProductsTrashedIndexRoute: typeof DashboardProductsTrashedIndexRoute
 }
 
 const DashboardProductsRouteRouteChildren: DashboardProductsRouteRouteChildren =
   {
     DashboardProductsProductIdRoute: DashboardProductsProductIdRoute,
     DashboardProductsIndexRoute: DashboardProductsIndexRoute,
+    DashboardProductsTrashedIndexRoute: DashboardProductsTrashedIndexRoute,
   }
 
 const DashboardProductsRouteRouteWithChildren =
@@ -547,6 +589,7 @@ interface DashboardRouteRouteChildren {
   DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute
   DashboardStockMovementsIndexRoute: typeof DashboardStockMovementsIndexRoute
   DashboardSuppliersIndexRoute: typeof DashboardSuppliersIndexRoute
+  DashboardCustomersTrashedIndexRoute: typeof DashboardCustomersTrashedIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
@@ -568,6 +611,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,
   DashboardStockMovementsIndexRoute: DashboardStockMovementsIndexRoute,
   DashboardSuppliersIndexRoute: DashboardSuppliersIndexRoute,
+  DashboardCustomersTrashedIndexRoute: DashboardCustomersTrashedIndexRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(

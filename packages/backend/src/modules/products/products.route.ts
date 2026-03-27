@@ -167,6 +167,72 @@ export const productsRoute = new Elysia({
     },
   )
   .get(
+    "/trashed",
+    async ({ organization, query }) => {
+      const { page, pageSize, search, sortBy, sortOrder } = query;
+      const { skip, take } = paginationToSkipTake(page, pageSize);
+      const { data, total } = await productsService.listTrashedProducts(
+        organization.id,
+        {
+          skip,
+          take,
+          search,
+          orderBy: sortBy ? { field: sortBy, order: sortOrder ?? "desc" } : undefined,
+        },
+      );
+      return {
+        data: data.map((p) => ({
+          ...p,
+          createdAt: p.createdAt.toISOString(),
+          updatedAt: p.updatedAt.toISOString(),
+          deletedAt: p.deletedAt?.toISOString() ?? null,
+          variants: p.variants.map((v) => ({
+            ...v,
+            price: v.price.toNumber(),
+            createdAt: v.createdAt.toISOString(),
+            updatedAt: v.updatedAt.toISOString(),
+            deletedAt: v.deletedAt?.toISOString() ?? null,
+          })),
+        })),
+        meta: buildPaginationMeta(total, page, pageSize),
+      };
+    },
+    {
+      requireAuth: true,
+      requireOrg: true,
+      requirePermission: { product: ["view"] },
+      query: listProductsQuery,
+      response: {
+        200: paginatedResponse(productSchema),
+      },
+      detail: {
+        summary: "List trashed products",
+        description:
+          "Retrieves a paginated list of all soft-deleted products belonging to the authenticated organization.",
+      },
+    },
+  )
+  .post(
+    "/:id/restore",
+    async ({ organization, params, status }) => {
+      await productsService.restoreProduct(organization.id, params.id);
+      return status(200, { message: "Product restored" });
+    },
+    {
+      requireAuth: true,
+      requireOrg: true,
+      requirePermission: { product: ["delete"] },
+      params: productIdParam,
+      response: {
+        200: errorResponse,
+      },
+      detail: {
+        summary: "Restore a product",
+        description: "Restores a soft-deleted product by its ID.",
+      },
+    },
+  )
+  .get(
     "/:id",
     async ({ organization, params, status }) => {
       const product = await productsService.getProduct(

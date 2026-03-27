@@ -9,9 +9,12 @@ import {
   useCreateVariant,
   useUpdateVariant,
   useDeleteVariant,
+  useRestoreVariant,
+  useProductTrashedVariants,
   ProductDetailHeader,
   EmptyVariantsState,
   VariantsTable,
+  TrashedVariantsTable,
   ProductLoadingState,
   ProductErrorState,
   ProductFormSheet,
@@ -26,6 +29,7 @@ import type {
 } from '@/modules/products'
 import { Button } from '@/components/ui/button'
 import { useHasPermission } from '@/lib/use-permissions'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_dashboard/products/$productId')({
   component: ProductDetailPage,
@@ -38,6 +42,7 @@ function ProductDetailPage() {
   const router = useRouter()
   const { data: product, isLoading, isError } = useProduct(productId)
   const { data: variantsData } = useProductVariants(productId)
+  const { data: trashedVariants } = useProductTrashedVariants(productId)
 
   const variants: ProductVariant[] = variantsData ?? product?.variants ?? []
 
@@ -45,6 +50,7 @@ function ProductDetailPage() {
   const createVariant = useCreateVariant(productId)
   const updateVariant = useUpdateVariant()
   const deleteVariant = useDeleteVariant()
+  const restoreVariant = useRestoreVariant()
   const updateProduct = useUpdateProduct()
   const deleteProduct = useDeleteProduct()
 
@@ -107,6 +113,18 @@ function ProductDetailPage() {
     setProductDeleteDialogOpen(false)
     router.navigate({ to: '/products' })
   }, [product, deleteProduct, router])
+
+  const handleRestoreVariant = React.useCallback(
+    async (variant: ProductVariant) => {
+      try {
+        await restoreVariant.mutateAsync(variant.id)
+        toast.success(`Varian "${variant.name}" telah dipulihkan`)
+      } catch (error) {
+        toast.error('Gagal memulihkan varian')
+      }
+    },
+    [restoreVariant],
+  )
 
   async function handleProductSubmit(values: {
     name: string
@@ -238,6 +256,14 @@ function ProductDetailPage() {
                 />
               )}
             </div>
+
+            {trashedVariants && trashedVariants.length > 0 && (
+              <TrashedVariantsTable
+                variants={trashedVariants}
+                onRestore={handleRestoreVariant}
+                isRestorePending={restoreVariant.isPending}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -265,8 +291,8 @@ function ProductDetailPage() {
             <span className="font-medium text-foreground">
               {deletingVariant?.name}
             </span>{' '}
-            ({deletingVariant?.sku}). Varian ini akan dihapus dan tidak bisa
-            dikembalikan.
+            ({deletingVariant?.sku}). Varian ini akan dipindahkan ke tempat
+            sampah dan dapat dipulihkan nanti.
           </>
         }
         onConfirm={handleDeleteConfirm}
@@ -292,7 +318,8 @@ function ProductDetailPage() {
           <>
             Anda akan menghapus{' '}
             <span className="font-medium text-foreground">{product.name}</span>.
-            Produk ini akan hilang selamanya dan tidak bisa dikembalikan.
+            Produk ini akan dipindahkan ke tempat sampah dan dapat dipulihkan
+            nanti.
           </>
         }
         onConfirm={handleProductDeleteConfirm}

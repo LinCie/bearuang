@@ -13,6 +13,9 @@ export const productKeys = {
   lists: () => [...productKeys.all, 'list'] as const,
   list: (params: ListProductsQuery) =>
     [...productKeys.lists(), params] as const,
+  trashed: () => [...productKeys.all, 'trashed'] as const,
+  trashedList: (params: ListProductsQuery) =>
+    [...productKeys.trashed(), params] as const,
   details: () => [...productKeys.all, 'detail'] as const,
   detail: (id: string) => [...productKeys.details(), id] as const,
 }
@@ -34,6 +37,25 @@ export function useProducts(params: Partial<ListProductsQuery> = {}) {
     queryKey: productKeys.list(params as ListProductsQuery),
     queryFn: async () => {
       const { data, error } = await api.products.get({
+        query: {
+          page: params.page ?? 1,
+          pageSize: params.pageSize ?? 50,
+          sortBy: params.sortBy,
+          sortOrder: params.sortOrder,
+          search: params.search,
+        },
+      })
+      if (error) throw error
+      return data
+    },
+  })
+}
+
+export function useTrashedProducts(params: Partial<ListProductsQuery> = {}) {
+  return useQuery({
+    queryKey: productKeys.trashedList(params as ListProductsQuery),
+    queryFn: async () => {
+      const { data, error } = await api.products.trashed.get({
         query: {
           page: params.page ?? 1,
           pageSize: params.pageSize ?? 50,
@@ -109,6 +131,24 @@ export function useDeleteProduct() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: productKeys.trashed() })
+    },
+  })
+}
+
+export function useRestoreProduct() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await api.products({ id }).restore.post()
+      if (error) throw error
+      return data
+    },
+    onSuccess: (_data, id) => {
+      queryClient.invalidateQueries({ queryKey: productKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: productKeys.trashed() })
+      queryClient.invalidateQueries({ queryKey: productKeys.detail(id) })
     },
   })
 }

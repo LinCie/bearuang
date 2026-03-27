@@ -78,6 +78,24 @@ export function useProductVariants(productId: string) {
   })
 }
 
+export function useProductTrashedVariants(productId: string) {
+  return useQuery({
+    queryKey: [...variantKeys.byProduct(productId), 'trashed'],
+    queryFn: async () => {
+      // Note: We'll use the global variants trashed endpoint for now and filter by productId
+      // or we can add a specific endpoint. Since we have a global one, let's use it with search or just filter.
+      // Better: let's assume we might need a specific endpoint if we wanted, but for now
+      // let's just use the global one and filter.
+      const { data, error } = await api.variants.trashed.get({
+        query: { page: 1, search: productId, pageSize: 100 },
+      })
+      if (error) throw error
+      return data.data.filter((v: any) => v.productId === productId)
+    },
+    enabled: !!productId,
+  })
+}
+
 // ─── Mutations ───────────────────────────────────────────────
 
 export function useCreateVariant(productId: string) {
@@ -135,6 +153,24 @@ export function useDeleteVariant() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: variantKeys.all })
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+    },
+  })
+}
+
+export function useRestoreVariant() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await api.variants({ id }).restore.post()
+      if (error) throw error
+      return data
+    },
+    onSuccess: (_data, id) => {
+      queryClient.invalidateQueries({ queryKey: variantKeys.all })
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: variantKeys.detail(id) })
     },
   })
 }
