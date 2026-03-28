@@ -10,6 +10,39 @@ import {
   paginationToSkipTake,
   sortQuery,
 } from '@/common/pagination'
+import { getPublicUrl } from '@/integrations/s3'
+
+const mediaSchema = z.object({
+  id: z.string(),
+  organizationId: z.string(),
+  key: z.string(),
+  filename: z.string(),
+  contentType: z.string(),
+  size: z.number(),
+  purpose: z.string().nullable(),
+  url: z.string(),
+  createdAt: z.iso.datetime(),
+})
+
+const productImageSchema = z.object({
+  id: z.string(),
+  productId: z.string(),
+  mediaId: z.string(),
+  altText: z.string().nullable(),
+  sortOrder: z.number(),
+  createdAt: z.iso.datetime(),
+  media: mediaSchema,
+})
+
+const variantImageSchema = z.object({
+  id: z.string(),
+  variantId: z.string(),
+  mediaId: z.string(),
+  altText: z.string().nullable(),
+  sortOrder: z.number(),
+  createdAt: z.iso.datetime(),
+  media: mediaSchema,
+})
 
 export const variantSchema = z.object({
   id: z.string(),
@@ -25,6 +58,7 @@ export const variantSchema = z.object({
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
   deletedAt: z.iso.datetime().nullable(),
+  images: z.array(variantImageSchema),
 })
 
 export const productSchema = z.object({
@@ -38,6 +72,7 @@ export const productSchema = z.object({
   updatedAt: z.iso.datetime(),
   deletedAt: z.iso.datetime().nullable(),
   variants: z.array(variantSchema),
+  images: z.array(productImageSchema),
 })
 
 const slugRegex = /^[a-z0-9_-]+$/
@@ -85,6 +120,82 @@ const productIdParam = z.object({
   id: z.string().uuid(),
 })
 
+const addImageDto = z.object({
+  mediaId: z.string(),
+  altText: z.string().optional(),
+})
+
+const reorderImagesDto = z.object({
+  imageIds: z.array(z.string()),
+})
+
+const imageIdParam = z.object({
+  id: z.string().uuid(),
+  imageId: z.string().uuid(),
+})
+
+export type ProductImage = z.infer<typeof productImageSchema>
+export type VariantImage = z.infer<typeof variantImageSchema>
+
+function serializeMedia(m: { createdAt: Date; key: string }) {
+  return {
+    ...m,
+    url: getPublicUrl(m.key),
+    createdAt: m.createdAt.toISOString(),
+  }
+}
+
+function serializeImage(img: {
+  createdAt: Date
+  media: { createdAt: Date; key: string }
+}): ProductImage {
+  return {
+    ...img,
+    createdAt: img.createdAt.toISOString(),
+    media: serializeMedia(img.media),
+  } as unknown as ProductImage
+}
+
+function serializeVariant(v: {
+  price: { toNumber: () => number }
+  createdAt: Date
+  updatedAt: Date
+  deletedAt: Date | null
+  images: Array<{ createdAt: Date; media: { createdAt: Date; key: string } }>
+}): ProductVariant {
+  return {
+    ...v,
+    price: v.price.toNumber(),
+    createdAt: v.createdAt.toISOString(),
+    updatedAt: v.updatedAt.toISOString(),
+    deletedAt: v.deletedAt?.toISOString() ?? null,
+    images: v.images.map(serializeImage),
+  } as unknown as ProductVariant
+}
+
+function serializeProduct(p: {
+  createdAt: Date
+  updatedAt: Date
+  deletedAt: Date | null
+  variants: Array<{
+    price: { toNumber: () => number }
+    createdAt: Date
+    updatedAt: Date
+    deletedAt: Date | null
+    images: Array<{ createdAt: Date; media: { createdAt: Date; key: string } }>
+  }>
+  images: Array<{ createdAt: Date; media: { createdAt: Date; key: string } }>
+}): Product {
+  return {
+    ...p,
+    createdAt: p.createdAt.toISOString(),
+    updatedAt: p.updatedAt.toISOString(),
+    deletedAt: p.deletedAt?.toISOString() ?? null,
+    variants: p.variants.map(serializeVariant),
+    images: p.images.map(serializeImage),
+  } as unknown as Product
+}
+
 export const productsRoute = new Elysia({
   prefix: '/products',
   tags: ['Products'],
@@ -107,19 +218,7 @@ export const productsRoute = new Elysia({
         },
       )
       return {
-        data: data.map((p) => ({
-          ...p,
-          createdAt: p.createdAt.toISOString(),
-          updatedAt: p.updatedAt.toISOString(),
-          deletedAt: p.deletedAt?.toISOString() ?? null,
-          variants: p.variants.map((v) => ({
-            ...v,
-            price: v.price.toNumber(),
-            createdAt: v.createdAt.toISOString(),
-            updatedAt: v.updatedAt.toISOString(),
-            deletedAt: v.deletedAt?.toISOString() ?? null,
-          })),
-        })),
+        data: data.map(serializeProduct),
         meta: buildPaginationMeta(total, page, pageSize),
       }
     },
@@ -142,19 +241,7 @@ export const productsRoute = new Elysia({
     '/',
     async ({ organization, body, status }) => {
       const product = await productsService.createProduct(organization.id, body)
-      return status(201, {
-        ...product,
-        createdAt: product.createdAt.toISOString(),
-        updatedAt: product.updatedAt.toISOString(),
-        deletedAt: product.deletedAt?.toISOString() ?? null,
-        variants: product.variants.map((v) => ({
-          ...v,
-          price: v.price.toNumber(),
-          createdAt: v.createdAt.toISOString(),
-          updatedAt: v.updatedAt.toISOString(),
-          deletedAt: v.deletedAt?.toISOString() ?? null,
-        })),
-      })
+      return status(201, serializeProduct(product))
     },
     {
       requireAuth: true,
@@ -188,19 +275,7 @@ export const productsRoute = new Elysia({
         },
       )
       return {
-        data: data.map((p) => ({
-          ...p,
-          createdAt: p.createdAt.toISOString(),
-          updatedAt: p.updatedAt.toISOString(),
-          deletedAt: p.deletedAt?.toISOString() ?? null,
-          variants: p.variants.map((v) => ({
-            ...v,
-            price: v.price.toNumber(),
-            createdAt: v.createdAt.toISOString(),
-            updatedAt: v.updatedAt.toISOString(),
-            deletedAt: v.deletedAt?.toISOString() ?? null,
-          })),
-        })),
+        data: data.map(serializeProduct),
         meta: buildPaginationMeta(total, page, pageSize),
       }
     },
@@ -247,19 +322,7 @@ export const productsRoute = new Elysia({
         params.id,
       )
       if (!product) return status(404, { message: 'Product not found' })
-      return {
-        ...product,
-        createdAt: product.createdAt.toISOString(),
-        updatedAt: product.updatedAt.toISOString(),
-        deletedAt: product.deletedAt?.toISOString() ?? null,
-        variants: product.variants.map((v) => ({
-          ...v,
-          price: v.price.toNumber(),
-          createdAt: v.createdAt.toISOString(),
-          updatedAt: v.updatedAt.toISOString(),
-          deletedAt: v.deletedAt?.toISOString() ?? null,
-        })),
-      }
+      return serializeProduct(product)
     },
     {
       requireAuth: true,
@@ -321,6 +384,80 @@ export const productsRoute = new Elysia({
       detail: {
         summary: 'Delete a product',
         description: 'Soft-deletes a product by its ID.',
+      },
+    },
+  )
+  .post(
+    '/:id/images',
+    async ({ organization, params, body, status }) => {
+      const image = await productsService.addProductImage(
+        organization.id,
+        params.id,
+        body,
+      )
+      return status(201, serializeImage(image))
+    },
+    {
+      requireAuth: true,
+      requireOrg: true,
+      requirePermission: { product: ['update'] },
+      params: productIdParam,
+      body: addImageDto,
+      response: {
+        201: productImageSchema,
+      },
+      detail: {
+        summary: 'Add image to product',
+        description: 'Attaches a media image to a product.',
+      },
+    },
+  )
+  .delete(
+    '/:id/images/:imageId',
+    async ({ organization, params, status }) => {
+      await productsService.removeProductImage(
+        organization.id,
+        params.id,
+        params.imageId,
+      )
+      return status(200, { message: 'Image removed' })
+    },
+    {
+      requireAuth: true,
+      requireOrg: true,
+      requirePermission: { product: ['update'] },
+      params: imageIdParam,
+      response: {
+        200: errorResponse,
+      },
+      detail: {
+        summary: 'Remove image from product',
+        description: 'Removes an image from a product.',
+      },
+    },
+  )
+  .patch(
+    '/:id/images/reorder',
+    async ({ organization, params, body }) => {
+      await productsService.reorderProductImages(
+        organization.id,
+        params.id,
+        body.imageIds,
+      )
+      return { message: 'Images reordered' }
+    },
+    {
+      requireAuth: true,
+      requireOrg: true,
+      requirePermission: { product: ['update'] },
+      params: productIdParam,
+      body: reorderImagesDto,
+      response: {
+        200: errorResponse,
+      },
+      detail: {
+        summary: 'Reorder product images',
+        description: 'Sets the display order of product images.',
       },
     },
   )

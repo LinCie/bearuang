@@ -1,4 +1,5 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { Plus } from 'lucide-react'
 import {
@@ -28,7 +29,10 @@ import type {
   ProductVariant,
 } from '@/modules/products'
 import { Button } from '@/components/ui/button'
+import { ImageGallery } from '@/components/ui/image-gallery'
+import type { GalleryImage } from '@/components/ui/image-gallery'
 import { useHasPermission } from '@/lib/use-permissions'
+import { api } from '@/lib/api'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_dashboard/products/$productId')({
@@ -40,6 +44,7 @@ export const Route = createFileRoute('/_dashboard/products/$productId')({
 function ProductDetailPage() {
   const { productId } = Route.useParams()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { data: product, isLoading, isError } = useProduct(productId)
   const { data: variantsData } = useProductVariants(productId)
   const { data: trashedVariants } = useProductTrashedVariants(productId)
@@ -131,6 +136,9 @@ function ProductDetailPage() {
     slug: string
     description: string
     isActive: boolean
+    pendingImages: { id: string }[]
+    removedImageIds: string[]
+    reorderedImageIds?: string[]
   }) {
     if (!product) return
     const input: UpdateProductInput & { id: string } = {
@@ -141,6 +149,22 @@ function ProductDetailPage() {
       isActive: values.isActive,
     }
     await updateProduct.mutateAsync(input)
+
+    for (const imageId of values.removedImageIds) {
+      await api.products({ id: product.id }).images({ imageId }).delete()
+    }
+    for (const media of values.pendingImages) {
+      await api.products({ id: product.id }).images.post({ mediaId: media.id })
+    }
+    if (values.reorderedImageIds && values.reorderedImageIds.length > 0) {
+      await api
+        .products({ id: product.id })
+        .images.reorder.patch({ imageIds: values.reorderedImageIds })
+    }
+
+    queryClient.invalidateQueries({
+      queryKey: ['products', 'detail', product.id],
+    })
     setProductSheetOpen(false)
   }
 
@@ -150,6 +174,8 @@ function ProductDetailPage() {
     price: number
     unit?: string
     isActive: boolean
+    pendingImages: { id: string }[]
+    removedImageIds: string[]
   }) {
     if (editingVariant) {
       const input: UpdateVariantInput & { id: string } = {
@@ -161,6 +187,18 @@ function ProductDetailPage() {
         isActive: values.isActive,
       }
       await updateVariant.mutateAsync(input)
+
+      for (const imageId of values.removedImageIds) {
+        await api
+          .variants({ id: editingVariant.id })
+          .images({ imageId })
+          .delete()
+      }
+      for (const media of values.pendingImages) {
+        await api
+          .variants({ id: editingVariant.id })
+          .images.post({ mediaId: media.id })
+      }
     } else {
       const input: CreateVariantInput = {
         sku: values.sku,
@@ -169,10 +207,21 @@ function ProductDetailPage() {
         unit: values.unit || undefined,
         isActive: values.isActive,
       }
-      await createVariant.mutateAsync(input)
+      const created = await createVariant.mutateAsync(input)
+
+      for (const media of values.pendingImages) {
+        await api
+          .variants({ id: created.id })
+          .images.post({ mediaId: media.id })
+      }
     }
     setSheetOpen(false)
     setEditingVariant(null)
+    if (product) {
+      queryClient.invalidateQueries({
+        queryKey: ['products', 'detail', product.id],
+      })
+    }
   }
 
   // ─── Loading State ─────────────────────────────────────────
@@ -226,6 +275,27 @@ function ProductDetailPage() {
               </div>
             )}
           </div>
+
+          {/* Images */}
+          {product.images.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                Gambar Produk
+              </h2>
+              <ImageGallery
+                images={[...product.images]
+                  .sort((a, b) => a.sortOrder - b.sortOrder)
+                  .map(
+                    (img): GalleryImage => ({
+                      src: img.media.url,
+                      alt: img.altText ?? img.media.filename,
+                    }),
+                  )}
+                columns={3}
+                aspectRatio="square"
+              />
+            </div>
+          )}
 
           {/* Variants Section */}
           <div className="flex flex-col gap-4">

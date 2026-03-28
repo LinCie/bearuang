@@ -11,6 +11,29 @@ import {
   paginationToSkipTake,
   sortQuery,
 } from '@/common/pagination'
+import { getPublicUrl } from '@/integrations/s3'
+
+const mediaSchema = z.object({
+  id: z.string(),
+  organizationId: z.string(),
+  key: z.string(),
+  filename: z.string(),
+  contentType: z.string(),
+  size: z.number(),
+  purpose: z.string().nullable(),
+  url: z.string(),
+  createdAt: z.iso.datetime(),
+})
+
+const variantImageSchema = z.object({
+  id: z.string(),
+  variantId: z.string(),
+  mediaId: z.string(),
+  altText: z.string().nullable(),
+  sortOrder: z.number(),
+  createdAt: z.iso.datetime(),
+  media: mediaSchema,
+})
 
 export const variantSchema = z.object({
   id: z.string(),
@@ -26,6 +49,7 @@ export const variantSchema = z.object({
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
   deletedAt: z.iso.datetime().nullable(),
+  images: z.array(variantImageSchema),
 })
 
 export const variantWithProductSchema = variantSchema.extend({
@@ -66,20 +90,56 @@ const variantIdParam = z.object({
   id: z.string().uuid(),
 })
 
+const variantImageIdParam = z.object({
+  id: z.string().uuid(),
+  imageId: z.string().uuid(),
+})
+
+const addVariantImageDto = z.object({
+  mediaId: z.string().min(1),
+  altText: z.string().optional(),
+})
+
 const productIdParam = z.object({
   id: z.string().uuid(),
 })
 
-const serializeVariant = (v: ProductVariant) => ({
+const serializeMedia = (m: { createdAt: Date; key: string }) => ({
+  ...m,
+  url: getPublicUrl(m.key),
+  createdAt: m.createdAt.toISOString(),
+})
+
+const serializeVariantImage = (img: {
+  createdAt: Date
+  media: { createdAt: Date; key: string }
+}) =>
+  ({
+    ...img,
+    createdAt: img.createdAt.toISOString(),
+    media: serializeMedia(img.media),
+  }) as unknown as VariantImage
+
+export type VariantImage = z.infer<typeof variantImageSchema>
+
+const serializeVariant = (
+  v: ProductVariant & {
+    images?: Array<{ createdAt: Date; media: { createdAt: Date; key: string } }>
+  },
+) => ({
   ...v,
   price: v.price.toNumber(),
   createdAt: v.createdAt.toISOString(),
   updatedAt: v.updatedAt.toISOString(),
   deletedAt: v.deletedAt?.toISOString() ?? null,
+  images: (v.images ?? []).map(serializeVariantImage),
 })
 
 const serializeVariantWithProduct = (
-  v: ProductVariant & { product: { name: string } },
+  v: ProductVariant & {
+    product: { name: string }
+    images?: Array<{ createdAt: Date; media: { createdAt: Date; key: string } }>
+  },
 ) => ({
   ...serializeVariant(v),
   product: v.product,
@@ -340,6 +400,55 @@ export const variantsRoute = new Elysia({ tags: ['Variants'] })
           detail: {
             summary: 'Delete a variant',
             description: 'Soft-deletes a product variant by its ID.',
+          },
+        },
+      )
+      .post(
+        '/:id/images',
+        async ({ organization, params, body, status }) => {
+          const image = await variantsService.addVariantImage(
+            organization.id,
+            params.id,
+            body,
+          )
+          return status(201, serializeVariantImage(image))
+        },
+        {
+          requireAuth: true,
+          requireOrg: true,
+          requirePermission: { productVariant: ['update'] },
+          params: variantIdParam,
+          body: addVariantImageDto,
+          response: {
+            201: variantImageSchema,
+          },
+          detail: {
+            summary: 'Add image to variant',
+            description: 'Attaches a media image to a variant.',
+          },
+        },
+      )
+      .delete(
+        '/:id/images/:imageId',
+        async ({ organization, params, status }) => {
+          await variantsService.removeVariantImage(
+            organization.id,
+            params.id,
+            params.imageId,
+          )
+          return status(200, { message: 'Image removed' })
+        },
+        {
+          requireAuth: true,
+          requireOrg: true,
+          requirePermission: { productVariant: ['update'] },
+          params: variantImageIdParam,
+          response: {
+            200: errorResponse,
+          },
+          detail: {
+            summary: 'Remove image from variant',
+            description: 'Removes an image from a variant.',
           },
         },
       ),

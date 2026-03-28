@@ -31,7 +31,18 @@ export const productsService = {
     const [data, total] = await prisma.$transaction([
       prisma.product.findMany({
         where,
-        include: { variants: { where: { deletedAt: null } } },
+        include: {
+          variants: {
+            where: { deletedAt: null },
+            include: {
+              images: {
+                include: { media: true },
+                orderBy: { sortOrder: 'asc' },
+              },
+            },
+          },
+          images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
+        },
         skip: params?.skip,
         take: params?.take ?? 50,
         orderBy: params?.orderBy
@@ -73,7 +84,17 @@ export const productsService = {
     const [data, total] = await prisma.$transaction([
       prisma.product.findMany({
         where,
-        include: { variants: true },
+        include: {
+          variants: {
+            include: {
+              images: {
+                include: { media: true },
+                orderBy: { sortOrder: 'asc' },
+              },
+            },
+          },
+          images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
+        },
         skip: params?.skip,
         take: params?.take ?? 50,
         orderBy: params?.orderBy
@@ -88,7 +109,15 @@ export const productsService = {
   async getProduct(organizationId: string, id: string) {
     return prisma.product.findFirst({
       where: { id, organizationId, deletedAt: null },
-      include: { variants: { where: { deletedAt: null } } },
+      include: {
+        variants: {
+          where: { deletedAt: null },
+          include: {
+            images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
+          },
+        },
+        images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
+      },
     })
   },
 
@@ -103,7 +132,14 @@ export const productsService = {
   ) {
     return prisma.product.create({
       data: { ...data, organizationId },
-      include: { variants: true },
+      include: {
+        variants: {
+          include: {
+            images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
+          },
+        },
+        images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
+      },
     })
   },
 
@@ -149,5 +185,95 @@ export const productsService = {
         data: { deletedAt: null },
       }),
     ])
+  },
+
+  async addProductImage(
+    organizationId: string,
+    productId: string,
+    data: { mediaId: string; altText?: string },
+  ) {
+    const maxSort = await prisma.productImage.aggregate({
+      where: { productId },
+      _max: { sortOrder: true },
+    })
+    return prisma.productImage.create({
+      data: {
+        productId,
+        mediaId: data.mediaId,
+        altText: data.altText,
+        sortOrder: (maxSort._max.sortOrder ?? -1) + 1,
+      },
+      include: { media: true },
+    })
+  },
+
+  async removeProductImage(
+    organizationId: string,
+    productId: string,
+    imageId: string,
+  ) {
+    return prisma.productImage.deleteMany({
+      where: { id: imageId, productId },
+    })
+  },
+
+  async reorderProductImages(
+    organizationId: string,
+    productId: string,
+    imageIds: string[],
+  ) {
+    await prisma.$transaction(
+      imageIds.map((id, index) =>
+        prisma.productImage.updateMany({
+          where: { id, productId },
+          data: { sortOrder: index },
+        }),
+      ),
+    )
+  },
+
+  async addVariantImage(
+    organizationId: string,
+    variantId: string,
+    data: { mediaId: string; altText?: string },
+  ) {
+    const maxSort = await prisma.variantImage.aggregate({
+      where: { variantId },
+      _max: { sortOrder: true },
+    })
+    return prisma.variantImage.create({
+      data: {
+        variantId,
+        mediaId: data.mediaId,
+        altText: data.altText,
+        sortOrder: (maxSort._max.sortOrder ?? -1) + 1,
+      },
+      include: { media: true },
+    })
+  },
+
+  async removeVariantImage(
+    organizationId: string,
+    variantId: string,
+    imageId: string,
+  ) {
+    return prisma.variantImage.deleteMany({
+      where: { id: imageId, variantId },
+    })
+  },
+
+  async reorderVariantImages(
+    organizationId: string,
+    variantId: string,
+    imageIds: string[],
+  ) {
+    await prisma.$transaction(
+      imageIds.map((id, index) =>
+        prisma.variantImage.updateMany({
+          where: { id, variantId },
+          data: { sortOrder: index },
+        }),
+      ),
+    )
   },
 }

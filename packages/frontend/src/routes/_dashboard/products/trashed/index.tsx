@@ -173,6 +173,29 @@ function TrashedProductsPage() {
   const columns = React.useMemo<ColumnDef<Product>[]>(
     () => [
       {
+        id: 'image',
+        header: () => <span className="sr-only">Gambar</span>,
+        cell: ({ row }) => {
+          const url = row.original.images[0]?.media.url
+          return (
+            <div className="w-9 h-9 rounded-md overflow-hidden bg-muted flex-shrink-0">
+              {url ? (
+                <img
+                  src={url}
+                  alt={row.original.name}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
+                  <Package className="h-4 w-4" />
+                </div>
+              )}
+            </div>
+          )
+        },
+      },
+      {
         accessorKey: 'name',
         header: ({ column }) => (
           <SortableHeader column={column}>Nama</SortableHeader>
@@ -292,7 +315,7 @@ function TrashedProductsPage() {
                 className="border-b border-border/40 bg-muted/30 hover:bg-muted/30"
               >
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className={header.id === 'image' ? 'w-12' : undefined}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(

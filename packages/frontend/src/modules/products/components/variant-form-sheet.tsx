@@ -13,7 +13,13 @@ import {
   SheetDescription,
   SheetFooter,
 } from '@/components/ui/sheet'
-import type { ProductVariant } from 'backend/src/modules/products/products.route'
+import { MultiFileUpload } from '@/modules/uploads/components/multi-file-upload'
+import type { PendingImage } from '@/modules/uploads/components/multi-file-upload'
+import type { Media } from 'backend/src/modules/uploads/uploads.route'
+import type {
+  ProductVariant,
+  VariantImage,
+} from 'backend/src/modules/products/products.route'
 
 const variantSchema = z.object({
   sku: z.string().trim().min(1, 'SKU wajib diisi'),
@@ -33,6 +39,8 @@ interface VariantFormSheetProps {
     price: number
     unit?: string
     isActive: boolean
+    pendingImages: Media[]
+    removedImageIds: string[]
   }) => Promise<void>
   isPending: boolean
 }
@@ -45,6 +53,9 @@ export function VariantFormSheet({
   isPending,
 }: VariantFormSheetProps) {
   const [serverError, setServerError] = React.useState<string | null>(null)
+  const [existingImages, setExistingImages] = React.useState<VariantImage[]>([])
+  const [removedImageIds, setRemovedImageIds] = React.useState<string[]>([])
+  const [pendingImages, setPendingImages] = React.useState<PendingImage[]>([])
 
   const form = useForm({
     defaultValues: {
@@ -57,7 +68,14 @@ export function VariantFormSheet({
     onSubmit: async ({ value }) => {
       setServerError(null)
       try {
-        await onSubmit(value)
+        const doneImages = pendingImages
+          .filter((p) => p.status === 'done' && p.media)
+          .map((p) => p.media as Media)
+        await onSubmit({
+          ...value,
+          pendingImages: doneImages,
+          removedImageIds,
+        })
       } catch (err) {
         const error = err as { message?: string }
         setServerError(error.message ?? 'Terjadi kesalahan. Coba lagi.')
@@ -73,15 +91,26 @@ export function VariantFormSheet({
       form.setFieldValue('price', variant?.price ?? 0)
       form.setFieldValue('unit', variant?.unit ?? '')
       form.setFieldValue('isActive', variant?.isActive ?? true)
+      setExistingImages(variant?.images ?? [])
+      setRemovedImageIds([])
+      setPendingImages([])
       setServerError(null)
     }
   }, [open, variant])
 
   const isEditing = !!variant
 
+  const handleRemoveExisting = React.useCallback((imageId: string) => {
+    setExistingImages((prev) => prev.filter((img) => img.id !== imageId))
+    setRemovedImageIds((prev) => [...prev, imageId])
+  }, [])
+
+  const hasAnyUploading = pendingImages.some((p) => p.status === 'uploading')
+  const hasAnyError = pendingImages.some((p) => p.status === 'error')
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="sm:max-w-md">
+      <SheetContent side="right" className="sm:max-w-md overflow-y-auto">
         <SheetHead className="mb-6">
           <SheetTitle className="text-2xl">
             {isEditing ? 'Edit Varian' : 'Varian Baru'}
@@ -235,6 +264,18 @@ export function VariantFormSheet({
               </div>
             )}
           </form.Field>
+          <MultiFileUpload
+            existingImages={existingImages.map((img) => ({
+              id: img.id,
+              url: img.media.url,
+              altText: img.altText,
+            }))}
+            onRemoveExisting={handleRemoveExisting}
+            pendingImages={pendingImages}
+            onSetPendingImages={setPendingImages}
+            purpose="variant-image"
+            label="Foto Varian"
+          />
         </form>
 
         <SheetFooter className="px-4 pb-4">
@@ -253,7 +294,9 @@ export function VariantFormSheet({
                 <Button
                   type="submit"
                   className="flex-1 shadow-sm"
-                  disabled={isSubmitting || isPending}
+                  disabled={
+                    isSubmitting || isPending || hasAnyUploading || hasAnyError
+                  }
                   onClick={() => form.handleSubmit()}
                 >
                   {isSubmitting || isPending

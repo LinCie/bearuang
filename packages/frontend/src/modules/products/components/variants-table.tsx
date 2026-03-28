@@ -1,4 +1,5 @@
-import { Pencil, Trash2 } from 'lucide-react'
+import { Eye, Package, Pencil, Trash2 } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import { useHasPermission } from '@/lib/use-permissions'
 import {
@@ -29,16 +30,19 @@ export function VariantsTable({
       <Table className="w-full min-w-[700px]">
         <TableHeader>
           <TableRow className="border-b border-border/40 bg-orange-50/40 dark:bg-orange-950/20 hover:bg-orange-50/40 dark:hover:bg-orange-950/20">
+            <TableHead className="font-medium text-foreground w-12">
+              <span className="sr-only">Gambar</span>
+            </TableHead>
             <TableHead className="font-medium text-foreground w-[15%]">
               SKU
             </TableHead>
-            <TableHead className="font-medium text-foreground w-[30%]">
+            <TableHead className="font-medium text-foreground w-[25%]">
               Nama Varian
             </TableHead>
             <TableHead className="font-medium text-foreground w-[15%]">
               Stok
             </TableHead>
-            <TableHead className="font-medium text-foreground text-right w-[20%]">
+            <TableHead className="font-medium text-foreground text-right w-[18%]">
               Harga
             </TableHead>
             <TableHead className="font-medium text-foreground w-[10%]">
@@ -55,6 +59,22 @@ export function VariantsTable({
               key={v.id}
               className="group border-b border-border/40 hover:bg-orange-50/30 dark:hover:bg-orange-900/10 transition-colors duration-200 cursor-default"
             >
+              <TableCell>
+                <div className="size-15 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                  {v.images[0]?.media.url ? (
+                    <img
+                      src={v.images[0].media.url}
+                      alt={v.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
+                      <Package className="size-15" />
+                    </div>
+                  )}
+                </div>
+              </TableCell>
               <TableCell className="text-xs font-mono text-muted-foreground/80 group-hover:text-foreground/80 transition-colors">
                 {v.sku || '-'}
               </TableCell>
@@ -92,6 +112,21 @@ export function VariantsTable({
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-end gap-1 sm:opacity-40 transition-opacity group-hover:opacity-100">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-foreground/10 transition-colors"
+                    asChild
+                  >
+                    <Link
+                      to="/variants/$variantId"
+                      params={{ variantId: v.id }}
+                      title="Lihat detail varian"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      <span className="sr-only">Lihat detail varian</span>
+                    </Link>
+                  </Button>
                   {canUpdate && (
                     <Button
                       variant="ghost"

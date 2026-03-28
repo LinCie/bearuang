@@ -52,6 +52,8 @@ import type {
 } from '@/modules/products'
 import { useDebounce } from '@/hooks/use-debounce'
 import { useHasPermission } from '@/lib/use-permissions'
+import { api } from '@/lib/api'
+import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/_dashboard/products/')({
   component: ProductsPage,
@@ -155,6 +157,8 @@ function ProductsPage() {
     slug: string
     description: string
     isActive: boolean
+    pendingImages: { id: string }[]
+    removedImageIds: string[]
   }) {
     if (editingProduct) {
       const input: UpdateProductInput & { id: string } = {
@@ -165,6 +169,18 @@ function ProductsPage() {
         isActive: values.isActive,
       }
       await updateProduct.mutateAsync(input)
+
+      for (const imageId of values.removedImageIds) {
+        await api
+          .products({ id: editingProduct.id })
+          .images({ imageId })
+          .delete()
+      }
+      for (const media of values.pendingImages) {
+        await api
+          .products({ id: editingProduct.id })
+          .images.post({ mediaId: media.id })
+      }
     } else {
       const input: CreateProductInput = {
         name: values.name,
@@ -172,7 +188,13 @@ function ProductsPage() {
         description: values.description || undefined,
         isActive: values.isActive,
       }
-      await createProduct.mutateAsync(input)
+      const created = await createProduct.mutateAsync(input)
+
+      for (const media of values.pendingImages) {
+        await api
+          .products({ id: created.id })
+          .images.post({ mediaId: media.id })
+      }
     }
     setSheetOpen(false)
     setEditingProduct(null)
@@ -182,6 +204,29 @@ function ProductsPage() {
 
   const columns = React.useMemo<ColumnDef<Product>[]>(
     () => [
+      {
+        id: 'image',
+        header: () => <span className="sr-only">Gambar</span>,
+        cell: ({ row }) => {
+          const url = row.original.images[0]?.media.url
+          return (
+            <div className="size-15 rounded-md overflow-hidden bg-muted flex-shrink-0">
+              {url ? (
+                <img
+                  src={url}
+                  alt={row.original.name}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
+                  <Package className="size-15" />
+                </div>
+              )}
+            </div>
+          )
+        },
+      },
       {
         accessorKey: 'name',
         header: ({ column }) => (
@@ -394,7 +439,9 @@ function ProductsPage() {
                 className="border-b border-border/40 bg-orange-50/40 dark:bg-orange-950/20 hover:bg-orange-50/40 dark:hover:bg-orange-950/20"
               >
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className={cn(
+                    header.id === "image" ? "w-15" : undefined
+                  )}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
