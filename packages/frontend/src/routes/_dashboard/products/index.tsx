@@ -439,9 +439,10 @@ function ProductsPage() {
                 className="border-b border-border/40 bg-orange-50/40 dark:bg-orange-950/20 hover:bg-orange-50/40 dark:hover:bg-orange-950/20"
               >
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className={cn(
-                    header.id === "image" ? "w-15" : undefined
-                  )}>
+                  <TableHead
+                    key={header.id}
+                    className={cn(header.id === 'image' ? 'w-15' : undefined)}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(

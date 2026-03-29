@@ -315,7 +315,10 @@ function TrashedProductsPage() {
                 className="border-b border-border/40 bg-muted/30 hover:bg-muted/30"
               >
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className={header.id === 'image' ? 'w-12' : undefined}>
+                  <TableHead
+                    key={header.id}
+                    className={header.id === 'image' ? 'w-12' : undefined}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(

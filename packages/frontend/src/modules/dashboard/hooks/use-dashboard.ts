@@ -25,12 +25,45 @@ export interface RecentOrder {
   createdAt: string
 }
 
+export type OrdersPreset = 'today' | 'this-week' | 'this-month'
+export type OrdersVerdict = 'great' | 'normal' | 'slow'
+export type StockVerdict = 'healthy' | 'running-low' | 'critical' | 'normal'
+
+export interface OrdersReport {
+  preset: string
+  verdict: OrdersVerdict
+  currentRevenue: number
+  previousRevenue: number
+  changePercent: number
+  orderCount: number
+  previousOrderCount: number
+}
+
+export interface StockReportItem {
+  variantId: string
+  variantName: string
+  productName: string
+  stock: number
+}
+
+export interface StockReport {
+  verdict: StockVerdict
+  totalVariants: number
+  outOfStockCount: number
+  lowStockCount: number
+  lowStockPercentage: number
+  topItems: StockReportItem[]
+}
+
 // ─── Query Keys ──────────────────────────────────────────────
 
 export const dashboardKeys = {
   all: ['dashboard'] as const,
   summary: () => [...dashboardKeys.all, 'summary'] as const,
   recentOrders: () => [...dashboardKeys.all, 'recentOrders'] as const,
+  ordersReport: (preset: OrdersPreset) =>
+    [...dashboardKeys.all, 'ordersReport', preset] as const,
+  stockReport: () => [...dashboardKeys.all, 'stockReport'] as const,
 }
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -68,6 +101,27 @@ export function statusColor(status: RecentOrder['status']): string {
   return colors[status]
 }
 
+export function verdictLabel(verdict: OrdersVerdict | StockVerdict): string {
+  const labels: Record<string, string> = {
+    great: 'Bagus',
+    normal: 'Normal',
+    slow: 'Lambat',
+    healthy: 'Sehat',
+    'running-low': 'Menipis',
+    critical: 'Kritis',
+  }
+  return labels[verdict] ?? verdict
+}
+
+export function presetLabel(preset: OrdersPreset): string {
+  const labels: Record<OrdersPreset, string> = {
+    today: 'Hari Ini',
+    'this-week': 'Minggu Ini',
+    'this-month': 'Bulan Ini',
+  }
+  return labels[preset]
+}
+
 // ─── Queries ─────────────────────────────────────────────────
 
 export function useDashboardSummary() {
@@ -88,6 +142,30 @@ export function useDashboardRecentOrders() {
       const { data, error } = await api['dashboard']['recent-orders'].get()
       if (error) throw error
       return data as RecentOrder[]
+    },
+  })
+}
+
+export function useOrdersReport(preset: OrdersPreset = 'today') {
+  return useQuery({
+    queryKey: dashboardKeys.ordersReport(preset),
+    queryFn: async () => {
+      const { data, error } = await api.dashboard.reports.orders.get({
+        query: { preset },
+      })
+      if (error) throw error
+      return data as OrdersReport
+    },
+  })
+}
+
+export function useStockReport() {
+  return useQuery({
+    queryKey: dashboardKeys.stockReport(),
+    queryFn: async () => {
+      const { data, error } = await api.dashboard.reports.stock.get()
+      if (error) throw error
+      return data as StockReport
     },
   })
 }

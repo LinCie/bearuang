@@ -1,35 +1,39 @@
+import { useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useSession } from '@/lib/auth-client'
-import {
-  TrendingUp,
-  ShoppingBag,
-  ArrowRight,
-  ClipboardList,
-  Sparkles,
-} from 'lucide-react'
+import { ArrowRight, ClipboardList, Sparkles } from 'lucide-react'
 import {
   useDashboardSummary,
   useDashboardRecentOrders,
+  useOrdersReport,
+  useStockReport,
   formatRupiah,
   statusLabel,
   statusColor,
+  presetLabel,
 } from '@/modules/dashboard'
-import type { RecentOrder } from '@/modules/dashboard'
+import type { RecentOrder, OrdersPreset } from '@/modules/dashboard'
+import { VerdictCard } from '@/components/verdict-card'
 
 export const Route = createFileRoute('/_dashboard/')({
   component: DashboardPage,
 })
 
+const PRESETS: OrdersPreset[] = ['today', 'this-week', 'this-month']
+
 function DashboardPage() {
   const { data: sessionData } = useSession()
   const userName = sessionData?.user.name || 'User'
   const firstName = userName.split(' ')[0]
+  const [preset, setPreset] = useState<OrdersPreset>('today')
 
   const { data: summary, isLoading: summaryLoading } = useDashboardSummary()
   const { data: recentOrders, isLoading: ordersLoading } =
     useDashboardRecentOrders()
+  const { data: ordersReport, isLoading: ordersReportLoading } =
+    useOrdersReport(preset)
+  const { data: stockReport, isLoading: stockReportLoading } = useStockReport()
 
-  // Group orders by "today" vs "older"
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -50,96 +54,72 @@ function DashboardPage() {
 
   return (
     <>
-      {/* Welcome Header */}
-      <header className="mb-14">
+      <header className="mb-4">
         <h2 className="text-2xl font-medium text-foreground mb-1">
           {greeting}, {firstName}.
         </h2>
         <p className="text-muted-foreground">Ringkasan aktivitas hari ini.</p>
       </header>
 
-      {/* Summary Metrics - Asymmetric Rhythm */}
-      <section className="mb-24 flex flex-col md:flex-row gap-12 md:gap-24 items-start">
-        {/* Primary financial grouping */}
-        <div className="flex flex-col sm:flex-row gap-10 sm:gap-20">
-          <div>
-            <p className="text-muted-foreground text-sm mb-2">
-              Total Penjualan
-            </p>
-            <div className="flex items-baseline gap-3 mt-1">
-              {summaryLoading ? (
-                <SkeletonMetric size="xl" />
-              ) : (
-                <span className="text-5xl font-medium text-foreground tracking-tight">
-                  {formatCompactRupiah(summary?.weeklySales ?? 0)}
-                </span>
-              )}
-              <span className="text-sm font-medium text-primary/80 flex items-center">
-                <TrendingUp className="w-4 h-4 mr-1" aria-hidden="true" />
-                Minggu ini
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <p className="text-muted-foreground text-sm mb-2">
-              Pendapatan Bulanan
-            </p>
-            {summaryLoading ? (
-              <SkeletonMetric size="lg" className="mt-3" />
-            ) : (
-              <span className="text-3xl font-medium text-foreground/90 tracking-tight block mt-3">
-                {formatCompactRupiah(summary?.monthlyRevenue ?? 0)}
-              </span>
-            )}
-          </div>
+      <section className="mb-16">
+        <div className="flex gap-2 mb-6">
+          {PRESETS.map((p) => (
+            <button
+              key={p}
+              onClick={() => setPreset(p)}
+              className={`px-3 py-1.5 text-sm rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${preset === p ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
+            >
+              {presetLabel(p)}
+            </button>
+          ))}
         </div>
 
-        {/* Secondary operational grouping */}
-        <div className="flex flex-col sm:flex-row gap-10 sm:gap-16 md:ml-auto md:pt-4">
-          <div>
-            <p className="text-destructive/80 text-sm mb-1.5 flex items-center gap-1.5">
-              <ShoppingBag className="w-3.5 h-3.5" aria-hidden="true" /> Perlu
-              Tindakan
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <VerdictCard
+            verdict={ordersReport?.verdict ?? 'normal'}
+            loading={ordersReportLoading}
+          >
+            <p className="text-sm text-muted-foreground mb-1">Pesanan</p>
+            <p className="text-2xl font-medium text-foreground tracking-tight">
+              {formatCompactRupiah(ordersReport?.currentRevenue ?? 0)}
             </p>
-            <div className="flex items-baseline gap-2 mt-2">
-              {summaryLoading ? (
-                <SkeletonMetric size="md" />
-              ) : (
-                <>
-                  <span className="text-2xl font-medium text-foreground tracking-tight">
-                    {summary?.pendingPickup ?? 0}
-                  </span>
-                  <span className="text-sm text-muted-foreground/90">
-                    menunggu pengambilan
-                  </span>
-                </>
+            <p className="text-sm text-muted-foreground mt-1">
+              {ordersReport?.orderCount ?? 0} pesanan
+              {ordersReport && ordersReport.changePercent !== 0 && (
+                <span
+                  className={`ml-2 ${ordersReport.changePercent > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}
+                >
+                  {ordersReport.changePercent > 0 ? '+' : ''}
+                  {ordersReport.changePercent}% vs periode lalu
+                </span>
               )}
-            </div>
-          </div>
+            </p>
+          </VerdictCard>
 
-          <div>
-            <p className="text-muted-foreground text-sm mb-1.5">
-              Pelanggan Aktif
+          <VerdictCard
+            verdict={stockReport?.verdict ?? 'normal'}
+            loading={stockReportLoading}
+          >
+            <p className="text-sm text-muted-foreground mb-1">Stok</p>
+            <p className="text-2xl font-medium text-foreground tracking-tight">
+              {stockReport?.outOfStockCount ?? 0} habis,{' '}
+              {stockReport?.lowStockCount ?? 0} menipis
             </p>
-            <div className="flex items-baseline gap-2 mt-2">
-              {summaryLoading ? (
-                <SkeletonMetric size="md" />
-              ) : (
-                <>
-                  <span className="text-2xl font-medium text-foreground tracking-tight">
-                    {summary?.activeCustomers ?? 0}
-                  </span>
-                </>
+            <p className="text-sm text-muted-foreground mt-1">
+              dari {stockReport?.totalVariants ?? 0} varian
+              {stockReport && stockReport.topItems.length > 0 && (
+                <span>
+                  {' '}
+                  &middot; {stockReport.topItems[0].productName} &mdash;{' '}
+                  {stockReport.topItems[0].variantName}
+                </span>
               )}
-            </div>
-          </div>
+            </p>
+          </VerdictCard>
         </div>
       </section>
 
-      {/* Main Dashboard Content Grid */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-        {/* Recent Activity */}
         <div className="lg:col-span-8">
           <div className="flex items-baseline justify-between mb-4">
             <h3 className="text-lg font-medium text-foreground">
@@ -160,7 +140,6 @@ function DashboardPage() {
             <EmptyOrders />
           ) : (
             <div className="flex flex-col gap-10">
-              {/* Today Group */}
               {todayOrders.length > 0 && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground/50 uppercase tracking-widest mb-4">
@@ -174,7 +153,6 @@ function DashboardPage() {
                 </div>
               )}
 
-              {/* Older Group */}
               {olderOrders.length > 0 && (
                 <div>
                   <p className="text-xs font-medium text-muted-foreground/50 uppercase tracking-widest mb-4">
@@ -191,9 +169,7 @@ function DashboardPage() {
           )}
         </div>
 
-        {/* Side Column */}
         <div className="lg:col-span-4 flex flex-col gap-10 pt-1 lg:pt-0">
-          {/* Action Required */}
           <div>
             <h3 className="text-xs font-semibold text-secondary-foreground uppercase tracking-widest mb-3">
               Perlu Tindakan
@@ -212,42 +188,23 @@ function DashboardPage() {
             </Link>
           </div>
 
-          {/* Quick Links */}
           <div>
-            <h3 className="text-xs font-medium text-muted-foreground/80 uppercase tracking-widest mb-4">
-              Sorotan Cepat
-            </h3>
-            <ul className="flex flex-col gap-4">
-              <li>
-                <button className="group flex flex-col items-start text-left focus-visible:outline-none rounded">
-                  <span className="text-foreground text-sm font-medium group-hover:text-primary transition-colors">
-                    Laporan Pajak Q1
-                  </span>
-                  <span className="text-sm text-muted-foreground/80 mt-0.5">
-                    Akuntansi siap ditinjau
-                  </span>
-                </button>
-              </li>
-              <li>
-                <div className="flex flex-col items-start text-left">
-                  <span className="text-foreground text-sm font-medium">
-                    {summary?.activeCustomers ?? 0} Pelanggan Aktif
-                  </span>
-                  <span className="text-sm text-muted-foreground/80 mt-0.5">
-                    {formatCompactRupiah(summary?.monthlyRevenue ?? 0)} bulan
-                    ini
-                  </span>
-                </div>
-              </li>
-            </ul>
+            <p className="text-muted-foreground text-sm mb-1.5">
+              Pelanggan Aktif
+            </p>
+            {summaryLoading ? (
+              <div className="h-7 w-20 rounded-md bg-muted animate-pulse" />
+            ) : (
+              <span className="text-2xl font-medium text-foreground tracking-tight">
+                {summary?.activeCustomers ?? 0}
+              </span>
+            )}
           </div>
         </div>
       </section>
     </>
   )
 }
-
-// ─── Sub-components ──────────────────────────────────────────
 
 function OrderRow({ order }: { order: RecentOrder }) {
   return (
@@ -269,21 +226,6 @@ function OrderRow({ order }: { order: RecentOrder }) {
         </span>
       </div>
     </div>
-  )
-}
-
-function SkeletonMetric({
-  size = 'md',
-  className = '',
-}: {
-  size?: 'xl' | 'lg' | 'md'
-  className?: string
-}) {
-  const heights = { xl: 'h-12 w-36', lg: 'h-9 w-28', md: 'h-7 w-20' }
-  return (
-    <div
-      className={`${heights[size]} rounded-md bg-muted animate-pulse ${className}`}
-    />
   )
 }
 
@@ -328,8 +270,6 @@ function EmptyOrders() {
     </div>
   )
 }
-
-// ─── Helpers ──────────────────────────────────────────────────
 
 function getGreeting(): string {
   const hour = new Date().getHours()
