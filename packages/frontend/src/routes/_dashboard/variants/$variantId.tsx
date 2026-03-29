@@ -1,6 +1,4 @@
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
-import { useQueryClient } from '@tanstack/react-query'
-import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
 import * as React from 'react'
 import { ArrowLeft, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 import {
@@ -8,6 +6,8 @@ import {
   useUpdateVariant,
   useDeleteVariant,
   useRestoreVariant,
+  useAddVariantImage,
+  useRemoveVariantImage,
   VariantFormSheet,
   DeleteDialog,
 } from '@/modules/products'
@@ -20,7 +20,6 @@ import { ImageGallery } from '@/components/ui/image-gallery'
 import type { GalleryImage } from '@/components/ui/image-gallery'
 import { Button } from '@/components/ui/button'
 import { useHasPermission } from '@/lib/use-permissions'
-import { api } from '@/lib/api'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_dashboard/variants/$variantId')({
@@ -81,7 +80,6 @@ function VariantErrorState() {
 function VariantDetailPage() {
   const { variantId } = Route.useParams()
   const router = useRouter()
-  const queryClient = useQueryClient()
   const { data: variant, isLoading, isError } = useVariant(variantId)
 
   const { data: movementsData } = useVariantStockMovements(variantId)
@@ -90,6 +88,8 @@ function VariantDetailPage() {
   const updateVariant = useUpdateVariant()
   const deleteVariant = useDeleteVariant()
   const restoreVariant = useRestoreVariant()
+  const addVariantImage = useAddVariantImage()
+  const removeVariantImage = useRemoveVariantImage()
 
   const canUpdate = useHasPermission('product:update')
 
@@ -141,16 +141,18 @@ function VariantDetailPage() {
     await updateVariant.mutateAsync(input)
 
     for (const imageId of values.removedImageIds) {
-      await api.variants({ id: variant.id }).images({ imageId }).delete()
+      await removeVariantImage.mutateAsync({
+        variantId: variant.id,
+        imageId,
+      })
     }
     for (const media of values.pendingImages) {
-      await api.variants({ id: variant.id }).images.post({ mediaId: media.id })
+      await addVariantImage.mutateAsync({
+        variantId: variant.id,
+        mediaId: media.id,
+      })
     }
 
-    queryClient.invalidateQueries({
-      queryKey: ['variants', 'detail', variant.id],
-    })
-    queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     setSheetOpen(false)
   }
 

@@ -1,6 +1,5 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
 import * as React from 'react'
 import { Plus } from 'lucide-react'
 import {
@@ -13,6 +12,11 @@ import {
   useDeleteVariant,
   useRestoreVariant,
   useProductTrashedVariants,
+  useAddProductImage,
+  useRemoveProductImage,
+  useReorderProductImages,
+  useAddVariantImage,
+  useRemoveVariantImage,
   ProductDetailHeader,
   EmptyVariantsState,
   VariantsTable,
@@ -33,7 +37,6 @@ import { Button } from '@/components/ui/button'
 import { ImageGallery } from '@/components/ui/image-gallery'
 import type { GalleryImage } from '@/components/ui/image-gallery'
 import { useHasPermission } from '@/lib/use-permissions'
-import { api } from '@/lib/api'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_dashboard/products/$productId')({
@@ -59,6 +62,11 @@ function ProductDetailPage() {
   const restoreVariant = useRestoreVariant()
   const updateProduct = useUpdateProduct()
   const deleteProduct = useDeleteProduct()
+  const addProductImage = useAddProductImage(productId)
+  const removeProductImage = useRemoveProductImage(productId)
+  const reorderProductImages = useReorderProductImages(productId)
+  const addVariantImage = useAddVariantImage()
+  const removeVariantImage = useRemoveVariantImage()
 
   const canCreate = useHasPermission('product:create')
   const canUpdate = useHasPermission('product:update')
@@ -152,21 +160,15 @@ function ProductDetailPage() {
     await updateProduct.mutateAsync(input)
 
     for (const imageId of values.removedImageIds) {
-      await api.products({ id: product.id }).images({ imageId }).delete()
+      await removeProductImage.mutateAsync(imageId)
     }
     for (const media of values.pendingImages) {
-      await api.products({ id: product.id }).images.post({ mediaId: media.id })
+      await addProductImage.mutateAsync({ mediaId: media.id })
     }
     if (values.reorderedImageIds && values.reorderedImageIds.length > 0) {
-      await api
-        .products({ id: product.id })
-        .images.reorder.patch({ imageIds: values.reorderedImageIds })
+      await reorderProductImages.mutateAsync(values.reorderedImageIds)
     }
 
-    queryClient.invalidateQueries({
-      queryKey: ['products', 'detail', product.id],
-    })
-    queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     setProductSheetOpen(false)
   }
 
@@ -191,15 +193,16 @@ function ProductDetailPage() {
       await updateVariant.mutateAsync(input)
 
       for (const imageId of values.removedImageIds) {
-        await api
-          .variants({ id: editingVariant.id })
-          .images({ imageId })
-          .delete()
+        await removeVariantImage.mutateAsync({
+          variantId: editingVariant.id,
+          imageId,
+        })
       }
       for (const media of values.pendingImages) {
-        await api
-          .variants({ id: editingVariant.id })
-          .images.post({ mediaId: media.id })
+        await addVariantImage.mutateAsync({
+          variantId: editingVariant.id,
+          mediaId: media.id,
+        })
       }
     } else {
       const input: CreateVariantInput = {
@@ -212,9 +215,10 @@ function ProductDetailPage() {
       const created = await createVariant.mutateAsync(input)
 
       for (const media of values.pendingImages) {
-        await api
-          .variants({ id: created.id })
-          .images.post({ mediaId: media.id })
+        await addVariantImage.mutateAsync({
+          variantId: created.id,
+          mediaId: media.id,
+        })
       }
     }
     setSheetOpen(false)
@@ -223,7 +227,6 @@ function ProductDetailPage() {
       queryClient.invalidateQueries({
         queryKey: ['products', 'detail', product.id],
       })
-      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     }
   }
 

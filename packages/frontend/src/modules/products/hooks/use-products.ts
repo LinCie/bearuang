@@ -157,3 +157,70 @@ export function useRestoreProduct() {
     },
   })
 }
+
+// ─── Image Mutations ───────────────────────────────────────────
+
+export function useAddProductImage(productId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({
+      mediaId,
+      altText,
+    }: {
+      mediaId: string
+      altText?: string
+    }) => {
+      const { data, error } = await api
+        .products({ id: productId })
+        .images.post({ mediaId, altText })
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: productKeys.detail(productId),
+      })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
+    },
+  })
+}
+
+export function useRemoveProductImage(productId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (imageId: string) => {
+      const { error } = await api
+        .products({ id: productId })
+        .images({ imageId })
+        .delete()
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: productKeys.detail(productId),
+      })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
+    },
+  })
+}
+
+export function useReorderProductImages(productId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (imageIds: string[]) => {
+      const { error } = await api
+        .products({ id: productId })
+        .images.reorder.patch({ imageIds })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: productKeys.detail(productId),
+      })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
+    },
+  })
+}

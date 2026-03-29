@@ -179,3 +179,59 @@ export function useRestoreVariant() {
     },
   })
 }
+
+// ─── Image Mutations ───────────────────────────────────────────
+
+export function useAddVariantImage() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({
+      variantId,
+      mediaId,
+      altText,
+    }: {
+      variantId: string
+      mediaId: string
+      altText?: string
+    }) => {
+      const { data, error } = await api
+        .variants({ id: variantId })
+        .images.post({ mediaId, altText })
+      if (error) throw error
+      return data
+    },
+    onSuccess: (_data, { variantId }) => {
+      queryClient.invalidateQueries({
+        queryKey: variantKeys.detail(variantId),
+      })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
+    },
+  })
+}
+
+export function useRemoveVariantImage() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({
+      variantId,
+      imageId,
+    }: {
+      variantId: string
+      imageId: string
+    }) => {
+      const { error } = await api
+        .variants({ id: variantId })
+        .images({ imageId })
+        .delete()
+      if (error) throw error
+    },
+    onSuccess: (_data, { variantId }) => {
+      queryClient.invalidateQueries({
+        queryKey: variantKeys.detail(variantId),
+      })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
+    },
+  })
+}
