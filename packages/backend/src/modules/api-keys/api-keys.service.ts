@@ -29,7 +29,7 @@ export const apiKeysService = {
         expiresIn: data.expiresIn,
         rateLimitMax: data.rateLimitMax,
         rateLimitTimeWindow: data.rateLimitTimeWindow,
-        metadata: data.metadata,
+        metadata: { ...data.metadata, userId },
       },
     })
     return result

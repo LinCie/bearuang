@@ -22,6 +22,7 @@ const statement = {
   invitation: ['create', 'delete', 'view'],
   member: ['update', 'delete', 'view'],
   media: ['create', 'delete', 'view'],
+  auditLog: ['view'],
 } as const
 
 export const ac = createAccessControl(statement)
@@ -42,6 +43,7 @@ export const owner = ac.newRole({
   invitation: ['create', 'delete', 'view'],
   member: ['update', 'delete', 'view'],
   media: ['create', 'delete', 'view'],
+  auditLog: ['view'],
 })
 
 export const admin = ac.newRole({
@@ -60,6 +62,7 @@ export const admin = ac.newRole({
   invitation: ['create', 'delete', 'view'],
   member: ['update', 'delete', 'view'],
   media: ['create', 'delete', 'view'],
+  auditLog: ['view'],
 })
 
 export const member = ac.newRole({
@@ -78,6 +81,7 @@ export const member = ac.newRole({
   invitation: ['view'],
   member: ['view'],
   media: ['create', 'view'],
+  auditLog: ['view'],
 })
 
 export type PermissionStatement = typeof statement
@@ -99,6 +103,7 @@ export const permissionResources = [
   'invitation',
   'member',
   'media',
+  'auditLog',
 ] as const
 
 export const permissionActions: Record<string, readonly string[]> = {
@@ -116,6 +121,7 @@ export const permissionActions: Record<string, readonly string[]> = {
   invitation: ['create', 'delete', 'view'],
   member: ['update', 'delete', 'view'],
   media: ['create', 'delete', 'view'],
+  auditLog: ['view'],
 }
 
 /**

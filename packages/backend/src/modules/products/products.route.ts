@@ -11,6 +11,7 @@ import {
   sortQuery,
 } from '@/common/pagination'
 import { getPublicUrl } from '@/integrations/s3'
+import { logAudit } from '@/libraries/audit-logger'
 
 const mediaSchema = z.object({
   id: z.string(),
@@ -239,8 +240,16 @@ export const productsRoute = new Elysia({
   )
   .post(
     '/',
-    async ({ organization, body, status }) => {
+    async ({ _authType, organization, user, body, status }) => {
       const product = await productsService.createProduct(organization.id, body)
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Product',
+        operation: 'create',
+        args: { data: body },
+      })
       return status(201, serializeProduct(product))
     },
     {
@@ -296,8 +305,16 @@ export const productsRoute = new Elysia({
   )
   .post(
     '/:id/restore',
-    async ({ organization, params, status }) => {
+    async ({ _authType, organization, user, params, status }) => {
       await productsService.restoreProduct(organization.id, params.id)
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Product',
+        operation: 'restore',
+        args: { id: params.id },
+      })
       return status(200, { message: 'Product restored' })
     },
     {
@@ -341,7 +358,7 @@ export const productsRoute = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ organization, params, body, status }) => {
+    async ({ _authType, organization, user, params, body, status }) => {
       const count = await productsService.updateProduct(
         organization.id,
         params.id,
@@ -349,6 +366,14 @@ export const productsRoute = new Elysia({
       )
       if (count.count === 0)
         return status(404, { message: 'Product not found' })
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Product',
+        operation: 'update',
+        args: { id: params.id, data: body },
+      })
       return status(200, { message: 'Product updated' })
     },
     {
@@ -369,8 +394,16 @@ export const productsRoute = new Elysia({
   )
   .delete(
     '/:id',
-    async ({ organization, params, status }) => {
+    async ({ _authType, organization, user, params, status }) => {
       await productsService.deleteProduct(organization.id, params.id)
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Product',
+        operation: 'delete',
+        args: { id: params.id },
+      })
       return status(200, { message: 'Product deleted' })
     },
     {
@@ -389,12 +422,20 @@ export const productsRoute = new Elysia({
   )
   .post(
     '/:id/images',
-    async ({ organization, params, body, status }) => {
+    async ({ _authType, organization, user, params, body, status }) => {
       const image = await productsService.addProductImage(
         organization.id,
         params.id,
         body,
       )
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'ProductImage',
+        operation: 'create',
+        args: { productId: params.id, data: body },
+      })
       return status(201, serializeImage(image))
     },
     {
@@ -414,12 +455,20 @@ export const productsRoute = new Elysia({
   )
   .delete(
     '/:id/images/:imageId',
-    async ({ organization, params, status }) => {
+    async ({ _authType, organization, user, params, status }) => {
       await productsService.removeProductImage(
         organization.id,
         params.id,
         params.imageId,
       )
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'ProductImage',
+        operation: 'delete',
+        args: { productId: params.id, imageId: params.imageId },
+      })
       return status(200, { message: 'Image removed' })
     },
     {
@@ -438,12 +487,20 @@ export const productsRoute = new Elysia({
   )
   .patch(
     '/:id/images/reorder',
-    async ({ organization, params, body }) => {
+    async ({ _authType, organization, user, params, body }) => {
       await productsService.reorderProductImages(
         organization.id,
         params.id,
         body.imageIds,
       )
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'ProductImage',
+        operation: 'reorder',
+        args: { productId: params.id, imageIds: body.imageIds },
+      })
       return { message: 'Images reordered' }
     },
     {

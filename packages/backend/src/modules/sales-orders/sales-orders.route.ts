@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authPlugin } from '@/plugins/auth.plugin'
 import { salesOrdersService } from './sales-orders.service'
 import { errorResponse } from '@/common/error.response'
+import { logAudit } from '@/libraries/audit-logger'
 import {
   paginationQuery,
   paginatedResponse,
@@ -229,7 +230,7 @@ export const salesOrdersRoute = new Elysia({
   )
   .post(
     '/',
-    async ({ organization, body, status }) => {
+    async ({ _authType, organization, user, body, status }) => {
       const result = await salesOrdersService.createSalesOrder(
         organization.id,
         {
@@ -238,6 +239,14 @@ export const salesOrdersRoute = new Elysia({
         },
       )
       if ('error' in result) return status(400, { message: result.error })
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'SalesOrder',
+        operation: 'create',
+        args: { data: body },
+      })
       return status(
         201,
         serializeSalesOrder(
@@ -289,7 +298,7 @@ export const salesOrdersRoute = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ organization, params, body, status }) => {
+    async ({ _authType, organization, user, params, body, status }) => {
       const result = await salesOrdersService.updateSalesOrder(
         organization.id,
         params.id,
@@ -314,6 +323,14 @@ export const salesOrdersRoute = new Elysia({
           return status(404, { message: 'Sales order not found' })
         return status(400, { message: result.error })
       }
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'SalesOrder',
+        operation: 'update',
+        args: { id: params.id, data: body },
+      })
       return serializeSalesOrder(
         result as Parameters<typeof serializeSalesOrder>[0],
       )
@@ -338,7 +355,7 @@ export const salesOrdersRoute = new Elysia({
   )
   .delete(
     '/:id',
-    async ({ organization, params, status }) => {
+    async ({ _authType, organization, user, params, status }) => {
       const result = await salesOrdersService.deleteSalesOrder(
         organization.id,
         params.id,
@@ -348,6 +365,14 @@ export const salesOrdersRoute = new Elysia({
           return status(404, { message: 'Sales order not found' })
         return status(400, { message: result.error })
       }
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'SalesOrder',
+        operation: 'delete',
+        args: { id: params.id },
+      })
       return status(200, { message: 'Sales order deleted' })
     },
     {

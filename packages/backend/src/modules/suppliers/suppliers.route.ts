@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authPlugin } from '@/plugins/auth.plugin'
 import { suppliersService } from './suppliers.service'
 import { errorResponse } from '@/common/error.response'
+import { logAudit } from '@/libraries/audit-logger'
 import {
   paginationQuery,
   paginatedResponse,
@@ -118,11 +119,19 @@ export const suppliersRoute = new Elysia({
   )
   .post(
     '/',
-    async ({ organization, body, status }) => {
+    async ({ _authType, organization, user, body, status }) => {
       const supplier = await suppliersService.createSupplier(
         organization.id,
         body,
       )
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Supplier',
+        operation: 'create',
+        args: { data: body },
+      })
       return status(201, serializeSupplier(supplier))
     },
     {
@@ -167,13 +176,21 @@ export const suppliersRoute = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ organization, params, body, status }) => {
+    async ({ _authType, organization, user, params, body, status }) => {
       const supplier = await suppliersService.updateSupplier(
         organization.id,
         params.id,
         body,
       )
       if (!supplier) return status(404, { message: 'Supplier not found' })
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Supplier',
+        operation: 'update',
+        args: { id: params.id, data: body },
+      })
       return serializeSupplier(supplier)
     },
     {
@@ -194,12 +211,20 @@ export const suppliersRoute = new Elysia({
   )
   .delete(
     '/:id',
-    async ({ organization, params, status }) => {
+    async ({ _authType, organization, user, params, status }) => {
       const deleted = await suppliersService.deleteSupplier(
         organization.id,
         params.id,
       )
       if (!deleted) return status(404, { message: 'Supplier not found' })
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Supplier',
+        operation: 'delete',
+        args: { id: params.id },
+      })
       return status(200, { message: 'Supplier deleted' })
     },
     {

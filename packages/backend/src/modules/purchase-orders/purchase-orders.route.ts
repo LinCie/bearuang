@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authPlugin } from '@/plugins/auth.plugin'
 import { purchaseOrdersService } from './purchase-orders.service'
 import { errorResponse } from '@/common/error.response'
+import { logAudit } from '@/libraries/audit-logger'
 import {
   paginationQuery,
   paginatedResponse,
@@ -213,7 +214,7 @@ export const purchaseOrdersRoute = new Elysia({
   )
   .post(
     '/',
-    async ({ organization, body, status }) => {
+    async ({ _authType, organization, user, body, status }) => {
       const order = await purchaseOrdersService.createPurchaseOrder(
         organization.id,
         {
@@ -221,6 +222,14 @@ export const purchaseOrdersRoute = new Elysia({
           orderedAt: body.orderedAt ? new Date(body.orderedAt) : undefined,
         },
       )
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'PurchaseOrder',
+        operation: 'create',
+        args: { data: body },
+      })
       return status(201, serializePurchaseOrder(order))
     },
     {
@@ -266,7 +275,7 @@ export const purchaseOrdersRoute = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ organization, params, body, status }) => {
+    async ({ _authType, organization, user, params, body, status }) => {
       const result = await purchaseOrdersService.updatePurchaseOrder(
         organization.id,
         params.id,
@@ -285,6 +294,14 @@ export const purchaseOrdersRoute = new Elysia({
           return status(404, { message: 'Purchase order not found' })
         return status(400, { message: result.error })
       }
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'PurchaseOrder',
+        operation: 'update',
+        args: { id: params.id, data: body },
+      })
       return serializePurchaseOrder(result)
     },
     {
@@ -307,7 +324,7 @@ export const purchaseOrdersRoute = new Elysia({
   )
   .post(
     '/:id/receive',
-    async ({ organization, params, body, status }) => {
+    async ({ _authType, organization, user, params, body, status }) => {
       const result = await purchaseOrdersService.receivePurchaseOrder(
         organization.id,
         params.id,
@@ -319,6 +336,14 @@ export const purchaseOrdersRoute = new Elysia({
         return status(400, { message: result.error })
       }
       if (!result) return status(404, { message: 'Purchase order not found' })
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'PurchaseOrder',
+        operation: 'receive',
+        args: { id: params.id, items: body.items },
+      })
       return serializePurchaseOrder(result)
     },
     {
@@ -341,7 +366,7 @@ export const purchaseOrdersRoute = new Elysia({
   )
   .delete(
     '/:id',
-    async ({ organization, params, status }) => {
+    async ({ _authType, organization, user, params, status }) => {
       const result = await purchaseOrdersService.deletePurchaseOrder(
         organization.id,
         params.id,
@@ -351,6 +376,14 @@ export const purchaseOrdersRoute = new Elysia({
           return status(404, { message: 'Purchase order not found' })
         return status(400, { message: result.error })
       }
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'PurchaseOrder',
+        operation: 'delete',
+        args: { id: params.id },
+      })
       return status(200, { message: 'Purchase order deleted' })
     },
     {

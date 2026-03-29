@@ -19,6 +19,7 @@ import { rolesRoute } from '@/modules/roles/roles.route'
 import { permissionsRoute } from '@/modules/permissions/permissions.route'
 import { dashboardRoute } from '@/modules/dashboard/dashboard.route'
 import { uploadsRoute } from '@/modules/uploads/uploads.route'
+import { auditRoute } from '@/modules/audit/audit.route'
 
 const app = new Elysia()
   .onError(({ error }) => {
@@ -77,6 +78,10 @@ const app = new Elysia()
             name: 'Uploads',
             description: 'File upload and media management endpoints',
           },
+          {
+            name: 'Audit Logs',
+            description: 'Audit log viewing endpoints',
+          },
         ],
       },
       mapJsonSchema: { zod: z.toJSONSchema },
@@ -110,6 +115,7 @@ const app = new Elysia()
   .use(permissionsRoute)
   .use(dashboardRoute)
   .use(uploadsRoute)
+  .use(auditRoute)
   .get('/health', () => 'ok')
   .listen(Number(process.env.PORT) || 8000)
 

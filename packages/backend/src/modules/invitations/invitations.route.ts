@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authPlugin } from '@/plugins/auth.plugin'
 import { invitationsService } from './invitations.service'
 import { errorResponse } from '@/common/error.response'
+import { logAudit } from '@/libraries/audit-logger'
 import {
   paginationQuery,
   paginatedResponse,
@@ -130,12 +131,20 @@ export const invitationsRoute = new Elysia({
   )
   .post(
     '/',
-    async ({ request, body, status }) => {
+    async ({ _authType, organization, user, request, body, status }) => {
       try {
         const invitation = await invitationsService.createInvitation(
           request.headers,
           body,
         )
+        void logAudit({
+          organizationId: organization.id,
+          userId: user.id,
+          authType: _authType,
+          model: 'Invitation',
+          operation: 'create',
+          args: { data: body },
+        })
         return status(
           201,
           serializeInvitation(invitation as unknown as InvitationData),
@@ -164,12 +173,22 @@ export const invitationsRoute = new Elysia({
   )
   .post(
     '/:id/accept',
-    async ({ request, params, status }) => {
+    async ({ _authType, user, request, params, status }) => {
       try {
         const result = await invitationsService.acceptInvitation(
           request.headers,
           params.id,
         )
+        void logAudit({
+          organizationId:
+            ((result as Record<string, unknown>).organizationId as string) ??
+            '',
+          userId: user.id,
+          authType: _authType,
+          model: 'Invitation',
+          operation: 'accept',
+          args: { id: params.id },
+        })
         const typedResult = result as unknown as {
           invitation: InvitationData | null
           member: {
@@ -227,12 +246,22 @@ export const invitationsRoute = new Elysia({
   )
   .post(
     '/:id/reject',
-    async ({ request, params, status }) => {
+    async ({ _authType, user, request, params, status }) => {
       try {
         const result = await invitationsService.rejectInvitation(
           request.headers,
           params.id,
         )
+        void logAudit({
+          organizationId:
+            ((result as Record<string, unknown>).organizationId as string) ??
+            '',
+          userId: user.id,
+          authType: _authType,
+          model: 'Invitation',
+          operation: 'reject',
+          args: { id: params.id },
+        })
         const typedResult = result as unknown as {
           invitation: InvitationData | null
           member: null
@@ -265,13 +294,21 @@ export const invitationsRoute = new Elysia({
   )
   .delete(
     '/:id',
-    async ({ request, params, status }) => {
+    async ({ _authType, organization, user, request, params, status }) => {
       try {
         const invitation = await invitationsService.cancelInvitation(
           request.headers,
           params.id,
         )
         if (!invitation) return status(404, { message: 'Invitation not found' })
+        void logAudit({
+          organizationId: organization.id,
+          userId: user.id,
+          authType: _authType,
+          model: 'Invitation',
+          operation: 'delete',
+          args: { id: params.id },
+        })
         return status(200, { message: 'Invitation cancelled' })
       } catch {
         return status(404, { message: 'Invitation not found' })

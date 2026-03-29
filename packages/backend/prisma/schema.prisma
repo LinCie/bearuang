@@ -462,3 +462,24 @@ model Media {
   @@index([purpose])
   @@map("media")
 }
+
+model AuditLog {
+  id             String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  organizationId String
+  userId         String?
+  apiKeyId       String?
+  authType       String
+  model          String
+  operation      String
+  args           Json
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([apiKeyId])
+  @@index([model])
+  @@index([createdAt])
+  @@map("audit_log")
+}

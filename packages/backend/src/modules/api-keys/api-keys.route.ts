@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authPlugin } from '@/plugins/auth.plugin'
 import { apiKeysService } from './api-keys.service'
 import { errorResponse } from '@/common/error.response'
+import { logAudit } from '@/libraries/audit-logger'
 
 const apiKeySchema = z.object({
   id: z.string(),
@@ -82,12 +83,20 @@ export const apiKeysRoute = new Elysia({
   .use(authPlugin)
   .post(
     '/',
-    async ({ user, organization, body }) => {
+    async ({ _authType, user, organization, body }) => {
       const key = await apiKeysService.createApiKey(
         user.id,
         organization.id,
         body,
       )
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'ApiKey',
+        operation: 'create',
+        args: { data: body },
+      })
       return serializeWithSecret(key as unknown as ApiKey)
     },
     {
@@ -156,7 +165,15 @@ export const apiKeysRoute = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ user, organization, params, body, status, request }) => {
+    async ({
+      _authType,
+      user,
+      organization,
+      params,
+      body,
+      status,
+      request,
+    }) => {
       const existing = await apiKeysService.getApiKey(
         request.headers,
         organization.id,
@@ -168,6 +185,14 @@ export const apiKeysRoute = new Elysia({
         params.id,
         body,
       )
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'ApiKey',
+        operation: 'update',
+        args: { id: params.id, data: body },
+      })
       return serialize(updated as unknown as ApiKey)
     },
     {
@@ -189,7 +214,7 @@ export const apiKeysRoute = new Elysia({
   )
   .delete(
     '/:id',
-    async ({ organization, params, status, request }) => {
+    async ({ _authType, user, organization, params, status, request }) => {
       const existing = await apiKeysService.getApiKey(
         request.headers,
         organization.id,
@@ -197,6 +222,14 @@ export const apiKeysRoute = new Elysia({
       )
       if (!existing) return status(404, { message: 'API key not found' })
       await apiKeysService.deleteApiKey(request.headers, params.id)
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'ApiKey',
+        operation: 'delete',
+        args: { id: params.id },
+      })
       return status(200, { message: 'API key deleted' })
     },
     {

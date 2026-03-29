@@ -4,6 +4,7 @@ import { authPlugin } from '@/plugins/auth.plugin'
 import { stockMovementService } from './stock-movements.service'
 import { StockMovementType as PrismaStockMovementType } from '@/generated/prisma/client'
 import { errorResponse } from '@/common/error.response'
+import { logAudit } from '@/libraries/audit-logger'
 import {
   paginationQuery,
   paginatedResponse,
@@ -146,11 +147,19 @@ export const stockMovementRoute = new Elysia({
   )
   .post(
     '/',
-    async ({ organization, body, status }) => {
+    async ({ _authType, organization, user, body, status }) => {
       const movement = await stockMovementService.createMovement(
         organization.id,
         body,
       )
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'StockMovement',
+        operation: 'create',
+        args: { data: body },
+      })
       return status(201, serializeMovement(movement))
     },
     {
@@ -196,12 +205,20 @@ export const stockMovementRoute = new Elysia({
   )
   .delete(
     '/:id',
-    async ({ organization, params, status }) => {
+    async ({ _authType, organization, user, params, status }) => {
       const deleted = await stockMovementService.deleteMovement(
         organization.id,
         params.id,
       )
       if (!deleted) return status(404, { message: 'Stock movement not found' })
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'StockMovement',
+        operation: 'delete',
+        args: { id: params.id },
+      })
       return status(200, { message: 'Stock movement deleted' })
     },
     {

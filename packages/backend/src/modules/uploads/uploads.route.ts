@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authPlugin } from '@/plugins/auth.plugin'
 import { uploadsService } from './uploads.service'
 import { errorResponse } from '@/common/error.response'
+import { logAudit } from '@/libraries/audit-logger'
 import {
   paginationQuery,
   paginatedResponse,
@@ -70,11 +71,19 @@ export const uploadsRoute = new Elysia({
   .use(authPlugin)
   .post(
     '/presign',
-    async ({ organization, body, status }) => {
+    async ({ _authType, organization, user, body, status }) => {
       const { media, uploadUrl } = await uploadsService.presignUpload(
         organization.id,
         body,
       )
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Media',
+        operation: 'presign',
+        args: { data: body },
+      })
       return status(201, {
         id: media.id,
         key: media.key,
@@ -98,12 +107,20 @@ export const uploadsRoute = new Elysia({
   )
   .post(
     '/:id/confirm',
-    async ({ organization, params, status }) => {
+    async ({ _authType, organization, user, params, status }) => {
       const media = await uploadsService.confirmUpload(
         organization.id,
         params.id,
       )
       if (!media) return status(404, { message: 'Media not found' })
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Media',
+        operation: 'confirm',
+        args: { id: params.id },
+      })
       return serializeMedia(media)
     },
     {
@@ -177,12 +194,20 @@ export const uploadsRoute = new Elysia({
   )
   .delete(
     '/:id',
-    async ({ organization, params, status }) => {
+    async ({ _authType, organization, user, params, status }) => {
       const deleted = await uploadsService.deleteMedia(
         organization.id,
         params.id,
       )
       if (!deleted) return status(404, { message: 'Media not found' })
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Media',
+        operation: 'delete',
+        args: { id: params.id },
+      })
       return status(200, { message: 'Media deleted' })
     },
     {

@@ -19,7 +19,8 @@ export const auth = betterAuth({
     }),
     apiKey({
       references: 'organization',
-      enableSessionForAPIKeys: true,
+      enableSessionForAPIKeys: false,
+      enableMetadata: true,
       defaultPrefix: 'bk_',
       rateLimit: {
         enabled: true,

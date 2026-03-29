@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authPlugin } from '@/plugins/auth.plugin'
 import { customersService } from './customers.service'
 import { errorResponse } from '@/common/error.response'
+import { logAudit } from '@/libraries/audit-logger'
 import {
   paginationQuery,
   paginatedResponse,
@@ -118,11 +119,19 @@ export const customersRoute = new Elysia({
   )
   .post(
     '/',
-    async ({ organization, body, status }) => {
+    async ({ _authType, organization, user, body, status }) => {
       const customer = await customersService.createCustomer(
         organization.id,
         body,
       )
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Customer',
+        operation: 'create',
+        args: { data: body },
+      })
       return status(201, serializeCustomer(customer))
     },
     {
@@ -178,12 +187,20 @@ export const customersRoute = new Elysia({
   )
   .post(
     '/:id/restore',
-    async ({ organization, params, status }) => {
+    async ({ _authType, organization, user, params, status }) => {
       const restored = await customersService.restoreCustomer(
         organization.id,
         params.id,
       )
       if (!restored) return status(404, { message: 'Customer not found' })
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Customer',
+        operation: 'restore',
+        args: { id: params.id },
+      })
       return status(200, { message: 'Customer restored' })
     },
     {
@@ -229,13 +246,21 @@ export const customersRoute = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ organization, params, body, status }) => {
+    async ({ _authType, organization, user, params, body, status }) => {
       const customer = await customersService.updateCustomer(
         organization.id,
         params.id,
         body,
       )
       if (!customer) return status(404, { message: 'Customer not found' })
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Customer',
+        operation: 'update',
+        args: { id: params.id, data: body },
+      })
       return serializeCustomer(customer)
     },
     {
@@ -256,12 +281,20 @@ export const customersRoute = new Elysia({
   )
   .delete(
     '/:id',
-    async ({ organization, params, status }) => {
+    async ({ _authType, organization, user, params, status }) => {
       const deleted = await customersService.deleteCustomer(
         organization.id,
         params.id,
       )
       if (!deleted) return status(404, { message: 'Customer not found' })
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Customer',
+        operation: 'delete',
+        args: { id: params.id },
+      })
       return status(200, { message: 'Customer deleted' })
     },
     {

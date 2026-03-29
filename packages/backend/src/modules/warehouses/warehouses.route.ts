@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authPlugin } from '@/plugins/auth.plugin'
 import { warehousesService } from './warehouses.service'
 import { errorResponse } from '@/common/error.response'
+import { logAudit } from '@/libraries/audit-logger'
 import {
   paginationQuery,
   paginatedResponse,
@@ -105,11 +106,19 @@ export const warehousesRoute = new Elysia({
   )
   .post(
     '/',
-    async ({ organization, body, status }) => {
+    async ({ _authType, organization, user, body, status }) => {
       const warehouse = await warehousesService.createWarehouse(
         organization.id,
         body,
       )
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Warehouse',
+        operation: 'create',
+        args: { data: body },
+      })
       return status(201, serializeWarehouse(warehouse))
     },
     {
@@ -154,7 +163,7 @@ export const warehousesRoute = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ organization, params, body, status }) => {
+    async ({ _authType, organization, user, params, body, status }) => {
       const count = await warehousesService.updateWarehouse(
         organization.id,
         params.id,
@@ -162,6 +171,14 @@ export const warehousesRoute = new Elysia({
       )
       if (count.count === 0)
         return status(404, { message: 'Warehouse not found' })
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Warehouse',
+        operation: 'update',
+        args: { id: params.id, data: body },
+      })
       return status(200, { message: 'Warehouse updated' })
     },
     {
@@ -182,13 +199,21 @@ export const warehousesRoute = new Elysia({
   )
   .delete(
     '/:id',
-    async ({ organization, params, status }) => {
+    async ({ _authType, organization, user, params, status }) => {
       const count = await warehousesService.deleteWarehouse(
         organization.id,
         params.id,
       )
       if (count.count === 0)
         return status(404, { message: 'Warehouse not found' })
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Warehouse',
+        operation: 'delete',
+        args: { id: params.id },
+      })
       return status(200, { message: 'Warehouse deleted' })
     },
     {

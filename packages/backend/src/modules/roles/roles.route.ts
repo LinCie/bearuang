@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authPlugin } from '@/plugins/auth.plugin'
 import { rolesService } from './roles.service'
 import { errorResponse } from '@/common/error.response'
+import { logAudit } from '@/libraries/audit-logger'
 import {
   isSystemRole,
   isValidPermission,
@@ -142,9 +143,17 @@ export const rolesRoute = new Elysia({
   )
   .post(
     '/',
-    async ({ organization, body, status }) => {
+    async ({ _authType, organization, user, body, status }) => {
       try {
         const role = await rolesService.createRole(organization.id, body)
+        void logAudit({
+          organizationId: organization.id,
+          userId: user.id,
+          authType: _authType,
+          model: 'Role',
+          operation: 'create',
+          args: { data: body },
+        })
         return status(201, role)
       } catch (e) {
         const message = e instanceof Error ? e.message : 'Failed to create role'
@@ -169,7 +178,7 @@ export const rolesRoute = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ organization, params, body, status }) => {
+    async ({ _authType, organization, user, params, body, status }) => {
       // Prevent modifying system roles
       const existing = await rolesService.getRole(organization.id, params.id)
       if (!existing) return status(404, { message: 'Role not found' })
@@ -184,6 +193,14 @@ export const rolesRoute = new Elysia({
           body,
         )
         if (!role) return status(404, { message: 'Role not found' })
+        void logAudit({
+          organizationId: organization.id,
+          userId: user.id,
+          authType: _authType,
+          model: 'Role',
+          operation: 'update',
+          args: { id: params.id, data: body },
+        })
         return role
       } catch (e) {
         const message = e instanceof Error ? e.message : 'Failed to update role'
@@ -210,7 +227,7 @@ export const rolesRoute = new Elysia({
   )
   .delete(
     '/:id',
-    async ({ organization, params, status }) => {
+    async ({ _authType, organization, user, params, status }) => {
       // Prevent deleting system roles
       const existing = await rolesService.getRole(organization.id, params.id)
       if (!existing) return status(404, { message: 'Role not found' })
@@ -220,6 +237,14 @@ export const rolesRoute = new Elysia({
 
       const deleted = await rolesService.deleteRole(organization.id, params.id)
       if (!deleted) return status(404, { message: 'Role not found' })
+      void logAudit({
+        organizationId: organization.id,
+        userId: user.id,
+        authType: _authType,
+        model: 'Role',
+        operation: 'delete',
+        args: { id: params.id },
+      })
       return status(200, { message: 'Role deleted' })
     },
     {

@@ -15,6 +15,7 @@ import {
   ShoppingCart,
   UserPlus,
   KeyRound,
+  ScrollText,
 } from 'lucide-react'
 import { signOut, useSession } from '@/lib/auth-client'
 import { usePermissions } from '@/lib/use-permissions'
@@ -84,6 +85,12 @@ const MAIN_NAV: NavItem[] = [
 const SECONDARY_NAV: NavItem[] = [
   { icon: UserPlus, label: 'Anggota', to: '/members', permission: 'member' },
   { icon: KeyRound, label: 'API Keys', to: '/api-keys', permission: 'apiKey' },
+  {
+    icon: ScrollText,
+    label: 'Log Audit',
+    to: '/audit-logs',
+    permission: 'auditLog',
+  },
   { icon: Settings, label: 'Settings', to: '/settings' },
 ]
 
@@ -157,12 +164,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: permissions } = usePermissions()
 
   const filteredMainNav = MAIN_NAV.filter(
-    (item) =>
-      !item.permission || permissions?.viewResources.has(item.permission),
+    (item): item is NavItem =>
+      !item.permission || !!permissions?.viewResources.has(item.permission),
   )
   const filteredSecondaryNav = SECONDARY_NAV.filter(
-    (item) =>
-      !item.permission || permissions?.viewResources.has(item.permission),
+    (item): item is NavItem =>
+      !item.permission || !!permissions?.viewResources.has(item.permission),
   )
 
   async function handleSignOut() {

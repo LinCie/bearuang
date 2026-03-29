@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authPlugin } from '@/plugins/auth.plugin'
 import { membersService } from './members.service'
 import { errorResponse } from '@/common/error.response'
+import { logAudit } from '@/libraries/audit-logger'
 import {
   paginationQuery,
   paginatedResponse,
@@ -130,13 +131,29 @@ export const membersRoute = new Elysia({
   )
   .patch(
     '/:id',
-    async ({ request, params, body, status }) => {
+    async ({
+      _authType,
+      organization,
+      user,
+      request,
+      params,
+      body,
+      status,
+    }) => {
       try {
         const member = await membersService.updateMemberRole(
           request.headers,
           params.id,
           body.role,
         )
+        void logAudit({
+          organizationId: organization.id,
+          userId: user.id,
+          authType: _authType,
+          model: 'Member',
+          operation: 'update',
+          args: { id: params.id, data: body },
+        })
         return serializeMember(member as unknown as MemberData)
       } catch {
         return status(404, { message: 'Member not found' })
@@ -161,9 +178,17 @@ export const membersRoute = new Elysia({
   )
   .delete(
     '/:id',
-    async ({ request, params, status }) => {
+    async ({ _authType, organization, user, request, params, status }) => {
       try {
         await membersService.removeMember(request.headers, params.id)
+        void logAudit({
+          organizationId: organization.id,
+          userId: user.id,
+          authType: _authType,
+          model: 'Member',
+          operation: 'delete',
+          args: { id: params.id },
+        })
         return status(200, { message: 'Member removed' })
       } catch {
         return status(404, { message: 'Member not found' })

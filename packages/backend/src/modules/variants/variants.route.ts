@@ -12,6 +12,7 @@ import {
   sortQuery,
 } from '@/common/pagination'
 import { getPublicUrl } from '@/integrations/s3'
+import { logAudit } from '@/libraries/audit-logger'
 
 const mediaSchema = z.object({
   id: z.string(),
@@ -177,13 +178,21 @@ export const variantsRoute = new Elysia({ tags: ['Variants'] })
       )
       .post(
         '/',
-        async ({ organization, params, body, status }) => {
+        async ({ _authType, organization, user, params, body, status }) => {
           try {
             const variant = await variantsService.createVariant(
               organization.id,
               params.id,
               body,
             )
+            void logAudit({
+              organizationId: organization.id,
+              userId: user.id,
+              authType: _authType,
+              model: 'ProductVariant',
+              operation: 'create',
+              args: { productId: params.id, data: body },
+            })
             return status(201, serializeVariant(variant))
           } catch (e: unknown) {
             if (e instanceof Error && 'code' in e && e.code === 'P2002') {
@@ -289,13 +298,21 @@ export const variantsRoute = new Elysia({ tags: ['Variants'] })
       )
       .post(
         '/:id/restore',
-        async ({ organization, params, status }) => {
+        async ({ _authType, organization, user, params, status }) => {
           const count = await variantsService.restoreVariant(
             organization.id,
             params.id,
           )
           if (count.count === 0)
             return status(404, { message: 'Variant not found' })
+          void logAudit({
+            organizationId: organization.id,
+            userId: user.id,
+            authType: _authType,
+            model: 'ProductVariant',
+            operation: 'restore',
+            args: { id: params.id },
+          })
           return status(200, { message: 'Variant restored' })
         },
         {
@@ -341,7 +358,7 @@ export const variantsRoute = new Elysia({ tags: ['Variants'] })
       )
       .patch(
         '/:id',
-        async ({ organization, params, body, status }) => {
+        async ({ _authType, organization, user, params, body, status }) => {
           try {
             const count = await variantsService.updateVariant(
               organization.id,
@@ -350,6 +367,14 @@ export const variantsRoute = new Elysia({ tags: ['Variants'] })
             )
             if (count.count === 0)
               return status(404, { message: 'Variant not found' })
+            void logAudit({
+              organizationId: organization.id,
+              userId: user.id,
+              authType: _authType,
+              model: 'ProductVariant',
+              operation: 'update',
+              args: { id: params.id, data: body },
+            })
             return status(200, { message: 'Variant updated' })
           } catch (e: unknown) {
             if (e instanceof Error && 'code' in e && e.code === 'P2002') {
@@ -379,13 +404,21 @@ export const variantsRoute = new Elysia({ tags: ['Variants'] })
       )
       .delete(
         '/:id',
-        async ({ organization, params, status }) => {
+        async ({ _authType, organization, user, params, status }) => {
           const count = await variantsService.deleteVariant(
             organization.id,
             params.id,
           )
           if (count.count === 0)
             return status(404, { message: 'Variant not found' })
+          void logAudit({
+            organizationId: organization.id,
+            userId: user.id,
+            authType: _authType,
+            model: 'ProductVariant',
+            operation: 'delete',
+            args: { id: params.id },
+          })
           return status(200, { message: 'Variant deleted' })
         },
         {
@@ -405,12 +438,20 @@ export const variantsRoute = new Elysia({ tags: ['Variants'] })
       )
       .post(
         '/:id/images',
-        async ({ organization, params, body, status }) => {
+        async ({ _authType, organization, user, params, body, status }) => {
           const image = await variantsService.addVariantImage(
             organization.id,
             params.id,
             body,
           )
+          void logAudit({
+            organizationId: organization.id,
+            userId: user.id,
+            authType: _authType,
+            model: 'VariantImage',
+            operation: 'create',
+            args: { variantId: params.id, data: body },
+          })
           return status(201, serializeVariantImage(image))
         },
         {
@@ -430,12 +471,20 @@ export const variantsRoute = new Elysia({ tags: ['Variants'] })
       )
       .delete(
         '/:id/images/:imageId',
-        async ({ organization, params, status }) => {
+        async ({ _authType, organization, user, params, status }) => {
           await variantsService.removeVariantImage(
             organization.id,
             params.id,
             params.imageId,
           )
+          void logAudit({
+            organizationId: organization.id,
+            userId: user.id,
+            authType: _authType,
+            model: 'VariantImage',
+            operation: 'delete',
+            args: { variantId: params.id, imageId: params.imageId },
+          })
           return status(200, { message: 'Image removed' })
         },
         {
