@@ -7,7 +7,10 @@
   "scripts": {
     "dev": "bun run --parallel dev:backend dev:frontend",
     "dev:backend": "bun run --cwd packages/backend dev",
-    "dev:frontend": "bun run --cwd packages/frontend dev"
+    "dev:frontend": "bun run --cwd packages/frontend dev",
+    "check": "bun run --parallel check:backend check:frontend",
+    "check:backend": "bun run --cwd packages/backend check",
+    "check:frontend": "bun run --cwd packages/frontend check"
   },
   "overrides": {
     "@tanstack/query-core": "5.95.2"

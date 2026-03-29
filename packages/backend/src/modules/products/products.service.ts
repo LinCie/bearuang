@@ -188,7 +188,7 @@ export const productsService = {
   },
 
   async addProductImage(
-    organizationId: string,
+    _organizationId: string,
     productId: string,
     data: { mediaId: string; altText?: string },
   ) {
@@ -208,7 +208,7 @@ export const productsService = {
   },
 
   async removeProductImage(
-    organizationId: string,
+    _organizationId: string,
     productId: string,
     imageId: string,
   ) {
@@ -218,7 +218,7 @@ export const productsService = {
   },
 
   async reorderProductImages(
-    organizationId: string,
+    _organizationId: string,
     productId: string,
     imageIds: string[],
   ) {
@@ -233,7 +233,7 @@ export const productsService = {
   },
 
   async addVariantImage(
-    organizationId: string,
+    _organizationId: string,
     variantId: string,
     data: { mediaId: string; altText?: string },
   ) {
@@ -253,7 +253,7 @@ export const productsService = {
   },
 
   async removeVariantImage(
-    organizationId: string,
+    _organizationId: string,
     variantId: string,
     imageId: string,
   ) {
@@ -263,7 +263,7 @@ export const productsService = {
   },
 
   async reorderVariantImages(
-    organizationId: string,
+    _organizationId: string,
     variantId: string,
     imageIds: string[],
   ) {

@@ -73,6 +73,7 @@ bearuang/
 ```bash
 bun install                  # Install all dependencies
 bun run dev:backend          # Run backend with watch mode
+bun run check                # Run lint/format/typecheck for both frontend and backend
 ```
 
 ### Backend Commands (run from packages/backend/)
@@ -365,6 +366,7 @@ bun run db:generate          # Generate Prisma client
 - Apply the staff engineer standard: before marking anything done, ask "Would a staff engineer approve this?" If the answer is "probably not," keep working.
 - Verification is part of the task definition, not an optional post-step. A feature that works but has untested edge cases or unverified integration points is not done.
 - For bug fixes specifically: reproduce the bug first, fix it, then confirm the reproduction case no longer triggers. Document the verification steps.
+- **MANDATORY**: Always run `bun check` from the repository root after any changes. This ensures both frontend and backend pass linting, formatting, and type checking before marking work complete.
 
 ### Demand Elegance
 - For non-trivial changes, pause and ask "is there a more elegant way?"
