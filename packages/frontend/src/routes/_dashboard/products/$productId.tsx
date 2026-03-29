@@ -1,5 +1,6 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
+import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
 import * as React from 'react'
 import { Plus } from 'lucide-react'
 import {
@@ -165,6 +166,7 @@ function ProductDetailPage() {
     queryClient.invalidateQueries({
       queryKey: ['products', 'detail', product.id],
     })
+    queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     setProductSheetOpen(false)
   }
 
@@ -221,6 +223,7 @@ function ProductDetailPage() {
       queryClient.invalidateQueries({
         queryKey: ['products', 'detail', product.id],
       })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     }
   }
 

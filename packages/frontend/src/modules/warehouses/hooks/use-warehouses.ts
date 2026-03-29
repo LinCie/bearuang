@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
 import type {
   CreateWarehouseInput,
   ListWarehousesQuery,
@@ -73,6 +74,7 @@ export function useCreateWarehouse() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: warehouseKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -94,6 +96,7 @@ export function useUpdateWarehouse() {
       queryClient.invalidateQueries({
         queryKey: warehouseKeys.detail(variables.id),
       })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -109,6 +112,7 @@ export function useDeleteWarehouse() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: warehouseKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }

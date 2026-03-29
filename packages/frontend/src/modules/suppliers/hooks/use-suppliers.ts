@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
 import type {
   CreateSupplierInput,
   ListSuppliersQuery,
@@ -74,6 +75,7 @@ export function useCreateSupplier() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: supplierKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -95,6 +97,7 @@ export function useUpdateSupplier() {
       queryClient.invalidateQueries({
         queryKey: supplierKeys.detail(variables.id),
       })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -110,6 +113,7 @@ export function useDeleteSupplier() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: supplierKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }

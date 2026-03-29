@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
 import type {
   CreateCustomerInput,
   ListCustomersQuery,
@@ -96,6 +97,7 @@ export function useCreateCustomer() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -117,6 +119,7 @@ export function useUpdateCustomer() {
       queryClient.invalidateQueries({
         queryKey: customerKeys.detail(variables.id),
       })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -133,6 +136,7 @@ export function useDeleteCustomer() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() })
       queryClient.invalidateQueries({ queryKey: customerKeys.trashed() })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -150,6 +154,7 @@ export function useRestoreCustomer() {
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() })
       queryClient.invalidateQueries({ queryKey: customerKeys.trashed() })
       queryClient.invalidateQueries({ queryKey: customerKeys.detail(id) })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }

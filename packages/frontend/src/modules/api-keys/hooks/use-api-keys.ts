@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -90,6 +91,7 @@ export function useCreateApiKey() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: apiKeyKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -111,6 +113,7 @@ export function useUpdateApiKey() {
       queryClient.invalidateQueries({
         queryKey: apiKeyKeys.detail(variables.id),
       })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -126,6 +129,7 @@ export function useDeleteApiKey() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: apiKeyKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }

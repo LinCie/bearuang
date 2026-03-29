@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
 import type {
   ListMembersQuery,
   UpdateMemberRoleInput as _UpdateMemberRoleInput,
@@ -92,6 +93,7 @@ export function useCreateInvitation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: invitationKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -107,6 +109,7 @@ export function useCancelInvitation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: invitationKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -125,6 +128,7 @@ export function useUpdateMemberRole() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memberKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -140,6 +144,7 @@ export function useRemoveMember() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memberKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }

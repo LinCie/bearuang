@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
 import type {
   CreateProductInput,
   ListProductsQuery,
@@ -95,6 +96,7 @@ export function useCreateProduct() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -116,6 +118,7 @@ export function useUpdateProduct() {
       queryClient.invalidateQueries({
         queryKey: productKeys.detail(variables.id),
       })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -132,6 +135,7 @@ export function useDeleteProduct() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() })
       queryClient.invalidateQueries({ queryKey: productKeys.trashed() })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -149,6 +153,7 @@ export function useRestoreProduct() {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() })
       queryClient.invalidateQueries({ queryKey: productKeys.trashed() })
       queryClient.invalidateQueries({ queryKey: productKeys.detail(id) })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }

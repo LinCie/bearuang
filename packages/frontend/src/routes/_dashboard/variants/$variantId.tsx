@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
+import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
 import * as React from 'react'
 import { ArrowLeft, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 import {
@@ -149,6 +150,7 @@ function VariantDetailPage() {
     queryClient.invalidateQueries({
       queryKey: ['variants', 'detail', variant.id],
     })
+    queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     setSheetOpen(false)
   }
 

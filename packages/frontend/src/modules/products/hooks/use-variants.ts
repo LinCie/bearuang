@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
 import type {
   CreateVariantInput,
   SearchVariantQuery,
@@ -117,6 +118,7 @@ export function useCreateVariant(productId: string) {
       queryClient.invalidateQueries({
         queryKey: ['products', 'detail', productId],
       })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -138,6 +140,7 @@ export function useUpdateVariant() {
       queryClient.invalidateQueries({
         queryKey: variantKeys.detail(variables.id),
       })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -154,6 +157,7 @@ export function useDeleteVariant() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: variantKeys.all })
       queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -171,6 +175,7 @@ export function useRestoreVariant() {
       queryClient.invalidateQueries({ queryKey: variantKeys.all })
       queryClient.invalidateQueries({ queryKey: ['products'] })
       queryClient.invalidateQueries({ queryKey: variantKeys.detail(id) })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }

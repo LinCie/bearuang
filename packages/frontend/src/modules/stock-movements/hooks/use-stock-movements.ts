@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
 import { variantKeys } from '@/modules/products/hooks/use-variants'
 import type {
   CreateMovementInput,
@@ -147,6 +148,7 @@ export function useCreateStockMovement() {
       queryClient.invalidateQueries({
         queryKey: variantKeys.lists(),
       })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -170,6 +172,7 @@ export function useDeleteStockMovement() {
       queryClient.invalidateQueries({
         queryKey: variantKeys.all,
       })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }

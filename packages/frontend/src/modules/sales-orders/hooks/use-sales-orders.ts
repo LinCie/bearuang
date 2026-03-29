@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
 import type {
   CreateSalesOrderInput,
   ListSalesOrdersQuery,
@@ -120,6 +121,7 @@ export function useCreateSalesOrder() {
           queryKey: salesOrderKeys.byWarehouse(variables.warehouseId),
         })
       }
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -153,6 +155,7 @@ export function useUpdateSalesOrder() {
           queryKey: salesOrderKeys.byWarehouse(variables.warehouseId),
         })
       }
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
@@ -173,6 +176,7 @@ export function useDeleteSalesOrder() {
       queryClient.invalidateQueries({
         queryKey: salesOrderKeys.all,
       })
+      queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
 }
