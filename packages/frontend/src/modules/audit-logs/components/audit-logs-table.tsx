@@ -79,6 +79,17 @@ function OperationBadge({ operation }: { operation: string }) {
       'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
     deleteMany:
       'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300',
+    restore:
+      'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    receive:
+      'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+    accept:
+      'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    reject: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+    presign: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300',
+    confirm: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
+    reorder:
+      'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300',
   }
 
   const labels: Record<string, string> = {
@@ -88,6 +99,13 @@ function OperationBadge({ operation }: { operation: string }) {
     createMany: 'Buat Banyak',
     updateMany: 'Ubah Banyak',
     deleteMany: 'Hapus Banyak',
+    restore: 'Pulihkan',
+    receive: 'Terima',
+    accept: 'Terima',
+    reject: 'Tolak',
+    presign: 'Presign',
+    confirm: 'Konfirmasi',
+    reorder: 'Urutkan',
   }
 
   return (

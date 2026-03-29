@@ -41,6 +41,16 @@ const OPERATION_OPTIONS = [
   { value: 'create', label: 'Buat' },
   { value: 'update', label: 'Ubah' },
   { value: 'delete', label: 'Hapus' },
+  { value: 'restore', label: 'Pulihkan' },
+  { value: 'receive', label: 'Terima' },
+  { value: 'accept', label: 'Terima' },
+  { value: 'reject', label: 'Tolak' },
+  { value: 'presign', label: 'Presign' },
+  { value: 'confirm', label: 'Konfirmasi' },
+  { value: 'reorder', label: 'Urutkan' },
+  { value: 'createMany', label: 'Buat Banyak' },
+  { value: 'updateMany', label: 'Ubah Banyak' },
+  { value: 'deleteMany', label: 'Hapus Banyak' },
 ]
 
 function Badge({
