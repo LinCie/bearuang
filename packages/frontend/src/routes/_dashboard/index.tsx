@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useSession } from '@/lib/auth-client'
-import { ArrowRight, ClipboardList, Sparkles } from 'lucide-react'
+import { ArrowRight, ChevronDown, ClipboardList, Sparkles } from 'lucide-react'
 import {
   useDashboardSummary,
   useDashboardRecentOrders,
@@ -26,6 +26,7 @@ function DashboardPage() {
   const userName = sessionData?.user.name || 'User'
   const firstName = userName.split(' ')[0]
   const [preset, setPreset] = useState<OrdersPreset>('today')
+  const [stockExpanded, setStockExpanded] = useState(false)
 
   const { data: summary, isLoading: summaryLoading } = useDashboardSummary()
   const { data: recentOrders, isLoading: ordersLoading } =
@@ -107,14 +108,69 @@ function DashboardPage() {
             </p>
             <p className="text-sm text-muted-foreground mt-1">
               dari {stockReport?.totalVariants ?? 0} varian
-              {stockReport && stockReport.topItems.length > 0 && (
-                <span>
-                  {' '}
-                  &middot; {stockReport.topItems[0].productName} &mdash;{' '}
-                  {stockReport.topItems[0].variantName}
-                </span>
-              )}
             </p>
+            {stockReport && stockReport.topItems.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-border/60">
+                <button
+                  type="button"
+                  onClick={() => setStockExpanded((v) => !v)}
+                  className="flex items-center gap-1 text-sm text-primary/80 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                >
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform ${stockExpanded ? 'rotate-180' : ''}`}
+                    aria-hidden="true"
+                  />
+                  {stockExpanded ? 'Sembunyikan' : 'Lihat detail'}
+                </button>
+
+                {stockExpanded && (
+                  <ul className="mt-2.5 flex flex-col gap-2">
+                    {stockReport.topItems.map((item) => (
+                      <li
+                        key={item.variantId}
+                        className="flex items-center justify-between gap-3"
+                      >
+                        <Link
+                          to="/variants/$variantId"
+                          params={{ variantId: item.variantId }}
+                          className="text-sm text-foreground hover:text-primary transition-colors truncate focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded min-w-0"
+                        >
+                          <span className="truncate">
+                            {item.productName} &mdash; {item.variantName}
+                          </span>
+                        </Link>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span
+                            className={`text-xs font-medium tabular-nums px-1.5 py-0.5 rounded ${item.stock === 0 ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400'}`}
+                          >
+                            {item.stock}
+                          </span>
+                          <Link
+                            to="/stock-movements"
+                            search={{ variantId: item.variantId }}
+                            className="text-xs font-medium text-primary/80 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                          >
+                            Restok
+                          </Link>
+                        </div>
+                      </li>
+                    ))}
+                    <li className="pt-1.5">
+                      <Link
+                        to="/stock-movements"
+                        className="text-sm font-medium text-primary/80 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                      >
+                        Kelola Stok{' '}
+                        <ArrowRight
+                          className="inline w-3 h-3"
+                          aria-hidden="true"
+                        />
+                      </Link>
+                    </li>
+                  </ul>
+                )}
+              </div>
+            )}
           </VerdictCard>
         </div>
       </section>
