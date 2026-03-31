@@ -19,7 +19,6 @@ import { sessionQueryOptions } from '@/lib/session'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/signin')({
-  ssr: false,
   pendingComponent: PendingComponent,
   beforeLoad: async ({ context }) => {
     const session =

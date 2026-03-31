@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/sheet'
 
 export const Route = createFileRoute('/organizations')({
-  ssr: false,
   pendingComponent: PendingComponent,
   beforeLoad: async ({ context, location }) => {
     const session =

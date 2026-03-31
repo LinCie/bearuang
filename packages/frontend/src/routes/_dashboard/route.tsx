@@ -19,7 +19,6 @@ const ROUTE_PERMISSION_MAP: Record<string, string> = {
 }
 
 export const Route = createFileRoute('/_dashboard')({
-  ssr: false,
   pendingComponent: PendingComponent,
   beforeLoad: async ({ context, location }) => {
     const session =
