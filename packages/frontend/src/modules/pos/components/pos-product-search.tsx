@@ -92,7 +92,7 @@ export function PosProductSearch({
         )}
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+      <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
         {isFetching &&
           !variants.length &&
           Array.from({ length: 8 }).map((_, i) => (
@@ -103,20 +103,46 @@ export function PosProductSearch({
             key={variant.id}
             type="button"
             onClick={() => onAddToCart(variant)}
-            className="relative text-left p-3 rounded-lg border border-border/50 hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm transition-all duration-150 group cursor-pointer"
+            className="relative text-left p-2.5 rounded-lg border border-border/50 hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm transition-all duration-150 group cursor-pointer flex flex-col"
           >
             {cartVariantIds.has(variant.id) && (
-              <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+              <span className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center z-10">
                 {cartItems.find((i) => i.variant.id === variant.id)?.quantity}
               </span>
             )}
-            <p className="text-xs font-medium text-muted-foreground/70 truncate">
+            <div className="aspect-square w-full rounded-md bg-muted/50 overflow-hidden mb-2">
+              {variant.images[0]?.media?.url ? (
+                <img
+                  src={variant.images[0].media.url}
+                  alt={variant.images[0].altText || variant.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
+                  <svg
+                    className="w-8 h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+              )}
+            </div>
+            <p className="text-[10px] font-medium text-muted-foreground/70 truncate">
               {variant.product.name}
             </p>
-            <p className="text-sm font-semibold truncate mt-0.5">
+            <p className="text-xs font-semibold truncate mt-0.5 leading-tight">
               {variant.name}
             </p>
-            <p className="text-sm font-bold text-primary mt-1">
+            <p className="text-xs font-bold text-primary mt-1">
               Rp {variant.price.toLocaleString('id-ID')}
             </p>
             <p

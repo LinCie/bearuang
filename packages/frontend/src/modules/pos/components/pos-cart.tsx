@@ -27,7 +27,7 @@ export function PosCart({
 
   return (
     <div
-      className="flex-1 overflow-y-auto space-y-1"
+      className="p-2 space-y-2 max-h-[25vh] lg:max-h-none overflow-y-auto"
       role="region"
       aria-label="Keranjang"
       aria-live="polite"
@@ -37,62 +37,92 @@ export function PosCart({
         return (
           <div
             key={item.variant.id}
-            className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors group"
+            className="grid grid-cols-[auto_1fr] gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors group"
           >
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">
-                {item.variant.name}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">
-                {item.variant.product.name}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Rp {item.variant.price.toLocaleString('id-ID')} x{' '}
-                {item.quantity}
-              </p>
+            {/* Left column - Small image */}
+            <div className="w-12 h-12 shrink-0 rounded-md bg-muted/50 overflow-hidden">
+              {item.variant.images[0]?.media?.url ? (
+                <img
+                  src={item.variant.images[0].media.url}
+                  alt={item.variant.images[0].altText || item.variant.name}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+              )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-11"
-                onClick={() =>
-                  onUpdateQuantity(item.variant.id, item.quantity - 1)
-                }
-              >
-                <Minus className="w-3.5 h-3.5" />
-              </Button>
-              <span className="w-8 text-center text-sm font-semibold tabular-nums">
-                {item.quantity}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-11"
-                onClick={() =>
-                  onUpdateQuantity(item.variant.id, item.quantity + 1)
-                }
-              >
-                <Plus className="w-3.5 h-3.5" />
-              </Button>
-            </div>
+            {/* Right column - 2 rows */}
+            <div className="flex flex-col justify-between min-w-0">
+              {/* Top row - Product name */}
+              <div className="flex items-start justify-between gap-1">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium truncate leading-tight">
+                    {item.variant.name}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground truncate">
+                    {item.variant.product.name}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5 shrink-0 opacity-40 focus-visible:opacity-100 hover:opacity-100 transition-opacity text-destructive hover:text-destructive -mt-0.5 -mr-0.5"
+                  onClick={() => onRemoveItem(item.variant.id)}
+                  aria-label={`Hapus ${item.variant.name}`}
+                >
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              </div>
 
-            <div className="text-right w-24 shrink-0">
-              <p className="text-sm font-semibold tabular-nums">
-                Rp {lineTotal.toLocaleString('id-ID')}
-              </p>
-            </div>
+              {/* Bottom row - Quantity controls and price */}
+              <div className="flex items-center justify-between mt-1">
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() =>
+                      onUpdateQuantity(item.variant.id, item.quantity - 1)
+                    }
+                  >
+                    <Minus className="w-3 h-3" />
+                  </Button>
+                  <span className="w-6 text-center text-xs font-semibold tabular-nums">
+                    {item.quantity}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() =>
+                      onUpdateQuantity(item.variant.id, item.quantity + 1)
+                    }
+                  >
+                    <Plus className="w-3 h-3" />
+                  </Button>
+                </div>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-11 opacity-40 focus-visible:opacity-100 hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
-              onClick={() => onRemoveItem(item.variant.id)}
-              aria-label={`Hapus ${item.variant.name}`}
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </Button>
+                <p className="text-xs font-semibold tabular-nums text-primary">
+                  Rp {lineTotal.toLocaleString('id-ID')}
+                </p>
+              </div>
+            </div>
           </div>
         )
       })}

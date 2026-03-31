@@ -10,7 +10,6 @@ import {
   PosReceipt,
 } from '@/modules/pos'
 import type { PaymentMethod } from '@/modules/pos'
-import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_dashboard/pos/')({
@@ -18,15 +17,8 @@ export const Route = createFileRoute('/_dashboard/pos/')({
 })
 
 function POSPage() {
-  const {
-    items,
-    addItem,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    subtotal,
-    itemCount,
-  } = usePosCart()
+  const { items, addItem, removeItem, updateQuantity, clearCart, subtotal } =
+    usePosCart()
 
   const createOrder = useCreateSalesOrder()
   const [paymentOpen, setPaymentOpen] = React.useState(false)
@@ -104,25 +96,28 @@ function POSPage() {
       <div className="flex flex-col lg:flex-row flex-1 min-h-0">
         <div className="flex-1 flex flex-col p-4 gap-4 overflow-hidden lg:border-r lg:border-border/10 min-h-0">
           <h1 className="text-xl font-bold shrink-0 text-primary/90">Kasir</h1>
-          <div className="flex-1 overflow-hidden flex flex-col gap-4">
+          <div className="flex-1 overflow-hidden">
             <PosProductSearch onAddToCart={addItem} cartItems={items} />
-            <Separator />
+          </div>
+        </div>
+
+        <div className="w-full lg:w-80 xl:w-96 shrink-0 border-t lg:border-t-0 border-border/10 bg-primary/[0.02] flex flex-col">
+          <div className="flex-1 min-h-0 overflow-y-auto border-b border-border/10">
             <PosCart
               items={items}
               onUpdateQuantity={updateQuantity}
               onRemoveItem={removeItem}
             />
           </div>
-        </div>
-
-        <div className="w-full lg:w-80 xl:w-96 shrink-0 border-t lg:border-t-0 border-border/10 bg-primary/[0.02]">
-          <PosCheckoutPanel
-            items={items}
-            subtotal={subtotal}
-            itemCount={itemCount}
-            onCheckout={handleCheckout}
-            isProcessing={createOrder.isPending}
-          />
+          <div className="shrink-0">
+            <PosCheckoutPanel
+              items={items}
+              subtotal={subtotal}
+              onCheckout={handleCheckout}
+              onClearCart={clearCart}
+              isProcessing={createOrder.isPending}
+            />
+          </div>
         </div>
       </div>
 
