@@ -1,0 +1,70 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["package.json", "bun.lockb"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "env": ["NODE_ENV"]
+    },
+    "build:bundle": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
+      "env": ["NODE_ENV"]
+    },
+    "check": {
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "inputs": ["src/**", "*.config.*", "tsconfig.json"]
+    },
+    "lint": {
+      "dependsOn": [],
+      "outputs": [],
+      "inputs": ["src/**", "*.config.*"]
+    },
+    "format": {
+      "dependsOn": [],
+      "outputs": [],
+      "inputs": ["src/**", "*.config.*"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"],
+      "inputs": ["src/**", "test/**", "tests/**", "**/*.test.ts", "**/*.test.tsx", "vitest.config.*"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": ["NODE_ENV", "PORT", "DATABASE_URL"]
+    },
+    "db:generate": {
+      "cache": false,
+      "outputs": [],
+      "inputs": ["prisma/schema.prisma"]
+    },
+    "db:migrate": {
+      "cache": false,
+      "outputs": [],
+      "interactive": true
+    },
+    "db:push": {
+      "cache": false,
+      "outputs": [],
+      "interactive": true
+    },
+    "db:studio": {
+      "cache": false,
+      "persistent": true
+    },
+    "db:seed": {
+      "cache": false,
+      "outputs": [],
+      "inputs": ["prisma/seed.ts", "prisma/seed.js"]
+    },
+    "db:validate": {
+      "cache": false,
+      "outputs": [],
+      "inputs": ["prisma/schema.prisma"]
+    }
+  }
+}
