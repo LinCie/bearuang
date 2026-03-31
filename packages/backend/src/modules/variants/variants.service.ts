@@ -206,6 +206,16 @@ export const variantsService = {
     })
   },
 
+  async lookupBySku(organizationId: string, sku: string) {
+    return prisma.productVariant.findFirst({
+      where: { sku, organizationId, deletedAt: null, isActive: true },
+      include: {
+        product: { select: { name: true } },
+        images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
+      },
+    })
+  },
+
   async removeVariantImage(
     organizationId: string,
     variantId: string,

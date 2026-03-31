@@ -52,6 +52,7 @@ const salesOrderSchema = z.object({
     'CANCELLED',
   ]),
   paymentStatus: z.enum(['UNPAID', 'PARTIALLY_PAID', 'PAID']),
+  paymentMethod: z.string().nullable(),
   orderedAt: z.iso.datetime().nullable(),
   shippedAt: z.iso.datetime().nullable(),
   note: z.string().nullable(),
@@ -74,6 +75,7 @@ const createSalesOrderDto = z.object({
   shippingAddress: z.record(z.string(), z.any()).optional(),
   orderedAt: z.iso.datetime().optional(),
   note: z.string().optional(),
+  paymentMethod: z.enum(['CASH', 'QRIS', 'TRANSFER', 'CARD']).optional(),
   items: z.array(createSalesOrderItemDto).min(1),
 })
 
@@ -89,6 +91,10 @@ const updateSalesOrderDto = z.object({
     ])
     .optional(),
   paymentStatus: z.enum(['UNPAID', 'PARTIALLY_PAID', 'PAID']).optional(),
+  paymentMethod: z
+    .enum(['CASH', 'QRIS', 'TRANSFER', 'CARD'])
+    .nullable()
+    .optional(),
   customerId: z.string().uuid().nullable().optional(),
   warehouseId: z.string().uuid().optional(),
   guestName: z.string().nullable().optional(),
@@ -140,6 +146,7 @@ const serializeSalesOrder = (so: {
     | 'COMPLETED'
     | 'CANCELLED'
   paymentStatus: 'UNPAID' | 'PARTIALLY_PAID' | 'PAID'
+  paymentMethod: string | null
   orderedAt: Date | null
   shippedAt: Date | null
   note: string | null

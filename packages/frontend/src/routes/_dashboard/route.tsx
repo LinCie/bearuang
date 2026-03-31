@@ -13,6 +13,7 @@ const ROUTE_PERMISSION_MAP: Record<string, string> = {
   '/customers': 'customer',
   '/purchase-orders': 'purchaseOrder',
   '/sales-orders': 'salesOrder',
+  '/pos': 'salesOrder',
   '/members': 'member',
   '/api-keys': 'apiKey',
   '/audit-logs': 'auditLog',

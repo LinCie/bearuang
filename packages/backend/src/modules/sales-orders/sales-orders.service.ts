@@ -18,6 +18,7 @@ const TERMINAL_STATUSES: SalesOrderStatus[] = ['COMPLETED', 'CANCELLED']
 function buildUpdateData(data: {
   status?: SalesOrderStatus
   paymentStatus?: SalesOrderPaymentStatus
+  paymentMethod?: string | null
   customerId?: string | null
   warehouseId?: string
   guestName?: string | null
@@ -31,6 +32,8 @@ function buildUpdateData(data: {
   if (data.status !== undefined) updateData.status = data.status
   if (data.paymentStatus !== undefined)
     updateData.paymentStatus = data.paymentStatus
+  if (data.paymentMethod !== undefined)
+    updateData.paymentMethod = data.paymentMethod
   if (data.customerId !== undefined) updateData.customerId = data.customerId
   if (data.warehouseId !== undefined) updateData.warehouseId = data.warehouseId
   if (data.guestName !== undefined) updateData.guestName = data.guestName
@@ -130,6 +133,7 @@ export const salesOrdersService = {
       shippingAddress?: unknown
       orderedAt?: Date
       note?: string
+      paymentMethod?: 'CASH' | 'QRIS' | 'TRANSFER' | 'CARD'
       items: Array<{
         variantId: string
         quantity: number
@@ -172,6 +176,10 @@ export const salesOrdersService = {
         shippingAddress: data.shippingAddress ?? {},
         orderedAt: data.orderedAt,
         note: data.note,
+        paymentMethod: data.paymentMethod,
+        paymentStatus: data.paymentMethod
+          ? ('PAID' as const)
+          : ('UNPAID' as const),
         items: {
           create: data.items.map((item) => ({
             variantId: item.variantId,
@@ -198,6 +206,7 @@ export const salesOrdersService = {
     data: {
       status?: SalesOrderStatus
       paymentStatus?: SalesOrderPaymentStatus
+      paymentMethod?: string | null
       customerId?: string | null
       warehouseId?: string
       guestName?: string | null

@@ -397,6 +397,7 @@ model SalesOrder {
   shippingAddress Json                    @default("{}")
   status          SalesOrderStatus        @default(PENDING)
   paymentStatus   SalesOrderPaymentStatus @default(UNPAID)
+  paymentMethod   String?
   orderedAt       DateTime?
   shippedAt       DateTime?
   note            String?

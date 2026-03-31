@@ -81,6 +81,10 @@ export const searchVariantQuery = paginationQuery
     search: z.string().optional(),
   })
 
+const lookupSkuQuery = z.object({
+  sku: z.string().min(1),
+})
+
 export type Variant = z.infer<typeof variantSchema>
 export type VariantWithProduct = z.infer<typeof variantWithProductSchema>
 export type CreateVariantInput = z.infer<typeof createVariantDto>
@@ -257,6 +261,32 @@ export const variantsRoute = new Elysia({ tags: ['Variants'] })
             summary: 'Search all variants',
             description:
               'Globally search and list variants across the entire organization. Useful for comboboxes and quick lookups.',
+          },
+        },
+      )
+      .get(
+        '/lookup',
+        async ({ organization, query, status }) => {
+          const variant = await variantsService.lookupBySku(
+            organization.id,
+            query.sku,
+          )
+          if (!variant) return status(404, { message: 'Variant not found' })
+          return serializeVariantWithProduct(variant)
+        },
+        {
+          requireAuth: true,
+          requireOrg: true,
+          requirePermission: { productVariant: ['view'] },
+          query: lookupSkuQuery,
+          response: {
+            200: variantWithProductSchema,
+            404: errorResponse,
+          },
+          detail: {
+            summary: 'Lookup variant by SKU',
+            description:
+              'Quickly find a variant by its exact SKU. Used for barcode scanning in POS.',
           },
         },
       )

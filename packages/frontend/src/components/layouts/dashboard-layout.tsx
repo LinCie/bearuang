@@ -13,6 +13,7 @@ import {
   Users,
   ClipboardList,
   ShoppingCart,
+  Monitor,
   UserPlus,
   KeyRound,
   ScrollText,
@@ -54,6 +55,12 @@ interface NavItem {
 
 const MAIN_NAV: NavItem[] = [
   { icon: Home, label: 'Home', to: '/' },
+  {
+    icon: Monitor,
+    label: 'POS',
+    to: '/pos',
+    permission: 'salesOrder',
+  },
   { icon: Package, label: 'Produk', to: '/products', permission: 'product' },
   {
     icon: Tag,
