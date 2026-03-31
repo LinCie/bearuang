@@ -54,17 +54,25 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.1.4",
-    "eslint": "^10.1.0",
     "elysia": "^1.4.28",
+    "eslint": "^10.1.0",
     "jsdom": "^28.1.0",
+    "motion": "^12.38.0",
     "prettier": "^3.8.1",
-    "shadcn": "^4.1.0",
     "rollup-plugin-visualizer": "^7.0.1",
+    "shadcn": "^4.1.0",
     "typescript": "^5.7.2",
     "vite": "^7.3.1",
+    "vite-plugin-pwa": "^1.2.0",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.5",
-    "motion": "^12.38.0"
+    "workbox-build": "^7.4.0",
+    "workbox-core": "^7.4.0",
+    "workbox-expiration": "^7.4.0",
+    "workbox-precaching": "^7.4.0",
+    "workbox-routing": "^7.4.0",
+    "workbox-strategies": "^7.4.0",
+    "workbox-window": "^7.4.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
