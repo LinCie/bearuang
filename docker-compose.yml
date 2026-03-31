@@ -30,6 +30,17 @@ services:
         sleep 5 &&
         mc alias set local http://localhost:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} &&
         mc anonymous set download local/bearuang &&
+        mc anonymous set upload local/bearuang &&
+        mc anonymous set put local/bearuang &&
+        echo '[
+          {
+            \"AllowedOrigins\": [\"*\"],
+            \"AllowedMethods\": [\"GET\", \"PUT\", \"POST\", \"DELETE\", \"HEAD\"],
+            \"AllowedHeaders\": [\"*\"],
+            \"MaxAgeSeconds\": 3600
+          }
+        ]' > /tmp/cors.json &&
+        mc admin bucket cors set local/bearuang /tmp/cors.json || true &&
         wait
       "
     restart: unless-stopped
