@@ -156,9 +156,34 @@ model Apikey {
   @@map("apikey")
 }
 
+model ProductCategory {
+  id             String            @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  organizationId String
+  parentId       String?           @db.Uuid
+  parent         ProductCategory?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children       ProductCategory[] @relation("CategoryTree")
+  name           String
+  slug           String
+  description    String?
+  sortOrder      Int               @default(0)
+  isActive       Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  deletedAt      DateTime?
+
+  products Product[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([parentId])
+  @@map("product_category")
+}
+
 model Product {
   id             String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   organizationId String
+  categoryId     String?           @db.Uuid
+  category       ProductCategory?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   name           String
   slug           String
   description    String?
@@ -172,6 +197,7 @@ model Product {
 
   @@unique([organizationId, slug])
   @@index([organizationId])
+  @@index([categoryId])
   @@map("product")
 }
 

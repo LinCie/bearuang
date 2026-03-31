@@ -6,6 +6,7 @@ import { permissionsQueryOptions } from '@/lib/use-permissions'
 
 const ROUTE_PERMISSION_MAP: Record<string, string> = {
   '/products': 'product',
+  '/product-categories': 'productCategory',
   '/warehouses': 'warehouse',
   '/stock-movements': 'stock',
   '/suppliers': 'supplier',

@@ -16,6 +16,7 @@ import { Route as DashboardRouteRouteImport } from './routes/_dashboard/route'
 import { Route as DashboardIndexRouteImport } from './routes/_dashboard/index'
 import { Route as DashboardWarehousesRouteRouteImport } from './routes/_dashboard/warehouses/route'
 import { Route as DashboardProductsRouteRouteImport } from './routes/_dashboard/products/route'
+import { Route as DashboardProductCategoriesRouteRouteImport } from './routes/_dashboard/product-categories/route'
 import { Route as DashboardWarehousesIndexRouteImport } from './routes/_dashboard/warehouses/index'
 import { Route as DashboardSuppliersIndexRouteImport } from './routes/_dashboard/suppliers/index'
 import { Route as DashboardStockMovementsIndexRouteImport } from './routes/_dashboard/stock-movements/index'
@@ -23,6 +24,7 @@ import { Route as DashboardSettingsIndexRouteImport } from './routes/_dashboard/
 import { Route as DashboardSalesOrdersIndexRouteImport } from './routes/_dashboard/sales-orders/index'
 import { Route as DashboardPurchaseOrdersIndexRouteImport } from './routes/_dashboard/purchase-orders/index'
 import { Route as DashboardProductsIndexRouteImport } from './routes/_dashboard/products/index'
+import { Route as DashboardProductCategoriesIndexRouteImport } from './routes/_dashboard/product-categories/index'
 import { Route as DashboardMembersIndexRouteImport } from './routes/_dashboard/members/index'
 import { Route as DashboardCustomersIndexRouteImport } from './routes/_dashboard/customers/index'
 import { Route as DashboardAuditLogsIndexRouteImport } from './routes/_dashboard/audit-logs/index'
@@ -34,8 +36,10 @@ import { Route as DashboardStockMovementsMovementIdRouteImport } from './routes/
 import { Route as DashboardSalesOrdersSalesOrderIdRouteImport } from './routes/_dashboard/sales-orders/$salesOrderId'
 import { Route as DashboardPurchaseOrdersPurchaseOrderIdRouteImport } from './routes/_dashboard/purchase-orders/$purchaseOrderId'
 import { Route as DashboardProductsProductIdRouteImport } from './routes/_dashboard/products/$productId'
+import { Route as DashboardProductCategoriesCategoryIdRouteImport } from './routes/_dashboard/product-categories/$categoryId'
 import { Route as DashboardCustomersCustomerIdRouteImport } from './routes/_dashboard/customers/$customerId'
 import { Route as DashboardProductsTrashedIndexRouteImport } from './routes/_dashboard/products/trashed/index'
+import { Route as DashboardProductCategoriesTrashedIndexRouteImport } from './routes/_dashboard/product-categories/trashed/index'
 import { Route as DashboardCustomersTrashedIndexRouteImport } from './routes/_dashboard/customers/trashed/index'
 
 const SignupRoute = SignupRouteImport.update({
@@ -73,6 +77,12 @@ const DashboardProductsRouteRoute = DashboardProductsRouteRouteImport.update({
   path: '/products',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardProductCategoriesRouteRoute =
+  DashboardProductCategoriesRouteRouteImport.update({
+    id: '/product-categories',
+    path: '/product-categories',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const DashboardWarehousesIndexRoute =
   DashboardWarehousesIndexRouteImport.update({
     id: '/',
@@ -112,6 +122,12 @@ const DashboardProductsIndexRoute = DashboardProductsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardProductsRouteRoute,
 } as any)
+const DashboardProductCategoriesIndexRoute =
+  DashboardProductCategoriesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => DashboardProductCategoriesRouteRoute,
+  } as any)
 const DashboardMembersIndexRoute = DashboardMembersIndexRouteImport.update({
   id: '/members/',
   path: '/members/',
@@ -174,6 +190,12 @@ const DashboardProductsProductIdRoute =
     path: '/$productId',
     getParentRoute: () => DashboardProductsRouteRoute,
   } as any)
+const DashboardProductCategoriesCategoryIdRoute =
+  DashboardProductCategoriesCategoryIdRouteImport.update({
+    id: '/$categoryId',
+    path: '/$categoryId',
+    getParentRoute: () => DashboardProductCategoriesRouteRoute,
+  } as any)
 const DashboardCustomersCustomerIdRoute =
   DashboardCustomersCustomerIdRouteImport.update({
     id: '/customers/$customerId',
@@ -185,6 +207,12 @@ const DashboardProductsTrashedIndexRoute =
     id: '/trashed/',
     path: '/trashed/',
     getParentRoute: () => DashboardProductsRouteRoute,
+  } as any)
+const DashboardProductCategoriesTrashedIndexRoute =
+  DashboardProductCategoriesTrashedIndexRouteImport.update({
+    id: '/trashed/',
+    path: '/trashed/',
+    getParentRoute: () => DashboardProductCategoriesRouteRoute,
   } as any)
 const DashboardCustomersTrashedIndexRoute =
   DashboardCustomersTrashedIndexRouteImport.update({
@@ -198,9 +226,11 @@ export interface FileRoutesByFullPath {
   '/organizations': typeof OrganizationsRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/product-categories': typeof DashboardProductCategoriesRouteRouteWithChildren
   '/products': typeof DashboardProductsRouteRouteWithChildren
   '/warehouses': typeof DashboardWarehousesRouteRouteWithChildren
   '/customers/$customerId': typeof DashboardCustomersCustomerIdRoute
+  '/product-categories/$categoryId': typeof DashboardProductCategoriesCategoryIdRoute
   '/products/$productId': typeof DashboardProductsProductIdRoute
   '/purchase-orders/$purchaseOrderId': typeof DashboardPurchaseOrdersPurchaseOrderIdRoute
   '/sales-orders/$salesOrderId': typeof DashboardSalesOrdersSalesOrderIdRoute
@@ -212,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/audit-logs/': typeof DashboardAuditLogsIndexRoute
   '/customers/': typeof DashboardCustomersIndexRoute
   '/members/': typeof DashboardMembersIndexRoute
+  '/product-categories/': typeof DashboardProductCategoriesIndexRoute
   '/products/': typeof DashboardProductsIndexRoute
   '/purchase-orders/': typeof DashboardPurchaseOrdersIndexRoute
   '/sales-orders/': typeof DashboardSalesOrdersIndexRoute
@@ -220,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/suppliers/': typeof DashboardSuppliersIndexRoute
   '/warehouses/': typeof DashboardWarehousesIndexRoute
   '/customers/trashed/': typeof DashboardCustomersTrashedIndexRoute
+  '/product-categories/trashed/': typeof DashboardProductCategoriesTrashedIndexRoute
   '/products/trashed/': typeof DashboardProductsTrashedIndexRoute
 }
 export interface FileRoutesByTo {
@@ -228,6 +260,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/': typeof DashboardIndexRoute
   '/customers/$customerId': typeof DashboardCustomersCustomerIdRoute
+  '/product-categories/$categoryId': typeof DashboardProductCategoriesCategoryIdRoute
   '/products/$productId': typeof DashboardProductsProductIdRoute
   '/purchase-orders/$purchaseOrderId': typeof DashboardPurchaseOrdersPurchaseOrderIdRoute
   '/sales-orders/$salesOrderId': typeof DashboardSalesOrdersSalesOrderIdRoute
@@ -239,6 +272,7 @@ export interface FileRoutesByTo {
   '/audit-logs': typeof DashboardAuditLogsIndexRoute
   '/customers': typeof DashboardCustomersIndexRoute
   '/members': typeof DashboardMembersIndexRoute
+  '/product-categories': typeof DashboardProductCategoriesIndexRoute
   '/products': typeof DashboardProductsIndexRoute
   '/purchase-orders': typeof DashboardPurchaseOrdersIndexRoute
   '/sales-orders': typeof DashboardSalesOrdersIndexRoute
@@ -247,6 +281,7 @@ export interface FileRoutesByTo {
   '/suppliers': typeof DashboardSuppliersIndexRoute
   '/warehouses': typeof DashboardWarehousesIndexRoute
   '/customers/trashed': typeof DashboardCustomersTrashedIndexRoute
+  '/product-categories/trashed': typeof DashboardProductCategoriesTrashedIndexRoute
   '/products/trashed': typeof DashboardProductsTrashedIndexRoute
 }
 export interface FileRoutesById {
@@ -255,10 +290,12 @@ export interface FileRoutesById {
   '/organizations': typeof OrganizationsRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/_dashboard/product-categories': typeof DashboardProductCategoriesRouteRouteWithChildren
   '/_dashboard/products': typeof DashboardProductsRouteRouteWithChildren
   '/_dashboard/warehouses': typeof DashboardWarehousesRouteRouteWithChildren
   '/_dashboard/': typeof DashboardIndexRoute
   '/_dashboard/customers/$customerId': typeof DashboardCustomersCustomerIdRoute
+  '/_dashboard/product-categories/$categoryId': typeof DashboardProductCategoriesCategoryIdRoute
   '/_dashboard/products/$productId': typeof DashboardProductsProductIdRoute
   '/_dashboard/purchase-orders/$purchaseOrderId': typeof DashboardPurchaseOrdersPurchaseOrderIdRoute
   '/_dashboard/sales-orders/$salesOrderId': typeof DashboardSalesOrdersSalesOrderIdRoute
@@ -270,6 +307,7 @@ export interface FileRoutesById {
   '/_dashboard/audit-logs/': typeof DashboardAuditLogsIndexRoute
   '/_dashboard/customers/': typeof DashboardCustomersIndexRoute
   '/_dashboard/members/': typeof DashboardMembersIndexRoute
+  '/_dashboard/product-categories/': typeof DashboardProductCategoriesIndexRoute
   '/_dashboard/products/': typeof DashboardProductsIndexRoute
   '/_dashboard/purchase-orders/': typeof DashboardPurchaseOrdersIndexRoute
   '/_dashboard/sales-orders/': typeof DashboardSalesOrdersIndexRoute
@@ -278,6 +316,7 @@ export interface FileRoutesById {
   '/_dashboard/suppliers/': typeof DashboardSuppliersIndexRoute
   '/_dashboard/warehouses/': typeof DashboardWarehousesIndexRoute
   '/_dashboard/customers/trashed/': typeof DashboardCustomersTrashedIndexRoute
+  '/_dashboard/product-categories/trashed/': typeof DashboardProductCategoriesTrashedIndexRoute
   '/_dashboard/products/trashed/': typeof DashboardProductsTrashedIndexRoute
 }
 export interface FileRouteTypes {
@@ -287,9 +326,11 @@ export interface FileRouteTypes {
     | '/organizations'
     | '/signin'
     | '/signup'
+    | '/product-categories'
     | '/products'
     | '/warehouses'
     | '/customers/$customerId'
+    | '/product-categories/$categoryId'
     | '/products/$productId'
     | '/purchase-orders/$purchaseOrderId'
     | '/sales-orders/$salesOrderId'
@@ -301,6 +342,7 @@ export interface FileRouteTypes {
     | '/audit-logs/'
     | '/customers/'
     | '/members/'
+    | '/product-categories/'
     | '/products/'
     | '/purchase-orders/'
     | '/sales-orders/'
@@ -309,6 +351,7 @@ export interface FileRouteTypes {
     | '/suppliers/'
     | '/warehouses/'
     | '/customers/trashed/'
+    | '/product-categories/trashed/'
     | '/products/trashed/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -317,6 +360,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/'
     | '/customers/$customerId'
+    | '/product-categories/$categoryId'
     | '/products/$productId'
     | '/purchase-orders/$purchaseOrderId'
     | '/sales-orders/$salesOrderId'
@@ -328,6 +372,7 @@ export interface FileRouteTypes {
     | '/audit-logs'
     | '/customers'
     | '/members'
+    | '/product-categories'
     | '/products'
     | '/purchase-orders'
     | '/sales-orders'
@@ -336,6 +381,7 @@ export interface FileRouteTypes {
     | '/suppliers'
     | '/warehouses'
     | '/customers/trashed'
+    | '/product-categories/trashed'
     | '/products/trashed'
   id:
     | '__root__'
@@ -343,10 +389,12 @@ export interface FileRouteTypes {
     | '/organizations'
     | '/signin'
     | '/signup'
+    | '/_dashboard/product-categories'
     | '/_dashboard/products'
     | '/_dashboard/warehouses'
     | '/_dashboard/'
     | '/_dashboard/customers/$customerId'
+    | '/_dashboard/product-categories/$categoryId'
     | '/_dashboard/products/$productId'
     | '/_dashboard/purchase-orders/$purchaseOrderId'
     | '/_dashboard/sales-orders/$salesOrderId'
@@ -358,6 +406,7 @@ export interface FileRouteTypes {
     | '/_dashboard/audit-logs/'
     | '/_dashboard/customers/'
     | '/_dashboard/members/'
+    | '/_dashboard/product-categories/'
     | '/_dashboard/products/'
     | '/_dashboard/purchase-orders/'
     | '/_dashboard/sales-orders/'
@@ -366,6 +415,7 @@ export interface FileRouteTypes {
     | '/_dashboard/suppliers/'
     | '/_dashboard/warehouses/'
     | '/_dashboard/customers/trashed/'
+    | '/_dashboard/product-categories/trashed/'
     | '/_dashboard/products/trashed/'
   fileRoutesById: FileRoutesById
 }
@@ -427,6 +477,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProductsRouteRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/_dashboard/product-categories': {
+      id: '/_dashboard/product-categories'
+      path: '/product-categories'
+      fullPath: '/product-categories'
+      preLoaderRoute: typeof DashboardProductCategoriesRouteRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/_dashboard/warehouses/': {
       id: '/_dashboard/warehouses/'
       path: '/'
@@ -475,6 +532,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/products/'
       preLoaderRoute: typeof DashboardProductsIndexRouteImport
       parentRoute: typeof DashboardProductsRouteRoute
+    }
+    '/_dashboard/product-categories/': {
+      id: '/_dashboard/product-categories/'
+      path: '/'
+      fullPath: '/product-categories/'
+      preLoaderRoute: typeof DashboardProductCategoriesIndexRouteImport
+      parentRoute: typeof DashboardProductCategoriesRouteRoute
     }
     '/_dashboard/members/': {
       id: '/_dashboard/members/'
@@ -553,6 +617,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProductsProductIdRouteImport
       parentRoute: typeof DashboardProductsRouteRoute
     }
+    '/_dashboard/product-categories/$categoryId': {
+      id: '/_dashboard/product-categories/$categoryId'
+      path: '/$categoryId'
+      fullPath: '/product-categories/$categoryId'
+      preLoaderRoute: typeof DashboardProductCategoriesCategoryIdRouteImport
+      parentRoute: typeof DashboardProductCategoriesRouteRoute
+    }
     '/_dashboard/customers/$customerId': {
       id: '/_dashboard/customers/$customerId'
       path: '/customers/$customerId'
@@ -567,6 +638,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProductsTrashedIndexRouteImport
       parentRoute: typeof DashboardProductsRouteRoute
     }
+    '/_dashboard/product-categories/trashed/': {
+      id: '/_dashboard/product-categories/trashed/'
+      path: '/trashed'
+      fullPath: '/product-categories/trashed/'
+      preLoaderRoute: typeof DashboardProductCategoriesTrashedIndexRouteImport
+      parentRoute: typeof DashboardProductCategoriesRouteRoute
+    }
     '/_dashboard/customers/trashed/': {
       id: '/_dashboard/customers/trashed/'
       path: '/customers/trashed'
@@ -576,6 +654,26 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface DashboardProductCategoriesRouteRouteChildren {
+  DashboardProductCategoriesCategoryIdRoute: typeof DashboardProductCategoriesCategoryIdRoute
+  DashboardProductCategoriesIndexRoute: typeof DashboardProductCategoriesIndexRoute
+  DashboardProductCategoriesTrashedIndexRoute: typeof DashboardProductCategoriesTrashedIndexRoute
+}
+
+const DashboardProductCategoriesRouteRouteChildren: DashboardProductCategoriesRouteRouteChildren =
+  {
+    DashboardProductCategoriesCategoryIdRoute:
+      DashboardProductCategoriesCategoryIdRoute,
+    DashboardProductCategoriesIndexRoute: DashboardProductCategoriesIndexRoute,
+    DashboardProductCategoriesTrashedIndexRoute:
+      DashboardProductCategoriesTrashedIndexRoute,
+  }
+
+const DashboardProductCategoriesRouteRouteWithChildren =
+  DashboardProductCategoriesRouteRoute._addFileChildren(
+    DashboardProductCategoriesRouteRouteChildren,
+  )
 
 interface DashboardProductsRouteRouteChildren {
   DashboardProductsProductIdRoute: typeof DashboardProductsProductIdRoute
@@ -612,6 +710,7 @@ const DashboardWarehousesRouteRouteWithChildren =
   )
 
 interface DashboardRouteRouteChildren {
+  DashboardProductCategoriesRouteRoute: typeof DashboardProductCategoriesRouteRouteWithChildren
   DashboardProductsRouteRoute: typeof DashboardProductsRouteRouteWithChildren
   DashboardWarehousesRouteRoute: typeof DashboardWarehousesRouteRouteWithChildren
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -634,6 +733,8 @@ interface DashboardRouteRouteChildren {
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardProductCategoriesRouteRoute:
+    DashboardProductCategoriesRouteRouteWithChildren,
   DashboardProductsRouteRoute: DashboardProductsRouteRouteWithChildren,
   DashboardWarehousesRouteRoute: DashboardWarehousesRouteRouteWithChildren,
   DashboardIndexRoute: DashboardIndexRoute,

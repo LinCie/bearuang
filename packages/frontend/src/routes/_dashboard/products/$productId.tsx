@@ -144,6 +144,7 @@ function ProductDetailPage() {
     name: string
     slug: string
     description: string
+    categoryId: string | null
     isActive: boolean
     pendingImages: { id: string }[]
     removedImageIds: string[]
@@ -155,6 +156,7 @@ function ProductDetailPage() {
       name: values.name,
       slug: values.slug,
       description: values.description || undefined,
+      categoryId: values.categoryId,
       isActive: values.isActive,
     }
     await updateProduct.mutateAsync(input)

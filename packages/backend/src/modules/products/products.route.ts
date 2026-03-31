@@ -62,9 +62,17 @@ export const variantSchema = z.object({
   images: z.array(variantImageSchema),
 })
 
+const categoryBriefSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+})
+
 export const productSchema = z.object({
   id: z.string(),
   organizationId: z.string(),
+  categoryId: z.string().nullable(),
+  category: categoryBriefSchema.nullable(),
   name: z.string(),
   slug: z.string(),
   description: z.string().nullable(),
@@ -89,6 +97,7 @@ export const createProductDto = z.object({
     ),
   description: z.string().optional(),
   isActive: z.boolean().optional(),
+  categoryId: z.string().uuid().nullable().optional(),
 })
 
 export const updateProductDto = z.object({
@@ -103,12 +112,17 @@ export const updateProductDto = z.object({
     .optional(),
   description: z.string().optional(),
   isActive: z.boolean().optional(),
+  categoryId: z.string().uuid().nullable().optional(),
 })
 
 export const listProductsQuery = paginationQuery
   .merge(sortQuery(['name', 'createdAt', 'updatedAt']))
   .extend({
     search: z.string().optional(),
+    categoryId: z
+      .union([z.string().uuid(), z.literal('null')])
+      .transform((v) => (v === 'null' ? null : v))
+      .optional(),
   })
 
 export type Product = z.infer<typeof productSchema>
@@ -174,7 +188,7 @@ function serializeVariant(v: {
   } as unknown as ProductVariant
 }
 
-function serializeProduct(p: {
+export function serializeProduct(p: {
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -205,7 +219,7 @@ export const productsRoute = new Elysia({
   .get(
     '/',
     async ({ organization, query }) => {
-      const { page, pageSize, search, sortBy, sortOrder } = query
+      const { page, pageSize, search, sortBy, sortOrder, categoryId } = query
       const { skip, take } = paginationToSkipTake(page, pageSize)
       const { data, total } = await productsService.listProducts(
         organization.id,
@@ -213,6 +227,7 @@ export const productsRoute = new Elysia({
           skip,
           take,
           search,
+          categoryId,
           orderBy: sortBy
             ? { field: sortBy, order: sortOrder ?? 'desc' }
             : undefined,

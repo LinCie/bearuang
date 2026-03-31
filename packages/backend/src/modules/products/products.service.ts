@@ -1,5 +1,36 @@
 import { prisma } from '@/integrations/prisma'
 
+const categorySelect = {
+  select: { id: true, name: true, slug: true },
+} as const
+
+const productInclude = {
+  category: categorySelect,
+  variants: {
+    where: { deletedAt: null },
+    include: {
+      images: {
+        include: { media: true },
+        orderBy: { sortOrder: 'asc' },
+      },
+    },
+  },
+  images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
+} as const
+
+const trashedProductInclude = {
+  category: categorySelect,
+  variants: {
+    include: {
+      images: {
+        include: { media: true },
+        orderBy: { sortOrder: 'asc' },
+      },
+    },
+  },
+  images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
+} as const
+
 export const productsService = {
   async listProducts(
     organizationId: string,
@@ -7,6 +38,7 @@ export const productsService = {
       skip?: number
       take?: number
       search?: string
+      categoryId?: string | null
       orderBy?: {
         field: 'name' | 'createdAt' | 'updatedAt'
         order: 'asc' | 'desc'
@@ -16,6 +48,9 @@ export const productsService = {
     const where = {
       organizationId,
       deletedAt: null,
+      ...(params?.categoryId !== undefined && {
+        categoryId: params.categoryId,
+      }),
       ...(params?.search && {
         OR: [
           { name: { contains: params.search, mode: 'insensitive' as const } },
@@ -31,18 +66,7 @@ export const productsService = {
     const [data, total] = await prisma.$transaction([
       prisma.product.findMany({
         where,
-        include: {
-          variants: {
-            where: { deletedAt: null },
-            include: {
-              images: {
-                include: { media: true },
-                orderBy: { sortOrder: 'asc' },
-              },
-            },
-          },
-          images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
-        },
+        include: productInclude,
         skip: params?.skip,
         take: params?.take ?? 50,
         orderBy: params?.orderBy
@@ -84,17 +108,7 @@ export const productsService = {
     const [data, total] = await prisma.$transaction([
       prisma.product.findMany({
         where,
-        include: {
-          variants: {
-            include: {
-              images: {
-                include: { media: true },
-                orderBy: { sortOrder: 'asc' },
-              },
-            },
-          },
-          images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
-        },
+        include: trashedProductInclude,
         skip: params?.skip,
         take: params?.take ?? 50,
         orderBy: params?.orderBy
@@ -109,15 +123,7 @@ export const productsService = {
   async getProduct(organizationId: string, id: string) {
     return prisma.product.findFirst({
       where: { id, organizationId, deletedAt: null },
-      include: {
-        variants: {
-          where: { deletedAt: null },
-          include: {
-            images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
-          },
-        },
-        images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
-      },
+      include: productInclude,
     })
   },
 
@@ -128,18 +134,12 @@ export const productsService = {
       slug: string
       description?: string
       isActive?: boolean
+      categoryId?: string | null
     },
   ) {
     return prisma.product.create({
       data: { ...data, organizationId },
-      include: {
-        variants: {
-          include: {
-            images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
-          },
-        },
-        images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
-      },
+      include: productInclude,
     })
   },
 
@@ -151,6 +151,7 @@ export const productsService = {
       slug?: string
       description?: string
       isActive?: boolean
+      categoryId?: string | null
     },
   ) {
     return prisma.product.updateMany({
@@ -275,5 +276,65 @@ export const productsService = {
         }),
       ),
     )
+  },
+
+  async listProductsByCategoryTree(
+    organizationId: string,
+    rootCategoryId: string,
+    params?: {
+      skip?: number
+      take?: number
+      search?: string
+      orderBy?: {
+        field: 'name' | 'createdAt' | 'updatedAt'
+        order: 'asc' | 'desc'
+      }
+    },
+  ) {
+    const categoryIds = [rootCategoryId]
+    let frontier = [rootCategoryId]
+
+    while (frontier.length > 0) {
+      const children = await prisma.productCategory.findMany({
+        where: { parentId: { in: frontier }, deletedAt: null },
+        select: { id: true },
+      })
+      if (children.length === 0) break
+      const childIds = children.map((c) => c.id)
+      categoryIds.push(...childIds)
+      frontier = childIds
+    }
+
+    const where = {
+      organizationId,
+      deletedAt: null,
+      categoryId: { in: categoryIds },
+      ...(params?.search && {
+        OR: [
+          { name: { contains: params.search, mode: 'insensitive' as const } },
+          {
+            description: {
+              contains: params.search,
+              mode: 'insensitive' as const,
+            },
+          },
+        ],
+      }),
+    }
+
+    const [data, total] = await prisma.$transaction([
+      prisma.product.findMany({
+        where,
+        include: productInclude,
+        skip: params?.skip,
+        take: params?.take ?? 50,
+        orderBy: params?.orderBy
+          ? { [params.orderBy.field]: params.orderBy.order }
+          : { createdAt: 'desc' },
+      }),
+      prisma.product.count({ where }),
+    ])
+
+    return { data, total }
   },
 }

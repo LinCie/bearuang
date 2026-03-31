@@ -16,6 +16,7 @@ import {
   UserPlus,
   KeyRound,
   ScrollText,
+  Tag,
 } from 'lucide-react'
 import { signOut, useSession } from '@/lib/auth-client'
 import { usePermissions } from '@/lib/use-permissions'
@@ -54,6 +55,12 @@ interface NavItem {
 const MAIN_NAV: NavItem[] = [
   { icon: Home, label: 'Home', to: '/' },
   { icon: Package, label: 'Produk', to: '/products', permission: 'product' },
+  {
+    icon: Tag,
+    label: 'Kategori Produk',
+    to: '/product-categories',
+    permission: 'productCategory',
+  },
   {
     icon: Warehouse,
     label: 'Gudang',

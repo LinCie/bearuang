@@ -9,6 +9,7 @@ import {
 const statement = {
   ...defaultStatements,
   product: ['create', 'update', 'delete', 'view'],
+  productCategory: ['create', 'update', 'delete', 'view'],
   productVariant: ['create', 'update', 'delete', 'view'],
   warehouse: ['create', 'update', 'delete', 'view'],
   supplier: ['create', 'update', 'delete', 'view'],
@@ -30,6 +31,7 @@ export const ac = createAccessControl(statement)
 export const owner = ac.newRole({
   ...ownerAc.statements,
   product: ['create', 'update', 'delete', 'view'],
+  productCategory: ['create', 'update', 'delete', 'view'],
   productVariant: ['create', 'update', 'delete', 'view'],
   warehouse: ['create', 'update', 'delete', 'view'],
   supplier: ['create', 'update', 'delete', 'view'],
@@ -49,6 +51,7 @@ export const owner = ac.newRole({
 export const admin = ac.newRole({
   ...adminAc.statements,
   product: ['create', 'update', 'delete', 'view'],
+  productCategory: ['create', 'update', 'delete', 'view'],
   productVariant: ['create', 'update', 'delete', 'view'],
   warehouse: ['create', 'update', 'delete', 'view'],
   supplier: ['create', 'update', 'delete', 'view'],
@@ -68,6 +71,7 @@ export const admin = ac.newRole({
 export const member = ac.newRole({
   ...memberAc.statements,
   product: ['view'],
+  productCategory: ['view'],
   productVariant: ['view'],
   warehouse: ['view'],
   supplier: ['view'],
@@ -90,6 +94,7 @@ export type PermissionStatement = typeof statement
 
 export const permissionResources = [
   'product',
+  'productCategory',
   'productVariant',
   'warehouse',
   'supplier',
@@ -108,6 +113,7 @@ export const permissionResources = [
 
 export const permissionActions: Record<string, readonly string[]> = {
   product: ['create', 'update', 'delete', 'view'],
+  productCategory: ['create', 'update', 'delete', 'view'],
   productVariant: ['create', 'update', 'delete', 'view'],
   warehouse: ['create', 'update', 'delete', 'view'],
   supplier: ['create', 'update', 'delete', 'view'],

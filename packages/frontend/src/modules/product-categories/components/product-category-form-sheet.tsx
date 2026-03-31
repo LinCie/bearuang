@@ -23,27 +23,20 @@ import {
   ComboboxEmpty,
 } from '@/components/ui/combobox'
 import { useProductCategories } from '@/modules/product-categories/hooks/use-product-categories'
-import { MultiFileUpload } from '@/modules/uploads/components/multi-file-upload'
-import type { PendingImage } from '@/modules/uploads/components/multi-file-upload'
-import type { Media } from 'backend/src/modules/uploads/uploads.route'
-import type {
-  Product,
-  ProductImage,
-} from 'backend/src/modules/products/products.route'
+import type { ProductCategory } from 'backend/src/modules/product-categories/product-categories.route'
 
 const slugRegex = /^[a-z0-9_-]+$/
 
-const productSchema = z.object({
+const categorySchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, 'Nama produk wajib diisi')
-    .max(100, 'Nama produk maksimal 100 karakter'),
+    .min(1, 'Nama kategori wajib diisi')
+    .max(100, 'Nama kategori maksimal 100 karakter'),
   slug: z
     .string()
     .trim()
     .min(1, 'Slug wajib diisi')
-    .max(100, 'Slug maksimal 100 karakter')
     .regex(
       slugRegex,
       'Slug hanya boleh berisi huruf kecil, angka, strip, dan garis bawah',
@@ -53,86 +46,100 @@ const productSchema = z.object({
     .trim()
     .max(500, 'Deskripsi maksimal 500 karakter')
     .optional(),
-  categoryId: z.string().nullable(),
   isActive: z.boolean(),
+  parentId: z.string().nullable(),
 })
 
-interface ProductFormSheetProps {
+interface ProductCategoryFormSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  product: Product | null
+  category: ProductCategory | null
   onSubmit: (values: {
     name: string
     slug: string
     description: string
-    categoryId: string | null
     isActive: boolean
-    pendingImages: Media[]
-    removedImageIds: string[]
-    reorderedImageIds?: string[]
+    parentId: string | null
   }) => Promise<void>
   isPending: boolean
   mode?: 'create' | 'edit'
 }
 
-export function ProductFormSheet({
+function getDescendantIds(
+  categoryId: string,
+  categories: readonly ProductCategory[],
+): Set<string> {
+  const childrenMap = new Map<string, string[]>()
+  for (const cat of categories) {
+    if (cat.parentId) {
+      const existing = childrenMap.get(cat.parentId) ?? []
+      existing.push(cat.id)
+      childrenMap.set(cat.parentId, existing)
+    }
+  }
+
+  const result = new Set<string>()
+  function collect(id: string): void {
+    const children = childrenMap.get(id)
+    if (children) {
+      for (const childId of children) {
+        result.add(childId)
+        collect(childId)
+      }
+    }
+  }
+  collect(categoryId)
+  return result
+}
+
+export function ProductCategoryFormSheet({
   open,
   onOpenChange,
-  product,
+  category,
   onSubmit,
   isPending,
   mode = 'edit',
-}: ProductFormSheetProps) {
+}: ProductCategoryFormSheetProps) {
   const [serverError, setServerError] = React.useState<string | null>(null)
-  const [existingImages, setExistingImages] = React.useState<ProductImage[]>([])
-  const [removedImageIds, setRemovedImageIds] = React.useState<string[]>([])
-  const [reorderedImageIds, setReorderedImageIds] = React.useState<string[]>([])
-  const [pendingImages, setPendingImages] = React.useState<PendingImage[]>([])
+
+  const isEditing = mode === 'edit' && !!category
 
   const { data: categoriesData } = useProductCategories({ pageSize: 100 })
   const allCategories = categoriesData?.data ?? []
 
-  const [categoryOpen, setCategoryOpen] = React.useState(false)
-  const [categoryQuery, setCategoryQuery] = React.useState('')
+  const excludedIds = React.useMemo(() => {
+    if (!isEditing) return new Set<string>()
+    const ids = getDescendantIds(category.id, allCategories)
+    ids.add(category.id)
+    return ids
+  }, [isEditing, category, allCategories])
+
+  const [parentOpen, setParentOpen] = React.useState(false)
+  const [parentQuery, setParentQuery] = React.useState('')
+
+  const eligibleCategories = React.useMemo(
+    () => allCategories.filter((c) => !excludedIds.has(c.id)),
+    [allCategories, excludedIds],
+  )
 
   const filteredCategories = React.useMemo(() => {
-    if (!categoryQuery) return allCategories
-    const q = categoryQuery.toLowerCase()
-    return allCategories.filter((c) => c.name.toLowerCase().includes(q))
-  }, [allCategories, categoryQuery])
-
-  function generateSlug(name: string): string {
-    return name
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-+|-+$/g, '')
-  }
-
-  const isEditing = mode === 'edit' && !!product
+    if (!parentQuery) return eligibleCategories
+    const q = parentQuery.toLowerCase()
+    return eligibleCategories.filter((c) => c.name.toLowerCase().includes(q))
+  }, [eligibleCategories, parentQuery])
 
   const form = useForm({
     defaultValues: {
-      name: product?.name ?? '',
-      slug: product?.slug ?? '',
-      description: product?.description ?? '',
-      categoryId: product?.categoryId ?? null,
-      isActive: product?.isActive ?? true,
+      name: category?.name ?? '',
+      slug: category?.slug ?? '',
+      description: category?.description ?? '',
+      isActive: category?.isActive ?? true,
+      parentId: category?.parentId ?? null,
     },
     onSubmit: async ({ value }) => {
       setServerError(null)
       try {
-        const doneImages = pendingImages
-          .filter((p) => p.status === 'done' && p.media)
-          .map((p) => p.media as Media)
-        await onSubmit({
-          ...value,
-          pendingImages: doneImages,
-          removedImageIds,
-          reorderedImageIds,
-        })
+        await onSubmit(value)
       } catch (err) {
         const error = err as { message?: string }
         setServerError(error.message ?? 'Terjadi kesalahan. Coba lagi.')
@@ -142,37 +149,26 @@ export function ProductFormSheet({
 
   React.useEffect(() => {
     if (open) {
-      form.setFieldValue('name', product?.name ?? '')
-      form.setFieldValue('slug', product?.slug ?? '')
-      form.setFieldValue('description', product?.description ?? '')
-      form.setFieldValue('categoryId', product?.categoryId ?? null)
-      form.setFieldValue('isActive', product?.isActive ?? true)
-      setCategoryQuery('')
-      setCategoryOpen(false)
-      setExistingImages(product?.images ?? [])
-      setRemovedImageIds([])
-      setPendingImages([])
+      form.setFieldValue('name', category?.name ?? '')
+      form.setFieldValue('slug', category?.slug ?? '')
+      form.setFieldValue('description', category?.description ?? '')
+      form.setFieldValue('isActive', category?.isActive ?? true)
+      form.setFieldValue('parentId', category?.parentId ?? null)
+      setParentQuery('')
+      setParentOpen(false)
       setServerError(null)
     }
-  }, [open, product])
+  }, [open, category])
 
-  const title = isEditing ? 'Edit Info Produk' : 'Produk Baru'
+  const title = isEditing ? 'Edit Kategori' : 'Kategori Baru'
   const description = isEditing
-    ? 'Pastikan detail produk selalu up-to-date agar pelanggan tidak bingung.'
-    : 'Tambahkan barang atau layanan baru agar pelanggan bisa mulai memesannya.'
-  const submitLabel = isEditing ? 'Simpan Perubahan' : 'Simpan ke Katalog'
-
-  const handleRemoveExisting = React.useCallback((imageId: string) => {
-    setExistingImages((prev) => prev.filter((img) => img.id !== imageId))
-    setRemovedImageIds((prev) => [...prev, imageId])
-  }, [])
-
-  const hasAnyUploading = pendingImages.some((p) => p.status === 'uploading')
-  const hasAnyError = pendingImages.some((p) => p.status === 'error')
+    ? 'Perbarui informasi kategori produk.'
+    : 'Tambahkan kategori baru untuk mengatur produk Anda.'
+  const submitLabel = isEditing ? 'Simpan Perubahan' : 'Tambah Kategori'
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
-      <SheetContent side="right" className="sm:max-w-md overflow-y-auto">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="sm:max-w-md">
         <SheetHead className="mb-6">
           <SheetTitle className="text-2xl">{title}</SheetTitle>
           <SheetDescription className="text-base mt-1 text-balance">
@@ -184,12 +180,14 @@ export function ProductFormSheet({
           className="flex flex-col gap-4 px-4 flex-1"
           onSubmit={(e) => {
             e.preventDefault()
-            if (hasAnyUploading) return
             form.handleSubmit()
           }}
         >
           {serverError && (
-            <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-4 py-3 font-medium">
+            <p
+              role="alert"
+              className="text-sm text-destructive bg-destructive/10 rounded-lg px-4 py-3 font-medium"
+            >
               {serverError}
             </p>
           )}
@@ -198,27 +196,21 @@ export function ProductFormSheet({
           <form.Field
             name="name"
             validators={{
-              onBlur: productSchema.shape.name,
-              onSubmit: productSchema.shape.name,
+              onBlur: categorySchema.shape.name,
+              onSubmit: categorySchema.shape.name,
             }}
           >
             {(field) => (
               <div className="space-y-1.5">
                 <Label htmlFor={field.name} className="font-medium">
-                  Nama Produk <span className="text-destructive">*</span>
+                  Nama Kategori <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id={field.name}
-                  placeholder="Contoh: Kopi Arabika Premium"
+                  placeholder="Contoh: Makanan Ringan"
                   value={field.state.value}
                   onBlur={field.handleBlur}
-                  onChange={(e) => {
-                    const value = e.target.value
-                    field.handleChange(value)
-                    if (!isEditing) {
-                      form.setFieldValue('slug', generateSlug(value))
-                    }
-                  }}
+                  onChange={(e) => field.handleChange(e.target.value)}
                 />
                 {field.state.meta.errors[0] && (
                   <p className="text-xs text-destructive font-medium">
@@ -233,8 +225,8 @@ export function ProductFormSheet({
           <form.Field
             name="slug"
             validators={{
-              onBlur: productSchema.shape.slug,
-              onSubmit: productSchema.shape.slug,
+              onBlur: categorySchema.shape.slug,
+              onSubmit: categorySchema.shape.slug,
             }}
           >
             {(field) => (
@@ -244,15 +236,11 @@ export function ProductFormSheet({
                 </Label>
                 <Input
                   id={field.name}
-                  placeholder="kopi-arabika-premium"
+                  placeholder="Contoh: makanan-ringan"
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                 />
-                <p className="text-xs text-muted-foreground">
-                  URL-friendly identifier. Hanya huruf kecil, angka, strip (-),
-                  dan garis bawah (_).
-                </p>
                 {field.state.meta.errors[0] && (
                   <p className="text-xs text-destructive font-medium">
                     {field.state.meta.errors[0].message}
@@ -271,65 +259,65 @@ export function ProductFormSheet({
                 </Label>
                 <Textarea
                   id={field.name}
-                  placeholder="Ceritakan sedikit tentang produk ini (opsional)..."
+                  placeholder="Masukkan deskripsi kategori (opsional)..."
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  rows={3}
+                  rows={4}
                   className="resize-none"
                 />
               </div>
             )}
           </form.Field>
 
-          {/* Category */}
-          <form.Field name="categoryId">
+          {/* Parent Category Combobox */}
+          <form.Field name="parentId">
             {(field) => {
-              const selectedCategory =
+              const currentParent =
                 field.state.value && field.state.value !== ''
                   ? (allCategories.find((c) => c.id === field.state.value) ??
                     null)
                   : null
               return (
                 <div className="space-y-1.5">
-                  <Label htmlFor="product-category" className="font-medium">
-                    Kategori
+                  <Label htmlFor="parent-category" className="font-medium">
+                    Kategori Induk
                   </Label>
                   <Combobox
-                    open={categoryOpen}
-                    onOpenChange={setCategoryOpen}
-                    value={selectedCategory ? selectedCategory.id : null}
+                    open={parentOpen}
+                    onOpenChange={setParentOpen}
+                    value={currentParent ? currentParent.id : null}
                     onValueChange={(value) => {
                       field.handleChange((value as string) || null)
-                      setCategoryOpen(false)
-                      setCategoryQuery('')
+                      setParentOpen(false)
+                      setParentQuery('')
                     }}
                   >
                     <ComboboxInput
                       placeholder={
-                        selectedCategory
-                          ? selectedCategory.name
-                          : 'Cari dan pilih kategori...'
+                        currentParent
+                          ? currentParent.name
+                          : 'Cari dan pilih kategori induk...'
                       }
-                      value={categoryQuery}
+                      value={parentQuery}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setCategoryQuery(e.target.value)
-                        setCategoryOpen(true)
+                        setParentQuery(e.target.value)
+                        setParentOpen(true)
                       }}
-                      onFocus={() => setCategoryOpen(true)}
+                      onFocus={() => setParentOpen(true)}
                       className="w-full"
                     />
                     <ComboboxContent>
                       <ComboboxList>
                         <ComboboxEmpty>
-                          {allCategories.length === 0
+                          {eligibleCategories.length === 0
                             ? 'Tidak ada kategori tersedia'
                             : 'Tidak ada kategori ditemukan'}
                         </ComboboxEmpty>
-                        {selectedCategory && (
+                        {currentParent && (
                           <ComboboxItem value="">
                             <span className="flex-1 text-muted-foreground">
-                              Hapus kategori
+                              Hapus kategori induk
                             </span>
                           </ComboboxItem>
                         )}
@@ -342,7 +330,7 @@ export function ProductFormSheet({
                     </ComboboxContent>
                   </Combobox>
                   <p className="text-xs text-muted-foreground">
-                    Opsional. Untuk mengelompokkan produk yang serupa.
+                    Opsional. Biarkan kosong untuk menjadikan kategori root.
                   </p>
                 </div>
               )
@@ -364,25 +352,11 @@ export function ProductFormSheet({
                   htmlFor={field.name}
                   className="text-sm font-medium cursor-pointer select-none"
                 >
-                  Produk aktif
+                  Kategori aktif
                 </Label>
               </div>
             )}
           </form.Field>
-
-          <MultiFileUpload
-            existingImages={existingImages.map((img) => ({
-              id: img.id,
-              url: img.media.url,
-              altText: img.altText,
-            }))}
-            onRemoveExisting={handleRemoveExisting}
-            onReorderExisting={setReorderedImageIds}
-            pendingImages={pendingImages}
-            onSetPendingImages={setPendingImages}
-            purpose="product-image"
-            label="Foto Produk"
-          />
         </form>
 
         <SheetFooter className="px-4 pb-4">
@@ -401,9 +375,7 @@ export function ProductFormSheet({
                 <Button
                   type="submit"
                   className="flex-1 shadow-sm"
-                  disabled={
-                    isSubmitting || isPending || hasAnyUploading || hasAnyError
-                  }
+                  disabled={isSubmitting || isPending}
                   onClick={() => form.handleSubmit()}
                 >
                   {isSubmitting || isPending ? 'Menyimpan...' : submitLabel}

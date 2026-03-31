@@ -20,6 +20,7 @@ import { permissionsRoute } from '@/modules/permissions/permissions.route'
 import { dashboardRoute } from '@/modules/dashboard/dashboard.route'
 import { uploadsRoute } from '@/modules/uploads/uploads.route'
 import { auditRoute } from '@/modules/audit/audit.route'
+import { productCategoriesRoute } from '@/modules/product-categories/product-categories.route'
 
 const app = new Elysia()
   .onError(({ error }) => {
@@ -82,6 +83,10 @@ const app = new Elysia()
             name: 'Audit Logs',
             description: 'Audit log viewing endpoints',
           },
+          {
+            name: 'Product Categories',
+            description: 'Product category management endpoints',
+          },
         ],
       },
       mapJsonSchema: { zod: z.toJSONSchema },
@@ -116,6 +121,7 @@ const app = new Elysia()
   .use(dashboardRoute)
   .use(uploadsRoute)
   .use(auditRoute)
+  .use(productCategoriesRoute)
   .get('/health', () => 'ok')
   .listen(Number(process.env.PORT) || 8000)
 
