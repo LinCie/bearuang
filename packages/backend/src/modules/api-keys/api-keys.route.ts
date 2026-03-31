@@ -1,9 +1,9 @@
 import { Elysia } from 'elysia'
 import { z } from 'zod'
-import { authPlugin } from '@/plugins/auth.plugin'
+import { authPlugin } from '#plugins/auth.plugin'
 import { apiKeysService } from './api-keys.service'
-import { errorResponse } from '@/common/error.response'
-import { logAudit } from '@/libraries/audit-logger'
+import { errorResponse } from '#common/error.response'
+import { logAudit } from '#libraries/audit-logger'
 
 const apiKeySchema = z.object({
   id: z.string(),

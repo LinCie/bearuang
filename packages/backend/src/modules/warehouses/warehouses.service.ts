@@ -1,4 +1,4 @@
-import { prisma } from '@/integrations/prisma'
+import { prisma } from '#integrations/prisma'
 
 export const warehousesService = {
   async listWarehouses(

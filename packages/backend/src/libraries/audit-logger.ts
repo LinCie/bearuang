@@ -1,5 +1,5 @@
-import { prisma } from '@/integrations/prisma'
-import { logger } from '@/libraries/utilities'
+import { prisma } from '#integrations/prisma'
+import { logger } from '#libraries/utilities'
 
 interface AuditInput {
   organizationId: string

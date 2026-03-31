@@ -1,4 +1,4 @@
-import { prisma } from '@/integrations/prisma'
+import { prisma } from '#integrations/prisma'
 
 const categorySelect = {
   select: { id: true, name: true, slug: true },

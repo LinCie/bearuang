@@ -1,18 +1,18 @@
 import { Elysia } from 'elysia'
 import { z } from 'zod'
-import { authPlugin } from '@/plugins/auth.plugin'
+import { authPlugin } from '#plugins/auth.plugin'
 import { variantsService } from './variants.service'
-import type { ProductVariant } from '@/generated/prisma/client'
-import { errorResponse } from '@/common/error.response'
+import type { ProductVariant } from '#generated/prisma/client'
+import { errorResponse } from '#common/error.response'
 import {
   paginationQuery,
   paginatedResponse,
   buildPaginationMeta,
   paginationToSkipTake,
   sortQuery,
-} from '@/common/pagination'
-import { getPublicUrl } from '@/integrations/s3'
-import { logAudit } from '@/libraries/audit-logger'
+} from '#common/pagination'
+import { getPublicUrl } from '#integrations/s3'
+import { logAudit } from '#libraries/audit-logger'
 
 const mediaSchema = z.object({
   id: z.string(),

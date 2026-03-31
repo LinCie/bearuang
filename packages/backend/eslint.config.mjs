@@ -8,6 +8,12 @@ export default defineConfig(
   eslint.configs.recommended,
   tseslint.configs.recommended,
   {
-    ignores: ['dist', 'prisma', 'eslint.config.mjs', '**/*.test.ts'],
+    ignores: [
+      'dist',
+      'prisma',
+      'eslint.config.mjs',
+      '**/*.test.ts',
+      './src/generated',
+    ],
   },
 )

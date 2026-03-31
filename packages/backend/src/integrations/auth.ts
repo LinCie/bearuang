@@ -4,7 +4,7 @@ import { apiKey } from '@better-auth/api-key'
 
 import { prisma } from './prisma'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
-import { ac, owner, admin, member } from '@/libraries/permissions'
+import { ac, owner, admin, member } from '#libraries/permissions'
 
 export const auth = betterAuth({
   basePath: '/auth',

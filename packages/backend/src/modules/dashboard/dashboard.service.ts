@@ -1,4 +1,4 @@
-import { prisma } from '@/integrations/prisma'
+import { prisma } from '#integrations/prisma'
 
 /**
  * Returns the Monday 00:00:00 of the current week.

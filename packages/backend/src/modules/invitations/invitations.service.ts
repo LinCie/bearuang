@@ -1,5 +1,5 @@
-import { prisma } from '@/integrations/prisma'
-import { auth } from '@/integrations/auth'
+import { prisma } from '#integrations/prisma'
+import { auth } from '#integrations/auth'
 
 export const invitationsService = {
   async listInvitations(

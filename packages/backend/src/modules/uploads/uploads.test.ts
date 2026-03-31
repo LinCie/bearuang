@@ -35,7 +35,7 @@ const mockService = {
   ),
 }
 
-mock.module('@/plugins/auth.plugin', () => ({
+mock.module('#plugins/auth.plugin', () => ({
   authPlugin: new Elysia({ name: 'auth' }).macro({
     requireAuth: {
       resolve: () => ({
@@ -51,7 +51,7 @@ mock.module('@/plugins/auth.plugin', () => ({
   }),
 }))
 
-mock.module('@/integrations/s3', () => ({
+mock.module('#integrations/s3', () => ({
   presignPut: mock(() =>
     Promise.resolve({ url: 'https://s3.example.com/presigned-put-url' }),
   ),

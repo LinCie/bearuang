@@ -1,4 +1,4 @@
-import { auth } from '@/integrations/auth'
+import { auth } from '#integrations/auth'
 
 /**
  * API Keys service — wraps better-auth's api-key plugin endpoints.

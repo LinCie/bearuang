@@ -1,7 +1,7 @@
-import { auth } from '@/integrations/auth'
-import { prisma } from '@/integrations/prisma'
+import { auth } from '#integrations/auth'
+import { prisma } from '#integrations/prisma'
 import { Elysia } from 'elysia'
-import { logger } from '@/libraries/utilities'
+import { logger } from '#libraries/utilities'
 
 type Permission = Record<string, string[]>
 

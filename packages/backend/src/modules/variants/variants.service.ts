@@ -1,5 +1,5 @@
-import { Prisma } from '@/generated/prisma/client'
-import { prisma } from '@/integrations/prisma'
+import { Prisma } from '#generated/prisma/client'
+import { prisma } from '#integrations/prisma'
 
 export const variantsService = {
   async listVariantsByProduct(organizationId: string, productId: string) {

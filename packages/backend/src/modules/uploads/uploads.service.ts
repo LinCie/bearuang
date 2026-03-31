@@ -1,5 +1,5 @@
-import { prisma } from '@/integrations/prisma'
-import { presignPut, deleteObject, MAX_FILE_SIZE } from '@/integrations/s3'
+import { prisma } from '#integrations/prisma'
+import { presignPut, deleteObject, MAX_FILE_SIZE } from '#integrations/s3'
 
 export const uploadsService = {
   async presignUpload(

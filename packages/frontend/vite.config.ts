@@ -28,10 +28,7 @@ const config = defineConfig({
           output: {
             manualChunks(id) {
               if (id.includes('node_modules')) {
-                if (
-                  id.includes('better-auth') ||
-                  id.includes('@better-auth')
-                ) {
+                if (id.includes('better-auth') || id.includes('@better-auth')) {
                   return 'vendor-auth'
                 }
                 if (id.includes('@dnd-kit')) {

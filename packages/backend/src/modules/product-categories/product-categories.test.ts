@@ -57,7 +57,7 @@ const mockService = {
   ),
 }
 
-mock.module('@/plugins/auth.plugin', () => ({
+mock.module('#plugins/auth.plugin', () => ({
   authPlugin: new Elysia({ name: 'auth' }).macro({
     requireAuth: {
       resolve: () => ({

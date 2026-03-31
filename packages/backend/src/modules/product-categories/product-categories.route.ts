@@ -1,21 +1,21 @@
 import { Elysia } from 'elysia'
 import { z } from 'zod'
-import { authPlugin } from '@/plugins/auth.plugin'
+import { authPlugin } from '#plugins/auth.plugin'
 import { productCategoriesService } from './product-categories.service'
-import { productsService } from '@/modules/products/products.service'
+import { productsService } from '#modules/products/products.service'
 import {
   productSchema,
   serializeProduct,
-} from '@/modules/products/products.route'
-import { errorResponse } from '@/common/error.response'
+} from '#modules/products/products.route'
+import { errorResponse } from '#common/error.response'
 import {
   paginationQuery,
   paginatedResponse,
   buildPaginationMeta,
   paginationToSkipTake,
   sortQuery,
-} from '@/common/pagination'
-import { logAudit } from '@/libraries/audit-logger'
+} from '#common/pagination'
+import { logAudit } from '#libraries/audit-logger'
 
 const categoryChildSchema = z.object({
   id: z.string(),

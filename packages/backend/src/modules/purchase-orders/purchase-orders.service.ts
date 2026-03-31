@@ -1,8 +1,8 @@
-import { prisma } from '@/integrations/prisma'
+import { prisma } from '#integrations/prisma'
 import {
   PurchaseOrderStatus,
   PurchaseOrderPaymentStatus,
-} from '@/generated/prisma/client'
+} from '#generated/prisma/client'
 
 const STATUS_TRANSITIONS: Record<PurchaseOrderStatus, PurchaseOrderStatus[]> = {
   PENDING: ['CONFIRMED', 'CANCELLED'],

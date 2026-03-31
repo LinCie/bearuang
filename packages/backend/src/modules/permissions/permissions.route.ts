@@ -1,13 +1,13 @@
 import { Elysia } from 'elysia'
 import { z } from 'zod'
-import { authPlugin } from '@/plugins/auth.plugin'
-import { auth } from '@/integrations/auth'
-import { prisma } from '@/integrations/prisma'
+import { authPlugin } from '#plugins/auth.plugin'
+import { auth } from '#integrations/auth'
+import { prisma } from '#integrations/prisma'
 import {
   permissionResources,
   permissionActions,
   isSystemRole,
-} from '@/libraries/permissions'
+} from '#libraries/permissions'
 
 const permissionsResponse = z.object({
   viewResources: z.array(z.string()),

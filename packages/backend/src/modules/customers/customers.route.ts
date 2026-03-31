@@ -1,16 +1,16 @@
 import { Elysia } from 'elysia'
 import { z } from 'zod'
-import { authPlugin } from '@/plugins/auth.plugin'
+import { authPlugin } from '#plugins/auth.plugin'
 import { customersService } from './customers.service'
-import { errorResponse } from '@/common/error.response'
-import { logAudit } from '@/libraries/audit-logger'
+import { errorResponse } from '#common/error.response'
+import { logAudit } from '#libraries/audit-logger'
 import {
   paginationQuery,
   paginatedResponse,
   buildPaginationMeta,
   paginationToSkipTake,
   sortQuery,
-} from '@/common/pagination'
+} from '#common/pagination'
 
 export const customerSchema = z.object({
   id: z.string(),

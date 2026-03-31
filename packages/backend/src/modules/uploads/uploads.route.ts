@@ -1,17 +1,17 @@
 import { Elysia } from 'elysia'
 import { z } from 'zod'
-import { authPlugin } from '@/plugins/auth.plugin'
+import { authPlugin } from '#plugins/auth.plugin'
 import { uploadsService } from './uploads.service'
-import { errorResponse } from '@/common/error.response'
-import { logAudit } from '@/libraries/audit-logger'
+import { errorResponse } from '#common/error.response'
+import { logAudit } from '#libraries/audit-logger'
 import {
   paginationQuery,
   paginatedResponse,
   buildPaginationMeta,
   paginationToSkipTake,
-} from '@/common/pagination'
-import { getPublicUrl } from '@/integrations/s3'
-import { MAX_FILE_SIZE } from '@/integrations/s3'
+} from '#common/pagination'
+import { getPublicUrl } from '#integrations/s3'
+import { MAX_FILE_SIZE } from '#integrations/s3'
 
 export const presignUploadDto = z.object({
   filename: z.string().min(1),

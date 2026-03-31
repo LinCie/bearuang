@@ -1,5 +1,5 @@
-import { prisma } from '@/integrations/prisma'
-import { StockMovementType } from '@/generated/prisma/client'
+import { prisma } from '#integrations/prisma'
+import { StockMovementType } from '#generated/prisma/client'
 
 export const stockMovementService = {
   async listMovements(

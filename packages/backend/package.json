@@ -55,5 +55,8 @@
       "types": "./src/*.ts",
       "import": "./src/*.ts"
     }
+  },
+  "imports": {
+    "#*": "./src/*.ts"
   }
 }

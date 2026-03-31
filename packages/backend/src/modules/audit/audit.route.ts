@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia'
 import { z } from 'zod'
-import { authPlugin } from '@/plugins/auth.plugin'
+import { authPlugin } from '#plugins/auth.plugin'
 import { auditService } from './audit.service'
 import {
   paginationQuery,
@@ -8,7 +8,7 @@ import {
   buildPaginationMeta,
   paginationToSkipTake,
   sortQuery,
-} from '@/common/pagination'
+} from '#common/pagination'
 
 export const auditLogSchema = z.object({
   id: z.string(),

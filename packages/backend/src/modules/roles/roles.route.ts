@@ -1,16 +1,16 @@
 import { Elysia } from 'elysia'
 import { z } from 'zod'
-import { authPlugin } from '@/plugins/auth.plugin'
+import { authPlugin } from '#plugins/auth.plugin'
 import { rolesService } from './roles.service'
-import { errorResponse } from '@/common/error.response'
-import { logAudit } from '@/libraries/audit-logger'
+import { errorResponse } from '#common/error.response'
+import { logAudit } from '#libraries/audit-logger'
 import {
   isSystemRole,
   isValidPermission,
   getAllPermissions,
   permissionResources,
   permissionActions,
-} from '@/libraries/permissions'
+} from '#libraries/permissions'
 
 // ─── Schemas ──────────────────────────────────────────────────
 

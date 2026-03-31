@@ -1,17 +1,17 @@
 import { Elysia } from 'elysia'
 import { z } from 'zod'
-import { authPlugin } from '@/plugins/auth.plugin'
+import { authPlugin } from '#plugins/auth.plugin'
 import { stockMovementService } from './stock-movements.service'
-import { StockMovementType as PrismaStockMovementType } from '@/generated/prisma/client'
-import { errorResponse } from '@/common/error.response'
-import { logAudit } from '@/libraries/audit-logger'
+import { StockMovementType as PrismaStockMovementType } from '#generated/prisma/client'
+import { errorResponse } from '#common/error.response'
+import { logAudit } from '#libraries/audit-logger'
 import {
   paginationQuery,
   paginatedResponse,
   buildPaginationMeta,
   paginationToSkipTake,
   sortQuery,
-} from '@/common/pagination'
+} from '#common/pagination'
 
 export const movementTypeEnum = z.enum([
   PrismaStockMovementType.IN,
