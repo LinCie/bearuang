@@ -18,7 +18,7 @@ BearUang is a monorepo containing a backend API and a frontend SPA:
 
 ### Frontend (`packages/frontend/`)
 
-- **Framework**: React 19 + TanStack Start (SSR) + TanStack Router
+- **Framework**: React 19 + TanStack Router
 - **Build**: Vite 7
 - **Language**: TypeScript (strict mode)
 - **Styling**: Tailwind CSS 4 + shadcn/ui (radix-vega style) + Lucide icons
