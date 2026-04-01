@@ -1,10 +1,11 @@
 import * as React from 'react'
 import { Search, ScanBarcode } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { useVariants } from '@/modules/products'
+import { useOfflineVariants } from '../hooks/use-offline-variants'
 import { useVariantLookup } from '../hooks/use-variant-lookup'
 import type { CartItem } from '../hooks/use-pos-cart'
 import type { VariantWithProduct } from 'backend/src/modules/variants/variants.route'
+import { useSession } from '@/lib/auth-client'
 
 interface PosProductSearchProps {
   onAddToCart: (variant: VariantWithProduct) => void
@@ -20,6 +21,10 @@ export function PosProductSearch({
   const barcodeTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const searchInputRef = React.useRef<HTMLInputElement>(null)
   const { lookupBySku, isLooking } = useVariantLookup()
+  const { data: sessionData } = useSession()
+  const orgId = sessionData
+    ? (sessionData.session.activeOrganizationId ?? undefined)
+    : undefined
 
   React.useEffect(() => {
     return () => {
@@ -29,10 +34,11 @@ export function PosProductSearch({
     }
   }, [])
 
-  const { data: variantsData, isFetching } = useVariants({
+  const { data: variantsData, isFetching } = useOfflineVariants({
     search: search || undefined,
     page: 1,
     pageSize: 24,
+    orgFilter: orgId,
   })
 
   const variants = variantsData?.data ?? []

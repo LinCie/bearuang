@@ -21,6 +21,8 @@ import {
 } from 'lucide-react'
 import { signOut, useSession } from '@/lib/auth-client'
 import { usePermissions } from '@/lib/use-permissions'
+import { useSyncInit } from '@/hooks/use-sync-init'
+import { OfflineIndicator } from '@/components/ui/offline-indicator'
 import { cn } from '@/lib/utils'
 import {
   DropdownMenu,
@@ -176,6 +178,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const greeting = useTimeGreeting()
   const [isSigningOut, setIsSigningOut] = React.useState(false)
   const { data: permissions } = usePermissions()
+  useSyncInit()
 
   const filteredMainNav = MAIN_NAV.filter(
     (item): item is NavItem =>
@@ -293,48 +296,51 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </search>
           </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                aria-label={`Menu akun untuk ${userName}`}
-                className="w-9 h-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center font-bold text-sm hover:bg-primary/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
-              >
-                {userName.charAt(0).toUpperCase()}
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col gap-0.5">
-                  <p className="text-sm font-medium text-foreground truncate">
-                    {userName}
-                  </p>
-                  {userEmail && (
-                    <p className="text-xs text-muted-foreground truncate">
-                      {userEmail}
+          <div className="flex items-center gap-3">
+            <OfflineIndicator />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label={`Menu akun untuk ${userName}`}
+                  className="w-9 h-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center font-bold text-sm hover:bg-primary/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+                >
+                  {userName.charAt(0).toUpperCase()}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {userName}
                     </p>
-                  )}
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/settings" className="cursor-pointer">
-                  <Settings className="w-4 h-4" aria-hidden="true" />
-                  Pengaturan
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={handleSignOut}
-                disabled={isSigningOut}
-                className="cursor-pointer"
-              >
-                <LogOut className="w-4 h-4" aria-hidden="true" />
-                {isSigningOut ? 'Keluar...' : 'Keluar'}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                    {userEmail && (
+                      <p className="text-xs text-muted-foreground truncate">
+                        {userEmail}
+                      </p>
+                    )}
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/settings" className="cursor-pointer">
+                    <Settings className="w-4 h-4" aria-hidden="true" />
+                    Pengaturan
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={handleSignOut}
+                  disabled={isSigningOut}
+                  className="cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" aria-hidden="true" />
+                  {isSigningOut ? 'Keluar...' : 'Keluar'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </header>
 
         {/* Main Content Area */}
