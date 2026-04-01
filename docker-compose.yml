@@ -28,7 +28,7 @@ services:
         mkdir -p /data/bearuang &&
         minio server /data --console-address ':9001' &
         sleep 5 &&
-        mc alias set local http://localhost:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} &&
+        mc alias set local http://localhost:9000 ${S3_ACCESS_KEY:-0b36760a936962694339b00777de7b0b} ${S3_SECRET_KEY:-8889ba14228a9f94345c8f542e39b3fb} &&
         mc anonymous set download local/bearuang &&
         mc anonymous set upload local/bearuang &&
         mc anonymous set put local/bearuang &&
