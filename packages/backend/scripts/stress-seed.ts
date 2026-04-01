@@ -23,6 +23,19 @@ if (!API_KEY) {
   process.exit(1)
 }
 
+function getMimeTypeFromPath(path: string): string {
+  const ext = path.split('.').pop()?.toLowerCase()
+  const mimeTypes: Record<string, string> = {
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    webp: 'image/webp',
+    svg: 'image/svg+xml',
+  }
+  return mimeTypes[ext || ''] || 'application/octet-stream'
+}
+
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE'
 
 interface ApiResponse<T = unknown> {
@@ -75,6 +88,10 @@ async function putFile(
     body: file,
     headers: { 'Content-Type': contentType },
   })
+  if (!res.ok) {
+    const errorText = await res.text().catch(() => 'Unknown error')
+    console.error(`    S3 upload failed (${res.status}): ${errorText}`)
+  }
   return res.ok
 }
 
@@ -287,11 +304,15 @@ function generateProductName(): { name: string; slug: string } {
   const base = pick(PRODUCT_BASES)
   const suffix = Math.random() > 0.8 ? ` ${randInt(100, 999)}` : ''
   const name = `${prefix}${base}${suffix}`.trim()
-  const slug =
-    `${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${faker.string.alphanumeric(4)}`.replace(
-      /-+/g,
-      '-',
-    )
+  // Normalize accented characters to ASCII, then remove non-alphanumeric
+  const normalized = name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+  // Use only lowercase alphanumeric for the suffix
+  const suffix4 = faker.string.alphanumeric(4).toLowerCase()
+  const slug = `${normalized}-${suffix4}`.replace(/-+/g, '-')
   return { name, slug }
 }
 
@@ -394,7 +415,7 @@ async function main() {
 
     const items = CATEGORY_DATA.slice(0, CAT_COUNT - 1).map((c, i) => ({
       ...c,
-      slug: `${c.slug}-${faker.string.alphanumeric(4)}`,
+      slug: `${c.slug}-${faker.string.alphanumeric(4).toLowerCase()}`,
       sortOrder: i + 1,
       parentId: i < 5 ? null : pick(categoryIds),
     }))
@@ -476,36 +497,44 @@ async function main() {
     )
   }
 
-  step(5, 'Uploading media via S3')
+  const PRODUCT_IMAGE_COUNT = Math.max(0, Math.floor(100 * SCALE))
+  const VARIANT_IMAGE_COUNT = Math.max(0, Math.floor(200 * SCALE))
+  const TOTAL_IMAGE_COUNT = PRODUCT_IMAGE_COUNT + VARIANT_IMAGE_COUNT
+
+  step(5, `Uploading ${TOTAL_IMAGE_COUNT} media files via S3`)
   const mediaIds: string[] = []
   {
     const scriptDir = import.meta.dir
-    const files = [
-      { path: `${scriptDir}/img-1.png`, contentType: 'image/png' },
-      { path: `${scriptDir}/img-2.png`, contentType: 'image/png' },
-      { path: `${scriptDir}/img-3.jpg`, contentType: 'image/jpeg' },
+    const sourceFiles = [
+      `${scriptDir}/img-1.png`,
+      `${scriptDir}/img-2.png`,
+      `${scriptDir}/img-3.jpg`,
     ]
 
-    for (const f of files) {
+    // Upload enough media files for all images (each media can only be used once due to @@unique constraint)
+    for (let i = 0; i < TOTAL_IMAGE_COUNT; i++) {
+      const sourceFilePath = sourceFiles[i % sourceFiles.length]
       try {
-        const file = Bun.file(f.path)
+        const file = Bun.file(sourceFilePath)
+        const contentType = getMimeTypeFromPath(sourceFilePath)
+        const uniqueFilename = `stress-${i + 1}-${faker.string.alphanumeric(6)}.${sourceFilePath.split('.').pop()}`
         const { data: presign, status: s1 } = await apiCall<
           HasId & { uploadUrl: string }
         >('POST', '/uploads/presign', {
-          filename: f.path.split('/').pop()!,
-          contentType: f.contentType,
+          filename: uniqueFilename,
+          contentType: contentType,
           size: file.size,
           purpose: 'products',
         })
 
         if (s1 !== 201 || !presign) {
-          console.error(`  ✗ Failed to presign ${f.path.split('/').pop()}`)
+          console.error(`  ✗ Failed to presign ${uniqueFilename}`)
           continue
         }
 
-        const uploaded = await putFile(presign.uploadUrl, file, f.contentType)
+        const uploaded = await putFile(presign.uploadUrl, file, contentType)
         if (!uploaded) {
-          console.error(`  ✗ S3 upload failed for ${f.path.split('/').pop()}`)
+          console.error(`  ✗ S3 upload failed for ${uniqueFilename}`)
           continue
         }
 
@@ -515,25 +544,68 @@ async function main() {
         )
         if (s2 === 200 && media) {
           mediaIds.push(media.id)
-          console.log(`  ✓ Uploaded ${f.path.split('/').pop()}`)
+          if ((i + 1) % 50 === 0 || i === TOTAL_IMAGE_COUNT - 1) {
+            process.stdout.write(
+              `    [${i + 1}/${TOTAL_IMAGE_COUNT}] uploaded\r`,
+            )
+          }
         }
       } catch (e: unknown) {
         console.error(`  ✗ Upload error: ${e}`)
       }
     }
-    console.log(`  ✓ Media: ${mediaIds.length} uploaded\n`)
+    console.log(`\n  ✓ Media: ${mediaIds.length} uploaded\n`)
   }
 
-  const IMAGE_COUNT = Math.max(0, Math.floor(300 * SCALE))
-  if (mediaIds.length > 0 && IMAGE_COUNT > 0) {
-    step(6, `Creating ${IMAGE_COUNT} variant images`)
+  // Create a shuffled copy of mediaIds to assign uniquely (each media can only be used once)
+  const availableMediaIds = [...mediaIds].sort(() => Math.random() - 0.5)
+  let mediaIndex = 0
+
+  if (availableMediaIds.length > 0 && PRODUCT_IMAGE_COUNT > 0) {
+    step(
+      6,
+      `Creating ${Math.min(PRODUCT_IMAGE_COUNT, availableMediaIds.length)} product images`,
+    )
+    {
+      const targetProducts = [...productIds]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, Math.min(PRODUCT_IMAGE_COUNT, availableMediaIds.length))
+      const items = targetProducts.map((productId) => ({
+        productId,
+        mediaId: availableMediaIds[mediaIndex++],
+        altText: faker.lorem.words(3),
+      }))
+
+      const r = await runBatch(
+        items,
+        10,
+        async ({ productId, mediaId, altText }) => {
+          await apiCall('POST', `/products/${productId}/images`, {
+            mediaId,
+            altText,
+          })
+        },
+      )
+      track(r)
+      console.log(
+        `  ✓ Product images: ${r.ok} created${r.fail > 0 ? `, ${r.fail} failed` : ''}\n`,
+      )
+    }
+  }
+
+  if (mediaIndex < availableMediaIds.length && VARIANT_IMAGE_COUNT > 0) {
+    const remainingMediaCount = availableMediaIds.length - mediaIndex
+    step(
+      7,
+      `Creating ${Math.min(VARIANT_IMAGE_COUNT, remainingMediaCount)} variant images`,
+    )
     {
       const targetVariants = [...variantIds]
         .sort(() => Math.random() - 0.5)
-        .slice(0, IMAGE_COUNT)
+        .slice(0, Math.min(VARIANT_IMAGE_COUNT, remainingMediaCount))
       const items = targetVariants.map((variantId) => ({
         variantId,
-        mediaId: pick(mediaIds),
+        mediaId: availableMediaIds[mediaIndex++],
         altText: faker.lorem.words(3),
       }))
 
@@ -555,7 +627,7 @@ async function main() {
   }
 
   const WH_COUNT = Math.max(1, Math.floor(5 * SCALE))
-  step(7, `Creating ${WH_COUNT} warehouses`)
+  step(8, `Creating ${WH_COUNT} warehouses`)
   const warehouseIds: string[] = []
   {
     const items = WAREHOUSE_CITIES.slice(0, WH_COUNT).map((w) => ({
@@ -575,7 +647,7 @@ async function main() {
   }
 
   const SUPPLIER_COUNT = Math.max(1, Math.floor(50 * SCALE))
-  step(8, `Creating ${SUPPLIER_COUNT} suppliers`)
+  step(9, `Creating ${SUPPLIER_COUNT} suppliers`)
   const supplierIds: string[] = []
   {
     const items = Array.from({ length: SUPPLIER_COUNT }, () => ({
@@ -596,7 +668,7 @@ async function main() {
   }
 
   const CUSTOMER_COUNT = Math.max(1, Math.floor(100 * SCALE))
-  step(9, `Creating ${CUSTOMER_COUNT} customers`)
+  step(10, `Creating ${CUSTOMER_COUNT} customers`)
   const customerIds: string[] = []
   {
     const items = Array.from({ length: CUSTOMER_COUNT }, () => ({
@@ -617,7 +689,7 @@ async function main() {
   }
 
   const PO_COUNT = Math.max(1, Math.floor(250 * SCALE))
-  step(10, `Creating ${PO_COUNT} purchase orders`)
+  step(11, `Creating ${PO_COUNT} purchase orders`)
   const purchaseOrders: POData[] = []
   {
     const items = Array.from({ length: PO_COUNT }, () => {
@@ -650,7 +722,7 @@ async function main() {
   }
 
   const SO_COUNT = Math.max(1, Math.floor(500 * SCALE))
-  step(11, `Creating ${SO_COUNT} sales orders`)
+  step(12, `Creating ${SO_COUNT} sales orders`)
   const salesOrders: SOData[] = []
   {
     const items = Array.from({ length: SO_COUNT }, () => {
@@ -689,7 +761,7 @@ async function main() {
     )
   }
 
-  step(12, 'Advancing purchase order statuses')
+  step(13, 'Advancing purchase order statuses')
   {
     const shuffled = [...purchaseOrders].sort(() => Math.random() - 0.5)
     const toConfirm = shuffled.slice(0, Math.floor(shuffled.length * 0.6))
@@ -779,7 +851,7 @@ async function main() {
     console.log()
   }
 
-  step(13, 'Advancing sales order statuses')
+  step(14, 'Advancing sales order statuses')
   {
     const shuffled = [...salesOrders].sort(() => Math.random() - 0.5)
     const toConfirm = shuffled.slice(0, Math.floor(shuffled.length * 0.7))
