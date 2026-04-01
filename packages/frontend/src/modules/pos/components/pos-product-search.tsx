@@ -80,8 +80,8 @@ export function PosProductSearch({
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="relative">
+    <div className="flex flex-col gap-3 h-full min-h-0">
+      <div className="relative shrink-0">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           ref={searchInputRef}
@@ -98,7 +98,7 @@ export function PosProductSearch({
         )}
       </div>
 
-      <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+      <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 overflow-y-auto content-start">
         {isFetching &&
           !variants.length &&
           Array.from({ length: 8 }).map((_, i) => (
