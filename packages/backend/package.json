@@ -20,14 +20,17 @@
     "db:validate": "bunx --bun prisma validate",
     "lint": "eslint",
     "format": "prettier --check .",
-    "check": "prettier --write . && eslint --fix && tsc --noEmit"
+    "check": "prettier --write . && eslint --fix && tsc --noEmit",
+    "seed:stress": "bun run scripts/stress-seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1018.0",
     "@aws-sdk/s3-request-presigner": "^3.1018.0",
     "@better-auth/api-key": "^1.5.5",
     "@elysiajs/cors": "^1.4.1",
+    "@elysiajs/eden": "^1.4.9",
     "@elysiajs/openapi": "^1.4.14",
+    "@faker-js/faker": "^10.4.0",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
     "better-auth": "^1.5.5",
