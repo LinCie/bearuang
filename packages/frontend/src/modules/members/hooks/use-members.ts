@@ -35,6 +35,7 @@ export type {
 
 export type {
   Invitation,
+  PendingInvitation,
   CreateInvitationInput,
   ListInvitationsQuery,
 } from 'backend/src/modules/invitations/invitations.route'
@@ -110,6 +111,56 @@ export function useCancelInvitation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: invitationKeys.lists() })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
+    },
+  })
+}
+
+// ─── My Invitations (Invitations sent to me) ───────────────────
+
+export const myInvitationKeys = {
+  all: ['my-invitations'] as const,
+  pending: () => [...myInvitationKeys.all, 'pending'] as const,
+}
+
+export function useMyPendingInvitations() {
+  return useQuery({
+    queryKey: myInvitationKeys.pending(),
+    queryFn: async () => {
+      const { data, error } = await api.invitations['my-pending'].get()
+      if (error) throw error
+      return data
+    },
+  })
+}
+
+export function useAcceptInvitation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await api.invitations({ id }).accept.post()
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: myInvitationKeys.all })
+      queryClient.invalidateQueries({ queryKey: ['session'] })
+      queryClient.invalidateQueries({ queryKey: ['organizations'] })
+    },
+  })
+}
+
+export function useRejectInvitation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await api.invitations({ id }).reject.post()
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: myInvitationKeys.all })
     },
   })
 }

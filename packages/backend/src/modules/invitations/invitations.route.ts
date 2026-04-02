@@ -40,6 +40,20 @@ export const listInvitationsQuery = paginationQuery
   })
 
 export type Invitation = z.infer<typeof invitationSchema>
+
+export const pendingInvitationSchema = z.object({
+  id: z.string(),
+  organizationId: z.string(),
+  email: z.string(),
+  role: z.string().nullable(),
+  status: z.string(),
+  inviterId: z.string(),
+  expiresAt: z.iso.datetime(),
+  createdAt: z.iso.datetime(),
+  organizationName: z.string(),
+})
+
+export type PendingInvitation = z.infer<typeof pendingInvitationSchema>
 export type CreateInvitationInput = z.infer<typeof createInvitationDto>
 export type ListInvitationsQuery = z.infer<typeof listInvitationsQuery>
 
@@ -52,13 +66,25 @@ type InvitationData = {
   inviterId: string
   expiresAt: Date
   createdAt: Date
+  organization?: { name: string }
 }
 
 const serializeInvitation = (inv: InvitationData) => ({
-  ...inv,
+  id: inv.id,
+  organizationId: inv.organizationId,
+  email: inv.email,
   role: inv.role ?? null,
+  status: inv.status,
+  inviterId: inv.inviterId,
   expiresAt: inv.expiresAt.toISOString(),
   createdAt: inv.createdAt.toISOString(),
+})
+
+const serializePendingInvitation = (
+  inv: InvitationData & { organization: { name: string } },
+) => ({
+  ...serializeInvitation(inv),
+  organizationName: inv.organization.name,
 })
 
 export const invitationsRoute = new Elysia({
@@ -326,6 +352,30 @@ export const invitationsRoute = new Elysia({
       detail: {
         summary: 'Cancel an invitation',
         description: 'Cancels a pending invitation to the organization.',
+      },
+    },
+  )
+  .get(
+    '/my-pending',
+    async ({ user }) => {
+      const invitations = await invitationsService.getPendingInvitationsForUser(
+        user.email,
+      )
+      return {
+        data: invitations.map(serializePendingInvitation),
+      }
+    },
+    {
+      requireAuth: true,
+      response: {
+        200: z.object({
+          data: z.array(pendingInvitationSchema),
+        }),
+      },
+      detail: {
+        summary: 'Get my pending invitations',
+        description:
+          'Retrieves all pending invitations sent to the current user.',
       },
     },
   )

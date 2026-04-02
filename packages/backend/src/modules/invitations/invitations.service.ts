@@ -77,4 +77,19 @@ export const invitationsService = {
       body: { invitationId },
     })
   },
+
+  async getPendingInvitationsForUser(email: string) {
+    return prisma.invitation.findMany({
+      where: {
+        email,
+        status: 'pending',
+      },
+      include: {
+        organization: {
+          select: { name: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+  },
 }
