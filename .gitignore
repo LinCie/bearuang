@@ -9,3 +9,6 @@
 .env.prod
 # Turborepo
 .turbo/
+
+# Cloudflare Workers
+.wrangler/
