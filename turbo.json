@@ -66,6 +66,11 @@
       "cache": false,
       "outputs": [],
       "inputs": ["prisma/schema.prisma"]
+    },
+    "start": {
+      "cache": false,
+      "persistent": true,
+      "env": ["NODE_ENV", "PORT"]
     }
   }
 }
