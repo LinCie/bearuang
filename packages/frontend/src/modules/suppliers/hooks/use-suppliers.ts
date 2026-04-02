@@ -112,7 +112,7 @@ export function useDeleteSupplier() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: supplierKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: supplierKeys.all })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })

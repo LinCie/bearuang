@@ -164,10 +164,7 @@ export function useDeleteStockMovement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: stockMovementKeys.lists(),
-      })
-      queryClient.invalidateQueries({
-        queryKey: variantKeys.lists(),
+        queryKey: stockMovementKeys.all,
       })
       queryClient.invalidateQueries({
         queryKey: variantKeys.all,

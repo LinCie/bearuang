@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
+import { productKeys, variantKeys } from './query-keys'
 import type {
   CreateVariantInput,
   SearchVariantQuery,
@@ -9,20 +10,7 @@ import type {
   VariantWithProduct,
 } from 'backend/src/modules/variants/variants.route'
 
-// ─── Query Keys ──────────────────────────────────────────────
-
-export const variantKeys = {
-  all: ['variants'] as const,
-  lists: () => [...variantKeys.all, 'list'] as const,
-  list: (params: SearchVariantQuery) =>
-    [...variantKeys.lists(), params] as const,
-  details: () => [...variantKeys.all, 'detail'] as const,
-  detail: (id: string) => [...variantKeys.details(), id] as const,
-  byProduct: (productId: string) =>
-    [...variantKeys.all, 'byProduct', productId] as const,
-}
-
-// ─── Re-exports ──────────────────────────────────────────────
+export { variantKeys } from './query-keys'
 
 export type {
   CreateVariantInput,
@@ -116,7 +104,7 @@ export function useCreateVariant(productId: string) {
         queryKey: variantKeys.byProduct(productId),
       })
       queryClient.invalidateQueries({
-        queryKey: ['products', 'detail', productId],
+        queryKey: productKeys.detail(productId),
       })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
@@ -140,6 +128,7 @@ export function useUpdateVariant() {
       queryClient.invalidateQueries({
         queryKey: variantKeys.detail(variables.id),
       })
+      queryClient.invalidateQueries({ queryKey: productKeys.all })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
@@ -156,7 +145,7 @@ export function useDeleteVariant() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: variantKeys.all })
-      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: productKeys.all })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
@@ -173,7 +162,7 @@ export function useRestoreVariant() {
     },
     onSuccess: (_data, id) => {
       queryClient.invalidateQueries({ queryKey: variantKeys.all })
-      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: productKeys.all })
       queryClient.invalidateQueries({ queryKey: variantKeys.detail(id) })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
@@ -205,6 +194,7 @@ export function useAddVariantImage() {
       queryClient.invalidateQueries({
         queryKey: variantKeys.detail(variantId),
       })
+      queryClient.invalidateQueries({ queryKey: variantKeys.lists() })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })

@@ -1,27 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
+import { productKeys, variantKeys } from './query-keys'
 import type {
   CreateProductInput,
   ListProductsQuery,
   UpdateProductInput,
 } from 'backend/src/modules/products/products.route'
 
-// ─── Query Keys ──────────────────────────────────────────────
-
-export const productKeys = {
-  all: ['products'] as const,
-  lists: () => [...productKeys.all, 'list'] as const,
-  list: (params: ListProductsQuery) =>
-    [...productKeys.lists(), params] as const,
-  trashed: () => [...productKeys.all, 'trashed'] as const,
-  trashedList: (params: ListProductsQuery) =>
-    [...productKeys.trashed(), params] as const,
-  details: () => [...productKeys.all, 'detail'] as const,
-  detail: (id: string) => [...productKeys.details(), id] as const,
-}
-
-// ─── Re-exports ──────────────────────────────────────────────
+export { productKeys } from './query-keys'
 
 export type {
   CreateProductInput,
@@ -118,6 +105,7 @@ export function useUpdateProduct() {
       queryClient.invalidateQueries({
         queryKey: productKeys.detail(variables.id),
       })
+      queryClient.invalidateQueries({ queryKey: variantKeys.lists() })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })

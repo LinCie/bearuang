@@ -215,9 +215,6 @@ export function useDeletePurchaseOrder() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: purchaseOrderKeys.lists(),
-      })
-      queryClient.invalidateQueries({
         queryKey: purchaseOrderKeys.all,
       })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })

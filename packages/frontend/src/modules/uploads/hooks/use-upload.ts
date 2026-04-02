@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { mediaKeys } from './use-media'
 import imageCompression from 'browser-image-compression'
 import type {
   Media,
@@ -53,6 +55,7 @@ async function confirmUpload(id: string): Promise<Media> {
 }
 
 export function useUpload(): UploadResult {
+  const queryClient = useQueryClient()
   const [media, setMedia] = useState<Media | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -114,6 +117,7 @@ export function useUpload(): UploadResult {
         const confirmedMedia = await confirmUpload(id)
         setMedia(confirmedMedia)
         setProgress(100)
+        queryClient.invalidateQueries({ queryKey: mediaKeys.lists() })
 
         return confirmedMedia
       } catch (err) {

@@ -128,7 +128,7 @@ export function useDeleteApiKey() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: apiKeyKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: apiKeyKeys.all })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })

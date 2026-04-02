@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
+import { productKeys } from '@/modules/products/hooks/use-products'
 import type {
   CreateProductCategoryInput,
   ListProductCategoriesQuery,
@@ -187,6 +188,9 @@ export function useDeleteProductCategory() {
       })
       queryClient.invalidateQueries({
         queryKey: productCategoryKeys.trashed(),
+      })
+      queryClient.invalidateQueries({
+        queryKey: productKeys.lists(),
       })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },

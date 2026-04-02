@@ -111,7 +111,7 @@ export function useDeleteWarehouse() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: warehouseKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: warehouseKeys.all })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })

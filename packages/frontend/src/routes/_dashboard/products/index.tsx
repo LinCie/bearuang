@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   useReactTable,
   getCoreRowModel,
@@ -44,6 +45,7 @@ import {
   useDeleteProduct,
   ProductFormSheet,
   DeleteDialog,
+  productKeys,
 } from '@/modules/products'
 import type {
   CreateProductInput,
@@ -83,6 +85,8 @@ function ProductsPage() {
   const [editingProduct, setEditingProduct] = React.useState<Product | null>(
     null,
   )
+
+  const queryClient = useQueryClient()
 
   // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
@@ -183,6 +187,8 @@ function ProductsPage() {
           .products({ id: editingProduct.id })
           .images.post({ mediaId: media.id })
       }
+      // Invalidate list to show updated images
+      queryClient.invalidateQueries({ queryKey: productKeys.lists() })
     } else {
       const input: CreateProductInput = {
         name: values.name,
@@ -198,6 +204,8 @@ function ProductsPage() {
           .products({ id: created.id })
           .images.post({ mediaId: media.id })
       }
+      // Invalidate after images are added so the list shows them
+      queryClient.invalidateQueries({ queryKey: productKeys.lists() })
     }
     setSheetOpen(false)
     setEditingProduct(null)

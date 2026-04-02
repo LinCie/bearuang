@@ -103,8 +103,11 @@ export function useUpdateRole() {
       if (error) throw error
       return data as Role
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: roleKeys.lists() })
+      queryClient.invalidateQueries({
+        queryKey: roleKeys.detail(variables.id),
+      })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
@@ -120,7 +123,7 @@ export function useDeleteRole() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: roleKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: roleKeys.all })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })

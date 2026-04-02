@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
+import { variantKeys } from '@/modules/products/hooks/use-variants'
 import type {
   CreateSalesOrderInput,
   ListSalesOrdersQuery,
@@ -121,6 +122,12 @@ export function useCreateSalesOrder() {
           queryKey: salesOrderKeys.byWarehouse(variables.warehouseId),
         })
       }
+      for (const item of variables.items) {
+        queryClient.invalidateQueries({
+          queryKey: variantKeys.detail(item.variantId),
+        })
+      }
+      queryClient.invalidateQueries({ queryKey: variantKeys.lists() })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
@@ -155,6 +162,7 @@ export function useUpdateSalesOrder() {
           queryKey: salesOrderKeys.byWarehouse(variables.warehouseId),
         })
       }
+      queryClient.invalidateQueries({ queryKey: variantKeys.all })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })
@@ -171,11 +179,10 @@ export function useDeleteSalesOrder() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: salesOrderKeys.lists(),
-      })
-      queryClient.invalidateQueries({
         queryKey: salesOrderKeys.all,
       })
+      queryClient.invalidateQueries({ queryKey: variantKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: variantKeys.all })
       queryClient.invalidateQueries({ queryKey: auditLogKeys.all })
     },
   })

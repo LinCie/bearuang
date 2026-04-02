@@ -229,6 +229,9 @@ function ProductDetailPage() {
       queryClient.invalidateQueries({
         queryKey: ['products', 'detail', product.id],
       })
+      queryClient.invalidateQueries({
+        queryKey: ['variants', 'byProduct', productId],
+      })
     }
   }
 
