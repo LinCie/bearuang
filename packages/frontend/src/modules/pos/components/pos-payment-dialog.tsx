@@ -7,7 +7,7 @@ import {
 } from '#components/ui/dialog'
 import { Button } from '#components/ui/button'
 import { Input } from '#components/ui/input'
-import { Banknote, QrCode, Building2, CreditCard } from 'lucide-react'
+import { Banknote, QrCode, Building2, CreditCard, WifiOff } from 'lucide-react'
 
 export type PaymentMethod = 'CASH' | 'QRIS' | 'TRANSFER' | 'CARD'
 
@@ -18,6 +18,7 @@ interface PosPaymentDialogProps {
   onConfirm: (paymentMethod: PaymentMethod, paidAmount?: number) => void
   isProcessing: boolean
   error?: string
+  isOffline?: boolean
 }
 
 const PAYMENT_METHODS: Array<{
@@ -38,6 +39,7 @@ export function PosPaymentDialog({
   onConfirm,
   isProcessing,
   error,
+  isOffline,
 }: PosPaymentDialogProps) {
   const [selectedMethod, setSelectedMethod] =
     React.useState<PaymentMethod | null>(null)
@@ -79,6 +81,16 @@ export function PosPaymentDialog({
         </DialogHeader>
 
         <div className="space-y-6">
+          {isOffline && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 text-sm">
+              <WifiOff className="w-4 h-4 shrink-0" />
+              <span>
+                Mode offline. Transaksi akan disimpan dan disinkronkan saat
+                kembali online.
+              </span>
+            </div>
+          )}
+
           <div className="text-center py-2">
             <p className="text-sm text-muted-foreground">Total</p>
             <p className="text-3xl font-bold tabular-nums mt-1">

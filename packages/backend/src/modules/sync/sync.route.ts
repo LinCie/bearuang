@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { authPlugin } from '#plugins/auth.plugin'
 import { prisma } from '#integrations/prisma'
 import { logger } from '#libraries/utilities'
+import { salesOrdersService } from '#modules/sales-orders/sales-orders.service'
+import { logAudit } from '#libraries/audit-logger'
 
 const SYNC_MODELS = [
   'products',
@@ -338,6 +340,172 @@ function parseModels(models: string | string[] | undefined): SyncModel[] {
     .filter((m): m is SyncModel => SYNC_MODELS.includes(m as SyncModel))
 }
 
+interface BatchMutation {
+  tempId: string
+  model: string
+  operation: 'create' | 'update' | 'delete'
+  data: Record<string, unknown>
+}
+
+interface BatchResult {
+  tempId: string
+  serverId?: string
+  status: 'success' | 'conflict' | 'failed'
+  conflictData?: unknown
+  error?: string
+}
+
+async function processBatchMutation(
+  organizationId: string,
+  userId: string,
+  authType: 'session' | 'api_key',
+  mutation: BatchMutation,
+): Promise<BatchResult> {
+  const { tempId, model, operation, data } = mutation
+
+  switch (model) {
+    case 'sales-orders': {
+      if (operation === 'create') {
+        const items = (data.items as Array<Record<string, unknown>>) ?? []
+        const result = await salesOrdersService.createSalesOrder(
+          organizationId,
+          {
+            warehouseId: data.warehouseId as string,
+            customerId: data.customerId as string | undefined,
+            guestName: data.guestName as string | undefined,
+            guestEmail: data.guestEmail as string | undefined,
+            paymentMethod: data.paymentMethod as
+              | 'CASH'
+              | 'QRIS'
+              | 'TRANSFER'
+              | 'CARD'
+              | undefined,
+            note: data.note as string | undefined,
+            orderedAt: data.orderedAt
+              ? new Date(data.orderedAt as string)
+              : undefined,
+            items: items.map((item) => ({
+              variantId: item.variantId as string,
+              quantity: item.quantity as number,
+              unitPrice: item.unitPrice as number,
+            })),
+          },
+        )
+
+        if ('error' in result) {
+          return { tempId, status: 'failed', error: result.error }
+        }
+
+        void logAudit({
+          organizationId,
+          userId,
+          authType,
+          model: 'SalesOrder',
+          operation: 'create',
+          args: { data, offlineSync: true, tempId },
+        })
+
+        return { tempId, serverId: result.id, status: 'success' }
+      }
+
+      if (operation === 'update') {
+        const id = data.id as string
+        if (!id) {
+          return { tempId, status: 'failed', error: 'Missing id for update' }
+        }
+
+        const result = await salesOrdersService.updateSalesOrder(
+          organizationId,
+          id,
+          {
+            status: data.status as
+              | 'PENDING'
+              | 'CONFIRMED'
+              | 'SHIPPED'
+              | 'DELIVERED'
+              | 'COMPLETED'
+              | 'CANCELLED'
+              | undefined,
+            paymentStatus: data.paymentStatus as
+              | 'UNPAID'
+              | 'PARTIALLY_PAID'
+              | 'PAID'
+              | undefined,
+            paymentMethod: data.paymentMethod as string | null | undefined,
+            note: data.note as string | null | undefined,
+          },
+        )
+
+        if ('error' in result) {
+          if (result.error === 'not_found') {
+            return { tempId, status: 'failed', error: 'Sales order not found' }
+          }
+          return {
+            tempId,
+            status: 'conflict',
+            error: result.error,
+            conflictData: { currentState: result },
+          }
+        }
+
+        void logAudit({
+          organizationId,
+          userId,
+          authType,
+          model: 'SalesOrder',
+          operation: 'update',
+          args: { id, data, offlineSync: true, tempId },
+        })
+
+        return { tempId, serverId: id, status: 'success' }
+      }
+
+      return {
+        tempId,
+        status: 'failed',
+        error: `Unsupported operation: ${operation} for ${model}`,
+      }
+    }
+
+    case 'customers': {
+      if (operation === 'create') {
+        const customer = await prisma.customer.create({
+          data: {
+            organizationId,
+            name: data.name as string,
+            email: (data.email as string) ?? null,
+            phone: (data.phone as string) ?? null,
+            address: (data.address as string) ?? null,
+          },
+        })
+
+        void logAudit({
+          organizationId,
+          userId,
+          authType,
+          model: 'Customer',
+          operation: 'create',
+          args: { data, offlineSync: true, tempId },
+        })
+
+        return { tempId, serverId: customer.id, status: 'success' }
+      }
+      return {
+        tempId,
+        status: 'failed',
+        error: `Unsupported operation: ${operation} for ${model}`,
+      }
+    }
+
+    default:
+      return {
+        tempId,
+        status: 'failed',
+        error: `Unknown model: ${model}`,
+      }
+  }
+}
+
 export const syncRoute = new Elysia({
   prefix: '/sync',
   tags: ['Sync'],
@@ -431,6 +599,77 @@ export const syncRoute = new Elysia({
         summary: 'Delta sync',
         description:
           'Fetches records updated since the given timestamp for the requested models. Includes soft-deleted records.',
+      },
+    },
+  )
+  .post(
+    '/batch',
+    async ({ _authType, organization, user, body }) => {
+      const results: Array<{
+        tempId: string
+        serverId?: string
+        status: 'success' | 'conflict' | 'failed'
+        conflictData?: unknown
+        error?: string
+      }> = []
+
+      for (const mutation of body.mutations) {
+        try {
+          const result = await processBatchMutation(
+            organization.id,
+            user.id,
+            _authType,
+            mutation,
+          )
+          results.push(result)
+        } catch (err) {
+          logger.error(
+            { err, tempId: mutation.tempId, model: mutation.model },
+            'Batch mutation failed',
+          )
+          results.push({
+            tempId: mutation.tempId,
+            status: 'failed',
+            error: err instanceof Error ? err.message : 'Unknown error',
+          })
+        }
+      }
+
+      return { results }
+    },
+    {
+      requireAuth: true,
+      requireOrg: true,
+      body: z.object({
+        mutations: z
+          .array(
+            z.object({
+              tempId: z.string(),
+              model: z.string(),
+              operation: z.enum(['create', 'update', 'delete']),
+              data: z.record(z.string(), z.unknown()),
+            }),
+          )
+          .min(1)
+          .max(50),
+      }),
+      response: {
+        200: z.object({
+          results: z.array(
+            z.object({
+              tempId: z.string(),
+              serverId: z.string().optional(),
+              status: z.enum(['success', 'conflict', 'failed']),
+              conflictData: z.unknown().optional(),
+              error: z.string().optional(),
+            }),
+          ),
+        }),
+      },
+      detail: {
+        summary: 'Batch sync mutations',
+        description:
+          'Processes a batch of offline mutations. Each mutation is processed in order. Returns per-mutation results with success/conflict/failed status.',
       },
     },
   )

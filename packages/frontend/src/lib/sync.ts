@@ -2,8 +2,14 @@ import { api } from './api'
 import { db, setLastSync, getLastSync } from './db'
 import type { SyncableTable } from './db'
 import type Dexie from 'dexie'
+import {
+  processSyncResults,
+  getPendingCount,
+  getMutationsByStatus,
+} from './mutation-queue'
+import type { SyncBatchResponse } from './mutation-queue'
 
-type SyncStatus = 'idle' | 'syncing' | 'error'
+type SyncStatus = 'idle' | 'syncing' | 'syncing-mutations' | 'error'
 
 type Listener = (status: SyncStatus) => void
 
@@ -156,18 +162,6 @@ async function syncDelta(models: string[]): Promise<void> {
   setStatus('idle')
 }
 
-export function startBackgroundSync(intervalMs = 5 * 60 * 1000): void {
-  stopBackgroundSync()
-
-  syncDelta(ALL_MODELS).catch(() => {})
-
-  syncIntervalId = setInterval(() => {
-    if (navigator.onLine) {
-      syncDelta(ALL_MODELS).catch(() => {})
-    }
-  }, intervalMs)
-}
-
 export function stopBackgroundSync(): void {
   if (syncIntervalId !== null) {
     clearInterval(syncIntervalId)
@@ -177,6 +171,94 @@ export function stopBackgroundSync(): void {
 
 export async function syncAllModels(): Promise<void> {
   await syncInitial(ALL_MODELS)
+}
+
+let isProcessingMutations = false
+
+export async function processMutationQueue(): Promise<SyncBatchResponse | null> {
+  if (!navigator.onLine || isProcessingMutations) return null
+
+  const pendingCount = await getPendingCount()
+  if (pendingCount === 0) return null
+
+  isProcessingMutations = true
+  setStatus('syncing-mutations')
+
+  try {
+    const pending = await getMutationsByStatus('pending')
+    if (pending.length === 0) {
+      setStatus('idle')
+      return null
+    }
+
+    const mutationIds = pending.filter((m) => m.id != null).map((m) => m.id!)
+
+    await db.mutationQueue.bulkUpdate(
+      mutationIds.map((id) => ({
+        key: id,
+        changes: { status: 'syncing' as const },
+      })),
+    )
+
+    const payload = pending.map((m) => ({
+      tempId: m.tempId,
+      model: m.model,
+      operation: m.operation as 'create' | 'update' | 'delete',
+      data: m.data,
+    }))
+
+    const { data, error } = await api.sync.batch.post({ mutations: payload })
+
+    if (error) {
+      await db.mutationQueue.bulkUpdate(
+        mutationIds.map((id) => ({
+          key: id,
+          changes: {
+            status: 'pending' as const,
+            error: 'Batch request failed',
+          },
+        })),
+      )
+      setStatus('error')
+      return null
+    }
+
+    const response = data as SyncBatchResponse
+    await processSyncResults(response.results)
+
+    setStatus('idle')
+    return response
+  } catch (err) {
+    console.error('[sync] Mutation queue processing failed:', err)
+
+    const syncing = await getMutationsByStatus('syncing')
+    await db.mutationQueue.bulkUpdate(
+      syncing
+        .filter((m) => m.id != null)
+        .map((m) => ({
+          key: m.id!,
+          changes: { status: 'pending' as const, error: 'Network error' },
+        })),
+    )
+    setStatus('error')
+    return null
+  } finally {
+    isProcessingMutations = false
+  }
+}
+
+export function startBackgroundSync(intervalMs = 5 * 60 * 1000): void {
+  stopBackgroundSync()
+
+  syncDelta(ALL_MODELS).catch(() => {})
+  processMutationQueue().catch(() => {})
+
+  syncIntervalId = setInterval(() => {
+    if (navigator.onLine) {
+      syncDelta(ALL_MODELS).catch(() => {})
+      processMutationQueue().catch(() => {})
+    }
+  }, intervalMs)
 }
 
 export { syncInitial, syncDelta }

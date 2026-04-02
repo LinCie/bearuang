@@ -84,11 +84,16 @@ interface SupplierRecord {
 
 interface MutationQueueItem {
   id?: number
+  tempId: string
   createdAt: string
-  status: string
+  syncedAt: string | null
+  status: 'pending' | 'syncing' | 'failed' | 'conflict'
   model: string
-  operation: string
+  operation: 'create' | 'update' | 'delete'
   data: Record<string, unknown>
+  error: string | null
+  retries: number
+  dependsOn: number | null
 }
 
 interface SalesOrderRecord {
@@ -133,6 +138,11 @@ class BearUangDB extends Dexie {
       salesOrders: 'id,organizationId,status,createdAt,updatedAt',
       stockSnapshot: 'variantId,warehouseId,stock,updatedAt',
     })
+
+    this.version(2).stores({
+      mutationQueue:
+        '++id,tempId,createdAt,syncedAt,status,model,operation,retries',
+    })
   }
 }
 
@@ -150,6 +160,7 @@ const SYNCABLE_TABLES = [
 type SyncableTable = (typeof SYNCABLE_TABLES)[number]
 
 export { type SyncableTable, SYNCABLE_TABLES }
+export type { MutationQueueItem }
 
 export async function clearOrgData(organizationId: string): Promise<void> {
   await Promise.all(
@@ -162,6 +173,8 @@ export async function clearOrgData(organizationId: string): Promise<void> {
       db.syncMeta.where('key').equals(`lastSync:${table}`).delete(),
     ),
   )
+  await db.mutationQueue.where('status').anyOf('pending', 'syncing').delete()
+  await db.salesOrders.where('organizationId').equals(organizationId).delete()
 }
 
 export async function getLastSync(model: string): Promise<string | null> {
