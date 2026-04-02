@@ -1,4 +1,4 @@
-import type { PurchaseOrder } from '@/modules/purchase-orders'
+import type { PurchaseOrder } from '#modules/purchase-orders/index'
 
 export const statusStyles: Record<PurchaseOrder['status'], string> = {
   PENDING: 'bg-muted text-muted-foreground border-muted-foreground/20',

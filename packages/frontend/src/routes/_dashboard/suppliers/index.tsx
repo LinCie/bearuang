@@ -26,8 +26,8 @@ import {
   Phone,
   Mail,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
 
 import {
   Table,
@@ -36,7 +36,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 
 import {
   useSuppliers,
@@ -45,14 +45,14 @@ import {
   useDeleteSupplier,
   SupplierFormSheet,
   DeleteDialog,
-} from '@/modules/suppliers'
+} from '#modules/suppliers/index'
 import type {
   CreateSupplierInput,
   UpdateSupplierInput,
   Supplier,
-} from '@/modules/suppliers'
-import { useDebounce } from '@/hooks/use-debounce'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/suppliers/index'
+import { useDebounce } from '#hooks/use-debounce'
+import { useHasPermission } from '#lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/suppliers/')({
   component: SuppliersPage,

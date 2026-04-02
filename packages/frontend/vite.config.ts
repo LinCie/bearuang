@@ -1,17 +1,19 @@
 import { defineConfig } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
-import tsconfigPaths from 'vite-tsconfig-paths'
 
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 
 import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const config = defineConfig({
   plugins: [
     devtools(),
-    tsconfigPaths({ projects: ['./tsconfig.json'] }),
     tailwindcss(),
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
     viteReact(),
@@ -56,6 +58,14 @@ const config = defineConfig({
       },
     }),
   ],
+  resolve: {
+    alias: [
+      {
+        find: /^#(.*)$/,
+        replacement: path.resolve(__dirname, './src/$1'),
+      },
+    ],
+  },
 })
 
 export default config

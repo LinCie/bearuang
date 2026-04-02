@@ -10,9 +10,9 @@ import {
   SupplierLoadingState,
   SupplierErrorState,
   DeleteDialog,
-} from '@/modules/suppliers'
-import type { UpdateSupplierInput } from '@/modules/suppliers'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/suppliers/index'
+import type { UpdateSupplierInput } from '#modules/suppliers/index'
+import { useHasPermission } from '#lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/suppliers/$supplierId')({
   component: SupplierDetailPage,

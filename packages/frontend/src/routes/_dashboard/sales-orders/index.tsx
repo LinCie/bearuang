@@ -27,9 +27,9 @@ import {
   Search,
   Eye,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useHasPermission } from '@/lib/use-permissions'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
+import { useHasPermission } from '#lib/use-permissions'
 
 import {
   Table,
@@ -38,7 +38,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 
 import {
   Select,
@@ -46,7 +46,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '#components/ui/select'
 
 import {
   useSalesOrders,
@@ -57,8 +57,11 @@ import {
   PaymentStatusBadge,
   formatRupiah,
   DeleteDialog,
-} from '@/modules/sales-orders'
-import type { CreateSalesOrderInput, SalesOrder } from '@/modules/sales-orders'
+} from '#modules/sales-orders/index'
+import type {
+  CreateSalesOrderInput,
+  SalesOrder,
+} from '#modules/sales-orders/index'
 
 // ─── Types ────────────────────────────────────────────────────
 

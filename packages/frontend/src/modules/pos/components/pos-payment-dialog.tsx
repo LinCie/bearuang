@@ -4,9 +4,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+} from '#components/ui/dialog'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
 import { Banknote, QrCode, Building2, CreditCard } from 'lucide-react'
 
 export type PaymentMethod = 'CASH' | 'QRIS' | 'TRANSFER' | 'CARD'

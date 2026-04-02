@@ -11,7 +11,7 @@ import {
   RefreshCw,
   Loader2,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '#components/ui/button'
 import {
   Table,
   TableBody,
@@ -19,13 +19,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '#components/ui/dropdown-menu'
 import {
   Dialog,
   DialogContent,
@@ -33,7 +33,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'
+} from '#components/ui/dialog'
 import {
   Sheet,
   SheetContent,
@@ -41,11 +41,11 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
-} from '@/components/ui/sheet'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Skeleton } from '@/components/ui/skeleton'
+} from '#components/ui/sheet'
+import { Input } from '#components/ui/input'
+import { Label } from '#components/ui/label'
+import { Textarea } from '#components/ui/textarea'
+import { Skeleton } from '#components/ui/skeleton'
 import {
   usePurchaseOrder,
   useUpdatePurchaseOrder,
@@ -54,14 +54,14 @@ import {
   LargeStatusBadge,
   PaymentStatusBadge,
   formatRupiah,
-} from '@/modules/purchase-orders'
-import { useStockMovementsByReference } from '@/modules/stock-movements'
+} from '#modules/purchase-orders/index'
+import { useStockMovementsByReference } from '#modules/stock-movements/index'
 import type {
   PurchaseOrder,
   UpdatePurchaseOrderInput,
-} from '@/modules/purchase-orders'
-import type { StockMovementType } from '@/modules/stock-movements'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/purchase-orders/index'
+import type { StockMovementType } from '#modules/stock-movements/index'
+import { useHasPermission } from '#lib/use-permissions'
 
 export const Route = createFileRoute(
   '/_dashboard/purchase-orders/$purchaseOrderId',

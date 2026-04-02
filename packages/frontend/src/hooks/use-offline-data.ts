@@ -1,9 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import type Dexie from 'dexie'
 import { useQuery } from '@tanstack/react-query'
-import { db } from '@/lib/db'
-import type { SyncableTable, SYNCABLE_TABLES } from '@/lib/db'
-import { subscribeSyncStatus, getSyncStatus } from '@/lib/sync'
+import { db } from '#lib/db'
+import type { SyncableTable, SYNCABLE_TABLES } from '#lib/db'
+import { subscribeSyncStatus, getSyncStatus } from '#lib/sync'
 import * as React from 'react'
 
 const MODEL_TO_TABLE = {

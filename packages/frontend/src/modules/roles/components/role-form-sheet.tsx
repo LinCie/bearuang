@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
+import { Label } from '#components/ui/label'
+import { Checkbox } from '#components/ui/checkbox'
 import {
   Sheet,
   SheetContent,
@@ -12,10 +12,10 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
-} from '@/components/ui/sheet'
+} from '#components/ui/sheet'
 import { useAvailablePermissions } from '../hooks/use-roles'
 import type { Role } from '../hooks/use-roles'
-import { cn } from '@/lib/utils'
+import { cn } from '#lib/utils'
 import { Check, Minus, Loader2 } from 'lucide-react'
 
 // Local form type to avoid strict template literal types from backend

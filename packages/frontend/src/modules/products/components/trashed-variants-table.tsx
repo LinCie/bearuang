@@ -1,7 +1,7 @@
 import { Eye, Package, RotateCcw } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
-import { useHasPermission } from '@/lib/use-permissions'
+import { Button } from '#components/ui/button'
+import { useHasPermission } from '#lib/use-permissions'
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 import type { ProductVariant } from 'backend/src/modules/products/products.route'
 
 const currencyFormatter = new Intl.NumberFormat('id-ID', {

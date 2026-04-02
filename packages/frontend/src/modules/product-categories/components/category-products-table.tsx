@@ -18,9 +18,9 @@ import {
   Eye,
   Search,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
+import { cn } from '#lib/utils'
 import {
   Table,
   TableBody,
@@ -28,10 +28,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 import { useCategoryProducts } from '../hooks/use-product-categories'
-import type { Product } from '@/modules/products'
-import { useDebounce } from '@/hooks/use-debounce'
+import type { Product } from '#modules/products/index'
+import { useDebounce } from '#hooks/use-debounce'
 
 interface CategoryProductsTableProps {
   categoryId: string

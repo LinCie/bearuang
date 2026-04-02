@@ -26,17 +26,17 @@ import {
   ProductFormSheet,
   VariantFormSheet,
   DeleteDialog,
-} from '@/modules/products'
+} from '#modules/products/index'
 import type {
   UpdateProductInput,
   CreateVariantInput,
   UpdateVariantInput,
   ProductVariant,
-} from '@/modules/products'
-import { Button } from '@/components/ui/button'
-import { ImageGallery } from '@/components/ui/image-gallery'
-import type { GalleryImage } from '@/components/ui/image-gallery'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/products/index'
+import { Button } from '#components/ui/button'
+import { ImageGallery } from '#components/ui/image-gallery'
+import type { GalleryImage } from '#components/ui/image-gallery'
+import { useHasPermission } from '#lib/use-permissions'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_dashboard/products/$productId')({

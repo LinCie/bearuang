@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { X, Filter, Check } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
 import {
   Combobox,
   ComboboxInput,
@@ -9,15 +9,15 @@ import {
   ComboboxList,
   ComboboxItem,
   ComboboxEmpty,
-} from '@/components/ui/combobox'
+} from '#components/ui/combobox'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import type { StockMovementType } from '@/modules/stock-movements'
+} from '#components/ui/select'
+import type { StockMovementType } from '#modules/stock-movements/index'
 
 interface Warehouse {
   id: string

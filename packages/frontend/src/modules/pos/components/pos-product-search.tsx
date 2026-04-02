@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { Search, ScanBarcode } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { Input } from '#components/ui/input'
 import { useOfflineVariants } from '../hooks/use-offline-variants'
 import { useVariantLookup } from '../hooks/use-variant-lookup'
 import type { CartItem } from '../hooks/use-pos-cart'
 import type { VariantWithProduct } from 'backend/src/modules/variants/variants.route'
-import { useSession } from '@/lib/auth-client'
+import { useSession } from '#lib/auth-client'
 
 interface PosProductSearchProps {
   onAddToCart: (variant: VariantWithProduct) => void

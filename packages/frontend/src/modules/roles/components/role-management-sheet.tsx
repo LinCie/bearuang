@@ -1,12 +1,12 @@
 import * as React from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '#components/ui/button'
 import {
   Sheet,
   SheetContent,
   SheetHeader as SheetHead,
   SheetTitle,
   SheetDescription,
-} from '@/components/ui/sheet'
+} from '#components/ui/sheet'
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'
+} from '#components/ui/dialog'
 import {
   useRoles,
   useCreateRole,
@@ -23,9 +23,9 @@ import {
 } from '../hooks/use-roles'
 import type { Role } from '../hooks/use-roles'
 import { RoleFormSheet } from './role-form-sheet'
-import { cn } from '@/lib/utils'
+import { cn } from '#lib/utils'
 import { Plus, Pencil, Trash2, Shield, Loader2 } from 'lucide-react'
-import { useHasPermission } from '@/lib/use-permissions'
+import { useHasPermission } from '#lib/use-permissions'
 
 // Local form type to avoid strict template literal types from backend
 interface RoleFormData {

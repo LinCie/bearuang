@@ -1,11 +1,11 @@
 import * as React from 'react'
-import { useSession } from '@/lib/auth-client'
+import { useSession } from '#lib/auth-client'
 import {
   syncAllModels,
   startBackgroundSync,
   stopBackgroundSync,
-} from '@/lib/sync'
-import { clearOrgData } from '@/lib/db'
+} from '#lib/sync'
+import { clearOrgData } from '#lib/db'
 
 export function useSyncInit(): void {
   const { data: sessionData } = useSession()

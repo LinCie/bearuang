@@ -2,9 +2,9 @@ import * as React from 'react'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import { Plus, X, Check, Package } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
+import { Label } from '#components/ui/label'
 import {
   Sheet,
   SheetContent,
@@ -12,7 +12,7 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
-} from '@/components/ui/sheet'
+} from '#components/ui/sheet'
 import {
   Combobox,
   ComboboxInput,
@@ -20,10 +20,10 @@ import {
   ComboboxList,
   ComboboxItem,
   ComboboxEmpty,
-} from '@/components/ui/combobox'
-import { useSuppliers } from '@/modules/suppliers'
-import { useWarehouses } from '@/modules/warehouses'
-import { useVariants } from '@/modules/products'
+} from '#components/ui/combobox'
+import { useSuppliers } from '#modules/suppliers/index'
+import { useWarehouses } from '#modules/warehouses/index'
+import { useVariants } from '#modules/products/index'
 import type { Variant } from 'backend/src/modules/variants/variants.route'
 
 const purchaseOrderItemSchema = z.object({

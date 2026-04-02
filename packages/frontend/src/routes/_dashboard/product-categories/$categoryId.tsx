@@ -10,9 +10,9 @@ import {
   ProductCategoryErrorState,
   CategoryProductsTable,
   DeleteDialog,
-} from '@/modules/product-categories'
-import type { UpdateProductCategoryInput } from '@/modules/product-categories'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/product-categories/index'
+import type { UpdateProductCategoryInput } from '#modules/product-categories/index'
+import { useHasPermission } from '#lib/use-permissions'
 
 export const Route = createFileRoute(
   '/_dashboard/product-categories/$categoryId',

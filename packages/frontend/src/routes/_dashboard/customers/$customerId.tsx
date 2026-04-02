@@ -10,9 +10,9 @@ import {
   CustomerLoadingState,
   CustomerErrorState,
   DeleteDialog,
-} from '@/modules/customers'
-import type { UpdateCustomerInput } from '@/modules/customers'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/customers/index'
+import type { UpdateCustomerInput } from '#modules/customers/index'
+import { useHasPermission } from '#lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/customers/$customerId')({
   component: CustomerDetailPage,

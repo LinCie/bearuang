@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
+import { Label } from '#components/ui/label'
+import { Checkbox } from '#components/ui/checkbox'
 import {
   Sheet,
   SheetContent,
@@ -12,9 +12,9 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
-} from '@/components/ui/sheet'
-import { MultiFileUpload } from '@/modules/uploads/components/multi-file-upload'
-import type { PendingImage } from '@/modules/uploads/components/multi-file-upload'
+} from '#components/ui/sheet'
+import { MultiFileUpload } from '#modules/uploads/components/multi-file-upload'
+import type { PendingImage } from '#modules/uploads/components/multi-file-upload'
 import type { Media } from 'backend/src/modules/uploads/uploads.route'
 import type {
   ProductVariant,

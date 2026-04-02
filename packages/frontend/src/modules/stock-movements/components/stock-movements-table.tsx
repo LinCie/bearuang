@@ -1,6 +1,6 @@
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
+import { Button } from '#components/ui/button'
 import {
   Table,
   TableBody,
@@ -8,11 +8,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 import type {
   StockMovement,
   StockMovementType,
-} from '@/modules/stock-movements'
+} from '#modules/stock-movements/index'
 
 function getReferenceLink(referenceType: string, referenceId: string) {
   switch (referenceType) {

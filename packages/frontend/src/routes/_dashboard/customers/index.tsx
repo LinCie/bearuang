@@ -26,8 +26,8 @@ import {
   Phone,
   Mail,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
 
 import {
   Table,
@@ -36,7 +36,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 
 import {
   useCustomers,
@@ -45,14 +45,14 @@ import {
   useDeleteCustomer,
   CustomerFormSheet,
   DeleteDialog,
-} from '@/modules/customers'
+} from '#modules/customers/index'
 import type {
   CreateCustomerInput,
   UpdateCustomerInput,
   Customer,
-} from '@/modules/customers'
-import { useDebounce } from '@/hooks/use-debounce'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/customers/index'
+import { useDebounce } from '#hooks/use-debounce'
+import { useHasPermission } from '#lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/customers/')({
   component: CustomersPage,

@@ -19,11 +19,11 @@ import {
   ScrollText,
   Tag,
 } from 'lucide-react'
-import { signOut, useSession } from '@/lib/auth-client'
-import { usePermissions } from '@/lib/use-permissions'
-import { useSyncInit } from '@/hooks/use-sync-init'
-import { OfflineIndicator } from '@/components/ui/offline-indicator'
-import { cn } from '@/lib/utils'
+import { signOut, useSession } from '#lib/auth-client'
+import { usePermissions } from '#lib/use-permissions'
+import { useSyncInit } from '#hooks/use-sync-init'
+import { OfflineIndicator } from '#components/ui/offline-indicator'
+import { cn } from '#lib/utils'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +31,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '#components/ui/dropdown-menu'
 import {
   SidebarProvider,
   Sidebar,
@@ -46,7 +46,7 @@ import {
   SidebarTrigger,
   SidebarRail,
   SidebarInset,
-} from '@/components/ui/sidebar'
+} from '#components/ui/sidebar'
 
 interface NavItem {
   icon: React.ElementType

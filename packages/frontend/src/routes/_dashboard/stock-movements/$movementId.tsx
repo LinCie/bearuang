@@ -7,7 +7,7 @@ import {
   MovementLoadingState,
   MovementErrorState,
   DeleteDialog,
-} from '@/modules/stock-movements'
+} from '#modules/stock-movements/index'
 import type { StockMovementType } from 'backend/src/modules/stock-movements/stock-movements.route'
 
 export const Route = createFileRoute('/_dashboard/stock-movements/$movementId')(

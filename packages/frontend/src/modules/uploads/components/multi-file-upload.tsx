@@ -17,9 +17,9 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { useUpload } from '@/modules/uploads/hooks/use-upload'
+import { cn } from '#lib/utils'
+import { Button } from '#components/ui/button'
+import { useUpload } from '#modules/uploads/hooks/use-upload'
 import type { Media } from 'backend/src/modules/uploads/uploads.route'
 
 type ExistingImage = {

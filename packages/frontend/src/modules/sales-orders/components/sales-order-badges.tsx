@@ -1,4 +1,4 @@
-import type { SalesOrder } from '@/modules/sales-orders'
+import type { SalesOrder } from '#modules/sales-orders/index'
 
 export const statusStyles: Record<SalesOrder['status'], string> = {
   PENDING: 'bg-muted text-muted-foreground border-muted-foreground/20',

@@ -20,9 +20,9 @@ import {
   ArrowLeft,
   Trash2,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
+import { Skeleton } from '#components/ui/skeleton'
 
 import {
   Table,
@@ -31,7 +31,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 
 import {
   AlertDialog,
@@ -42,15 +42,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+} from '#components/ui/alert-dialog'
 
 import {
   useTrashedProductCategories,
   useRestoreProductCategory,
-} from '@/modules/product-categories'
-import type { TrashedProductCategory } from '@/modules/product-categories'
-import { useDebounce } from '@/hooks/use-debounce'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/product-categories/index'
+import type { TrashedProductCategory } from '#modules/product-categories/index'
+import { useDebounce } from '#hooks/use-debounce'
+import { useHasPermission } from '#lib/use-permissions'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_dashboard/product-categories/trashed/')(

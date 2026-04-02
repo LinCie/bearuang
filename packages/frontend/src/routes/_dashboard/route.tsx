@@ -1,8 +1,8 @@
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
-import { DashboardLayout } from '@/components/layouts/dashboard-layout'
-import { PendingComponent } from '@/components/ui/pending-component'
-import { sessionQueryOptions } from '@/lib/session'
-import { permissionsQueryOptions } from '@/lib/use-permissions'
+import { DashboardLayout } from '#components/layouts/dashboard-layout'
+import { PendingComponent } from '#components/ui/pending-component'
+import { sessionQueryOptions } from '#lib/session'
+import { permissionsQueryOptions } from '#lib/use-permissions'
 
 const ROUTE_PERMISSION_MAP: Record<string, string> = {
   '/products': 'product',

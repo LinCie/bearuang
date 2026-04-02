@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
-import { api } from '@/lib/api'
-import { db } from '@/lib/db'
+import { api } from '#lib/api'
+import { db } from '#lib/db'
 import type { VariantWithProduct } from 'backend/src/modules/variants/variants.route'
 
 export function useVariantLookup() {

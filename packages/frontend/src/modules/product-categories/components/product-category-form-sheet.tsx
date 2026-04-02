@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
+import { Textarea } from '#components/ui/textarea'
+import { Label } from '#components/ui/label'
+import { Checkbox } from '#components/ui/checkbox'
 import {
   Sheet,
   SheetContent,
@@ -13,7 +13,7 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
-} from '@/components/ui/sheet'
+} from '#components/ui/sheet'
 import {
   Combobox,
   ComboboxInput,
@@ -21,8 +21,8 @@ import {
   ComboboxList,
   ComboboxItem,
   ComboboxEmpty,
-} from '@/components/ui/combobox'
-import { useProductCategories } from '@/modules/product-categories/hooks/use-product-categories'
+} from '#components/ui/combobox'
+import { useProductCategories } from '#modules/product-categories/hooks/use-product-categories'
 import type { ProductCategory } from 'backend/src/modules/product-categories/product-categories.route'
 
 const slugRegex = /^[a-z0-9_-]+$/

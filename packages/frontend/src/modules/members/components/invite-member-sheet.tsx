@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
+import { Label } from '#components/ui/label'
 import {
   Sheet,
   SheetContent,
@@ -11,15 +11,15 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
-} from '@/components/ui/sheet'
+} from '#components/ui/sheet'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { useRoles } from '@/modules/roles'
+} from '#components/ui/select'
+import { useRoles } from '#modules/roles/index'
 
 const inviteSchema = z.object({
   email: z

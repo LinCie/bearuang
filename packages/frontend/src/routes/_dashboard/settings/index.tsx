@@ -16,13 +16,13 @@ import {
   useSession,
   useActiveOrganization,
   useActiveMember,
-} from '@/lib/auth-client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { PasswordInput } from '@/components/ui/password-input'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from '#lib/auth-client'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
+import { Label } from '#components/ui/label'
+import { PasswordInput } from '#components/ui/password-input'
+import { Skeleton } from '#components/ui/skeleton'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '#components/ui/tabs'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,7 +34,7 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+} from '#components/ui/alert-dialog'
 
 export const Route = createFileRoute('/_dashboard/settings/')({
   component: SettingsPage,

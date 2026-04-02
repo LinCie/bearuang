@@ -14,14 +14,14 @@ import {
   Crown,
   Users,
 } from 'lucide-react'
-import { authClient, useListOrganizations } from '@/lib/auth-client'
-import { sessionQueryOptions } from '@/lib/session'
-import { PendingComponent } from '@/components/ui/pending-component'
-import { AuthLayout } from '@/components/layouts/auth-layout'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
+import { authClient, useListOrganizations } from '#lib/auth-client'
+import { sessionQueryOptions } from '#lib/session'
+import { PendingComponent } from '#components/ui/pending-component'
+import { AuthLayout } from '#components/layouts/auth-layout'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
+import { Label } from '#components/ui/label'
+import { Separator } from '#components/ui/separator'
 import {
   Sheet,
   SheetContent,
@@ -29,12 +29,12 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
-} from '@/components/ui/sheet'
+} from '#components/ui/sheet'
 import {
   useMyPendingInvitations,
   useAcceptInvitation,
   useRejectInvitation,
-} from '@/modules/members'
+} from '#modules/members/index'
 import {
   Dialog,
   DialogContent,
@@ -42,8 +42,8 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'
-import { cn } from '@/lib/utils'
+} from '#components/ui/dialog'
+import { cn } from '#lib/utils'
 
 export const Route = createFileRoute('/organizations')({
   pendingComponent: PendingComponent,

@@ -3,10 +3,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+} from '#components/ui/dialog'
+import { Button } from '#components/ui/button'
 import { Printer, RotateCcw, Loader2 } from 'lucide-react'
-import type { SalesOrder } from '@/modules/sales-orders/hooks/use-sales-orders'
+import type { SalesOrder } from '#modules/sales-orders/hooks/use-sales-orders'
 import type { CartItem } from '../hooks/use-pos-cart'
 import type { PaymentMethod } from './pos-payment-dialog'
 

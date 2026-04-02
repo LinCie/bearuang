@@ -23,8 +23,8 @@ import {
   Search,
   Eye,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
 
 import {
   Table,
@@ -33,7 +33,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 
 import {
   useProductCategories,
@@ -42,14 +42,14 @@ import {
   useDeleteProductCategory,
   ProductCategoryFormSheet,
   DeleteDialog,
-} from '@/modules/product-categories'
+} from '#modules/product-categories/index'
 import type {
   CreateProductCategoryInput,
   UpdateProductCategoryInput,
   ProductCategory as ProductCategoryType,
-} from '@/modules/product-categories'
-import { useDebounce } from '@/hooks/use-debounce'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/product-categories/index'
+import { useDebounce } from '#hooks/use-debounce'
+import { useHasPermission } from '#lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/product-categories/')({
   component: ProductCategoriesPage,

@@ -1,4 +1,4 @@
-import type { OrdersVerdict, StockVerdict } from '@/modules/dashboard'
+import type { OrdersVerdict, StockVerdict } from '#modules/dashboard/index'
 
 const VERDICT_BORDER: Record<string, string> = {
   great: 'border-l-emerald-500',

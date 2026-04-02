@@ -1,8 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useQuery } from '@tanstack/react-query'
-import { db } from '@/lib/db'
-import { api } from '@/lib/api'
-import { variantKeys } from '@/modules/products/hooks/use-variants'
+import { db } from '#lib/db'
+import { api } from '#lib/api'
+import { variantKeys } from '#modules/products/hooks/use-variants'
 import type { VariantWithProduct } from 'backend/src/modules/variants/variants.route'
 import * as React from 'react'
 

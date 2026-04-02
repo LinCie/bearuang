@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Upload, X, Loader2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { cn } from '#lib/utils'
+import { Button } from '#components/ui/button'
 import { useUpload } from '../hooks/use-upload'
 import type { Media } from 'backend/src/modules/uploads/uploads.route'
 

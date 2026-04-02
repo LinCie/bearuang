@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/lib/api'
-import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
+import { api } from '#lib/api'
+import { auditLogKeys } from '#modules/audit-logs/hooks/use-audit-logs'
 import type {
   CreateWarehouseInput,
   ListWarehousesQuery,

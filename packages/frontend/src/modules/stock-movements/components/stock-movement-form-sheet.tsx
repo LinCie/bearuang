@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
+import { Textarea } from '#components/ui/textarea'
+import { Label } from '#components/ui/label'
 import {
   Sheet,
   SheetContent,
@@ -12,7 +12,7 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
-} from '@/components/ui/sheet'
+} from '#components/ui/sheet'
 import {
   Combobox,
   ComboboxInput,
@@ -20,16 +20,16 @@ import {
   ComboboxList,
   ComboboxItem,
   ComboboxEmpty,
-} from '@/components/ui/combobox'
+} from '#components/ui/combobox'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { useProducts } from '@/modules/products'
-import type { StockMovementType } from '@/modules/stock-movements'
+} from '#components/ui/select'
+import { useProducts } from '#modules/products/index'
+import type { StockMovementType } from '#modules/stock-movements/index'
 import { Check } from 'lucide-react'
 
 const stockMovementSchema = z.object({

@@ -1,6 +1,6 @@
 import { PackageOpen, Plus, Sparkles } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { useHasPermission } from '@/lib/use-permissions'
+import { Button } from '#components/ui/button'
+import { useHasPermission } from '#lib/use-permissions'
 
 interface EmptyVariantsStateProps {
   onCreate: () => void

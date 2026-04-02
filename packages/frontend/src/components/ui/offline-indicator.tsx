@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { cn } from '@/lib/utils'
-import { subscribeSyncStatus } from '@/lib/sync'
+import { cn } from '#lib/utils'
+import { subscribeSyncStatus } from '#lib/sync'
 
 type SyncState = 'online' | 'offline' | 'syncing' | 'pending'
 

@@ -10,16 +10,16 @@ import {
   useRemoveVariantImage,
   VariantFormSheet,
   DeleteDialog,
-} from '@/modules/products'
-import type { UpdateVariantInput } from '@/modules/products'
+} from '#modules/products/index'
+import type { UpdateVariantInput } from '#modules/products/index'
 import {
   useVariantStockMovements,
   StockMovementsTable,
-} from '@/modules/stock-movements'
-import { ImageGallery } from '@/components/ui/image-gallery'
-import type { GalleryImage } from '@/components/ui/image-gallery'
-import { Button } from '@/components/ui/button'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/stock-movements/index'
+import { ImageGallery } from '#components/ui/image-gallery'
+import type { GalleryImage } from '#components/ui/image-gallery'
+import { Button } from '#components/ui/button'
+import { useHasPermission } from '#lib/use-permissions'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_dashboard/variants/$variantId')({

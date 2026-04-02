@@ -26,8 +26,8 @@ import {
   Search,
   Eye,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
 
 import {
   Table,
@@ -36,7 +36,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 
 import {
   useProducts,
@@ -46,16 +46,16 @@ import {
   ProductFormSheet,
   DeleteDialog,
   productKeys,
-} from '@/modules/products'
+} from '#modules/products/index'
 import type {
   CreateProductInput,
   Product,
   UpdateProductInput,
-} from '@/modules/products'
-import { useDebounce } from '@/hooks/use-debounce'
-import { useHasPermission } from '@/lib/use-permissions'
-import { api } from '@/lib/api'
-import { cn } from '@/lib/utils'
+} from '#modules/products/index'
+import { useDebounce } from '#hooks/use-debounce'
+import { useHasPermission } from '#lib/use-permissions'
+import { api } from '#lib/api'
+import { cn } from '#lib/utils'
 
 export const Route = createFileRoute('/_dashboard/products/')({
   component: ProductsPage,

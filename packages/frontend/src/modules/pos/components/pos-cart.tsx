@@ -1,5 +1,5 @@
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '#components/ui/button'
 import type { CartItem } from '../hooks/use-pos-cart'
 
 interface PosCartProps {

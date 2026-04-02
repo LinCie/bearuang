@@ -26,7 +26,7 @@ import {
   Calendar,
   Clock,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '#components/ui/button'
 
 import {
   Table,
@@ -35,7 +35,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 
 import {
   Select,
@@ -43,7 +43,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '#components/ui/select'
 
 import {
   usePurchaseOrders,
@@ -54,12 +54,12 @@ import {
   PaymentStatusBadge,
   formatRupiah,
   DeleteDialog,
-} from '@/modules/purchase-orders'
+} from '#modules/purchase-orders/index'
 import type {
   CreatePurchaseOrderInput,
   PurchaseOrder,
-} from '@/modules/purchase-orders'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/purchase-orders/index'
+import { useHasPermission } from '#lib/use-permissions'
 
 // ─── Types ────────────────────────────────────────────────────
 

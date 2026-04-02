@@ -1,21 +1,21 @@
 import * as React from 'react'
-import { useWarehouses } from '@/modules/warehouses/hooks/use-warehouses'
-import { useCustomers } from '@/modules/customers/hooks/use-customers'
+import { useWarehouses } from '#modules/warehouses/hooks/use-warehouses'
+import { useCustomers } from '#modules/customers/hooks/use-customers'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
+} from '#components/ui/select'
+import { Button } from '#components/ui/button'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from '#components/ui/dialog'
 import { CreditCard, Settings2, Store, Trash2, User } from 'lucide-react'
 import type { CartItem } from '../hooks/use-pos-cart'
 

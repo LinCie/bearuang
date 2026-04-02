@@ -20,7 +20,7 @@ import {
   Copy,
   Check,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '#components/ui/button'
 
 import {
   Table,
@@ -29,7 +29,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 
 import {
   useApiKeys,
@@ -38,13 +38,13 @@ import {
   useDeleteApiKey,
   ApiKeyFormSheet,
   DeleteDialog,
-} from '@/modules/api-keys'
+} from '#modules/api-keys/index'
 import type {
   ApiKey,
   CreateApiKeyInput,
   UpdateApiKeyInput,
-} from '@/modules/api-keys'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/api-keys/index'
+import { useHasPermission } from '#lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/api-keys/')({
   component: ApiKeysPage,

@@ -1,15 +1,15 @@
 import * as React from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { usePosCart } from '@/modules/pos/hooks/use-pos-cart'
-import { useCreateSalesOrder } from '@/modules/sales-orders/hooks/use-sales-orders'
+import { usePosCart } from '#modules/pos/hooks/use-pos-cart'
+import { useCreateSalesOrder } from '#modules/sales-orders/hooks/use-sales-orders'
 import {
   PosProductSearch,
   PosCart,
   PosCheckoutPanel,
   PosPaymentDialog,
   PosReceipt,
-} from '@/modules/pos'
-import type { PaymentMethod } from '@/modules/pos'
+} from '#modules/pos/index'
+import type { PaymentMethod } from '#modules/pos/index'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_dashboard/pos/')({

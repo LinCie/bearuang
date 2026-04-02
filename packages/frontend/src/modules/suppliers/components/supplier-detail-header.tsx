@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { useHasPermission } from '@/lib/use-permissions'
+import { Button } from '#components/ui/button'
+import { useHasPermission } from '#lib/use-permissions'
 
 interface SupplierDetailHeaderProps {
   supplier: {

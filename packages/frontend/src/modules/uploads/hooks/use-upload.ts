@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { api } from '@/lib/api'
+import { api } from '#lib/api'
 import { mediaKeys } from './use-media'
 import imageCompression from 'browser-image-compression'
 import type {

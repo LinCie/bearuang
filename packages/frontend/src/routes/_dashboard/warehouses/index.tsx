@@ -24,8 +24,8 @@ import {
   Search,
   Eye,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
 
 import {
   Table,
@@ -34,7 +34,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 
 import {
   useWarehouses,
@@ -43,14 +43,14 @@ import {
   useDeleteWarehouse,
   WarehouseFormSheet,
   DeleteDialog,
-} from '@/modules/warehouses'
+} from '#modules/warehouses/index'
 import type {
   CreateWarehouseInput,
   UpdateWarehouseInput,
   Warehouse as WarehouseType,
-} from '@/modules/warehouses'
-import { useDebounce } from '@/hooks/use-debounce'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/warehouses/index'
+import { useDebounce } from '#hooks/use-debounce'
+import { useHasPermission } from '#lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/warehouses/')({
   component: WarehousesPage,

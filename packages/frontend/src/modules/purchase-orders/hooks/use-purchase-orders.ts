@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/lib/api'
-import { auditLogKeys } from '@/modules/audit-logs/hooks/use-audit-logs'
-import { variantKeys } from '@/modules/products/hooks/use-variants'
+import { api } from '#lib/api'
+import { auditLogKeys } from '#modules/audit-logs/hooks/use-audit-logs'
+import { variantKeys } from '#modules/products/hooks/use-variants'
 import type {
   CreatePurchaseOrderInput,
   ListPurchaseOrdersQuery,

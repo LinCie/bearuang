@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useSession } from '@/lib/auth-client'
+import { useSession } from '#lib/auth-client'
 import { ArrowRight, ChevronDown, ClipboardList, Sparkles } from 'lucide-react'
 import {
   useDashboardSummary,
@@ -11,9 +11,9 @@ import {
   statusLabel,
   statusColor,
   presetLabel,
-} from '@/modules/dashboard'
-import type { RecentOrder, OrdersPreset } from '@/modules/dashboard'
-import { VerdictCard } from '@/components/verdict-card'
+} from '#modules/dashboard/index'
+import type { RecentOrder, OrdersPreset } from '#modules/dashboard/index'
+import { VerdictCard } from '#components/verdict-card'
 
 export const Route = createFileRoute('/_dashboard/')({
   component: DashboardPage,

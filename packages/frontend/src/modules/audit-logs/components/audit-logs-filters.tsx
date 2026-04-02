@@ -1,13 +1,13 @@
 import * as React from 'react'
 import { Filter, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '#components/ui/button'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '#components/ui/select'
 
 interface AuditLogsFiltersProps {
   filters: {

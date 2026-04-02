@@ -9,7 +9,7 @@ import {
   ArrowLeftRight,
   Boxes,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '#components/ui/button'
 import {
   useStockMovements,
   useCreateStockMovement,
@@ -18,12 +18,12 @@ import {
   StockMovementsTable,
   StockMovementsFilters,
   DeleteDialog,
-} from '@/modules/stock-movements'
-import { useWarehouses } from '@/modules/warehouses'
-import { useVariants } from '@/modules/products'
-import type { StockMovementType } from '@/modules/stock-movements'
-import { useDebounce } from '@/hooks/use-debounce'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/stock-movements/index'
+import { useWarehouses } from '#modules/warehouses/index'
+import { useVariants } from '#modules/products/index'
+import type { StockMovementType } from '#modules/stock-movements/index'
+import { useDebounce } from '#hooks/use-debounce'
+import { useHasPermission } from '#lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/stock-movements/')({
   component: StockMovementsPage,

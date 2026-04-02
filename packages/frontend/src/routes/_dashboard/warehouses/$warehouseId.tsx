@@ -9,9 +9,9 @@ import {
   WarehouseLoadingState,
   WarehouseErrorState,
   DeleteDialog,
-} from '@/modules/warehouses'
-import type { UpdateWarehouseInput } from '@/modules/warehouses'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/warehouses/index'
+import type { UpdateWarehouseInput } from '#modules/warehouses/index'
+import { useHasPermission } from '#lib/use-permissions'
 
 export const Route = createFileRoute('/_dashboard/warehouses/$warehouseId')({
   component: WarehouseDetailPage,

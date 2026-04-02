@@ -1,17 +1,17 @@
 import * as React from 'react'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
+import { Label } from '#components/ui/label'
+import { Checkbox } from '#components/ui/checkbox'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '#components/ui/select'
 import {
   Sheet,
   SheetContent,
@@ -19,10 +19,10 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
-} from '@/components/ui/sheet'
-import { useAvailablePermissions } from '@/modules/roles'
+} from '#components/ui/sheet'
+import { useAvailablePermissions } from '#modules/roles/index'
 import type { ApiKey } from '../hooks/use-api-keys'
-import { cn } from '@/lib/utils'
+import { cn } from '#lib/utils'
 import { Check, Minus, Loader2 } from 'lucide-react'
 
 const EXPIRY_OPTIONS = [

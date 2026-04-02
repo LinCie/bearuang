@@ -7,12 +7,12 @@ import {
   ArrowDownRight,
   RefreshCcw,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '#components/ui/button'
 import type {
   StockMovement,
   StockMovementType,
-} from '@/modules/stock-movements'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/stock-movements/index'
+import { useHasPermission } from '#lib/use-permissions'
 
 interface MovementDetailHeaderProps {
   movement: StockMovement

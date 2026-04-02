@@ -8,12 +8,12 @@ import {
   ClipboardList,
   ScrollText,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '#components/ui/button'
 import {
   useAuditLogs,
   AuditLogsTable,
   AuditLogsFilters,
-} from '@/modules/audit-logs'
+} from '#modules/audit-logs/index'
 
 export const Route = createFileRoute('/_dashboard/audit-logs/')({
   component: AuditLogsPage,

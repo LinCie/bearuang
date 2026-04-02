@@ -13,8 +13,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import type { AuditLog } from '@/modules/audit-logs'
+} from '#components/ui/table'
+import type { AuditLog } from '#modules/audit-logs/index'
 
 interface AuditLogsTableProps {
   logs: AuditLog[]

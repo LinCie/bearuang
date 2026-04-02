@@ -23,9 +23,9 @@ import {
   CheckCircle,
   X,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
+import { Checkbox } from '#components/ui/checkbox'
 
 import {
   Table,
@@ -34,19 +34,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 
 import {
   useTrashedCustomers,
   useRestoreCustomer,
   customerKeys,
-} from '@/modules/customers'
-import type { Customer } from '@/modules/customers'
-import { useDebounce } from '@/hooks/use-debounce'
-import { useHasPermission } from '@/lib/use-permissions'
+} from '#modules/customers/index'
+import type { Customer } from '#modules/customers/index'
+import { useDebounce } from '#hooks/use-debounce'
+import { useHasPermission } from '#lib/use-permissions'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
-import { cn } from '@/lib/utils'
+import { cn } from '#lib/utils'
 
 export const Route = createFileRoute('/_dashboard/customers/trashed/')({
   component: TrashedCustomersPage,

@@ -23,8 +23,8 @@ import {
   Shield,
   Settings2,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '#components/ui/button'
+import { Input } from '#components/ui/input'
 import {
   Table,
   TableBody,
@@ -32,14 +32,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '#components/ui/table'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '#components/ui/dropdown-menu'
 import {
   Dialog,
   DialogContent,
@@ -47,11 +47,11 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog'
-import { useActiveMember } from '@/lib/auth-client'
-import { useHasPermission } from '@/lib/use-permissions'
-import { cn } from '@/lib/utils'
-import { useDebounce } from '@/hooks/use-debounce'
+} from '#components/ui/dialog'
+import { useActiveMember } from '#lib/auth-client'
+import { useHasPermission } from '#lib/use-permissions'
+import { cn } from '#lib/utils'
+import { useDebounce } from '#hooks/use-debounce'
 import {
   useMembers,
   useInvitations,
@@ -60,10 +60,10 @@ import {
   useUpdateMemberRole,
   useRemoveMember,
   InviteMemberSheet,
-} from '@/modules/members'
-import type { Member, Invitation } from '@/modules/members'
-import { RoleManagementSheet, useRoles } from '@/modules/roles'
-import type { Role } from '@/modules/roles'
+} from '#modules/members/index'
+import type { Member, Invitation } from '#modules/members/index'
+import { RoleManagementSheet, useRoles } from '#modules/roles/index'
+import type { Role } from '#modules/roles/index'
 
 export const Route = createFileRoute('/_dashboard/members/')({
   component: MembersPage,
