@@ -23,27 +23,27 @@ services:
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
       - minio-data:/data
-    entrypoint: >
-      sh -c "
-        mkdir -p /data/bearuang &&
-        minio server /data --console-address ':9001' &
-        sleep 5 &&
-        mc alias set local http://localhost:9000 ${S3_ACCESS_KEY:-0b36760a936962694339b00777de7b0b} ${S3_SECRET_KEY:-8889ba14228a9f94345c8f542e39b3fb} &&
-        mc anonymous set download local/bearuang &&
-        mc anonymous set upload local/bearuang &&
-        mc anonymous set put local/bearuang &&
-        echo '[
-          {
-            \"AllowedOrigins\": [\"*\"],
-            \"AllowedMethods\": [\"GET\", \"PUT\", \"POST\", \"DELETE\", \"HEAD\"],
-            \"AllowedHeaders\": [\"*\"],
-            \"MaxAgeSeconds\": 3600
-          }
-        ]' > /tmp/cors.json &&
-        mc admin bucket cors set local/bearuang /tmp/cors.json || true &&
-        wait
-      "
+    command: server /data --console-address ':9001'
+    healthcheck:
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     restart: unless-stopped
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 ${S3_ACCESS_KEY:-0b36760a936962694339b00777de7b0b} ${S3_SECRET_KEY:-8889ba14228a9f94345c8f542e39b3fb} &&
+        mc mb --ignore-existing local/bearuang &&
+        mc anonymous set download local/bearuang &&
+        exit 0
+      "
 
 volumes:
   bearuang-data:
