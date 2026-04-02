@@ -6,6 +6,7 @@
     "dev": "vite dev --port ${PORT:-3000}",
     "build": "vite build",
     "preview": "vite preview",
+    "start": "vite preview",
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier --check .",

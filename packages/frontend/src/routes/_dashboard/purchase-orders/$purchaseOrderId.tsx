@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   RefreshCw,
   Loader2,
+  Banknote,
 } from 'lucide-react'
 import { Button } from '#components/ui/button'
 import {
@@ -20,12 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from '#components/ui/table'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '#components/ui/dropdown-menu'
 import {
   Dialog,
   DialogContent,
@@ -46,6 +41,8 @@ import { Input } from '#components/ui/input'
 import { Label } from '#components/ui/label'
 import { Textarea } from '#components/ui/textarea'
 import { Skeleton } from '#components/ui/skeleton'
+import { OrderPaymentDialog } from '#components/ui/order-payment-dialog'
+import type { PaymentMethod } from '#components/ui/order-payment-dialog'
 import {
   usePurchaseOrder,
   useUpdatePurchaseOrder,
@@ -55,11 +52,8 @@ import {
   PaymentStatusBadge,
   formatRupiah,
 } from '#modules/purchase-orders/index'
+import type { UpdatePurchaseOrderInput } from '#modules/purchase-orders/index'
 import { useStockMovementsByReference } from '#modules/stock-movements/index'
-import type {
-  PurchaseOrder,
-  UpdatePurchaseOrderInput,
-} from '#modules/purchase-orders/index'
 import type { StockMovementType } from '#modules/stock-movements/index'
 import { useHasPermission } from '#lib/use-permissions'
 
@@ -146,6 +140,7 @@ function PurchaseOrderDetailPage() {
   const [editSheetOpen, setEditSheetOpen] = React.useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [receiveDialogOpen, setReceiveDialogOpen] = React.useState(false)
+  const [paymentDialogOpen, setPaymentDialogOpen] = React.useState(false)
 
   // Edit form state
   const [editForm, setEditForm] = React.useState({
@@ -242,13 +237,15 @@ function PurchaseOrderDetailPage() {
     setReceiveDialogOpen(false)
   }, [purchaseOrder, receiveItems, receivePurchaseOrder])
 
-  const handlePaymentStatusChange = React.useCallback(
-    async (status: PurchaseOrder['paymentStatus']) => {
+  const handlePaymentConfirm = React.useCallback(
+    async (data: { paymentMethod: PaymentMethod; amountPaid: number }) => {
       if (!purchaseOrder) return
       await updatePurchaseOrder.mutateAsync({
         id: purchaseOrder.id,
-        paymentStatus: status,
+        paymentMethod: data.paymentMethod,
+        amountPaid: data.amountPaid,
       })
+      setPaymentDialogOpen(false)
     },
     [purchaseOrder, updatePurchaseOrder],
   )
@@ -277,6 +274,9 @@ function PurchaseOrderDetailPage() {
     return sum + item.quantity * parseFloat(item.unitCost)
   }, 0)
 
+  const currentAmountPaid = po.amountPaid ? parseFloat(po.amountPaid) : 0
+  const remainingAmount = Math.max(totalAmount - currentAmountPaid, 0)
+
   const totalReceived = po.items.reduce((sum, item) => {
     return sum + item.receivedQty
   }, 0)
@@ -290,6 +290,9 @@ function PurchaseOrderDetailPage() {
   const canConfirm = po.status === 'PENDING'
   const canReceive = po.status === 'CONFIRMED' || po.status === 'SHIPPED'
   const canComplete = po.status === 'RECEIVED'
+  const canPay =
+    canUpdate &&
+    (po.paymentStatus === 'UNPAID' || po.paymentStatus === 'PARTIALLY_PAID')
 
   // ─── Helpers ───────────────────────────────────────────────
 
@@ -438,42 +441,17 @@ function PurchaseOrderDetailPage() {
                     <span className="text-2xl font-bold text-foreground">
                       {formatRupiah(totalAmount)}
                     </span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full ring-offset-background transition-opacity hover:opacity-80">
-                        <PaymentStatusBadge status={po.paymentStatus} />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
-                        <DropdownMenuItem
-                          onClick={() => handlePaymentStatusChange('UNPAID')}
-                          disabled={
-                            updatePurchaseOrder.isPending ||
-                            po.paymentStatus === 'UNPAID'
-                          }
-                        >
-                          Belum Bayar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handlePaymentStatusChange('PARTIALLY_PAID')
-                          }
-                          disabled={
-                            updatePurchaseOrder.isPending ||
-                            po.paymentStatus === 'PARTIALLY_PAID'
-                          }
-                        >
-                          Dibayar Sebagian
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handlePaymentStatusChange('PAID')}
-                          disabled={
-                            updatePurchaseOrder.isPending ||
-                            po.paymentStatus === 'PAID'
-                          }
-                        >
-                          Lunas
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <PaymentStatusBadge status={po.paymentStatus} />
+                    {canPay && (
+                      <Button
+                        size="sm"
+                        onClick={() => setPaymentDialogOpen(true)}
+                        className="gap-2"
+                      >
+                        <Banknote className="h-4 w-4" />
+                        Bayar
+                      </Button>
+                    )}
                   </dd>
                 </div>
                 <div>
@@ -973,6 +951,16 @@ function PurchaseOrderDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Payment Dialog */}
+      <OrderPaymentDialog
+        open={paymentDialogOpen}
+        onOpenChange={setPaymentDialogOpen}
+        total={totalAmount}
+        remainingAmount={remainingAmount}
+        currentPaymentStatus={po.paymentStatus}
+        onConfirm={handlePaymentConfirm}
+        isProcessing={updatePurchaseOrder.isPending}
+      />
     </>
   )
 }

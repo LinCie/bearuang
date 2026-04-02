@@ -203,7 +203,7 @@ export async function processMutationQueue(): Promise<SyncBatchResponse | null> 
     const payload = pending.map((m) => ({
       tempId: m.tempId,
       model: m.model,
-      operation: m.operation as 'create' | 'update' | 'delete',
+      operation: m.operation,
       data: m.data,
     }))
 

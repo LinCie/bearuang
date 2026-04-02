@@ -138,6 +138,7 @@ function POSPage() {
           status: 'PENDING',
           paymentStatus: 'UNPAID',
           paymentMethod: method,
+          amountPaid: String(subtotal),
           orderedAt: new Date().toISOString(),
           shippedAt: null,
           note: null,

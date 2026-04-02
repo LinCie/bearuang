@@ -123,6 +123,8 @@ export const purchaseOrdersService = {
     data: {
       status?: PurchaseOrderStatus
       paymentStatus?: PurchaseOrderPaymentStatus
+      paymentMethod?: string | null
+      amountPaid?: number
       supplierId?: string
       warehouseId?: string
       orderedAt?: Date | null
@@ -160,6 +162,24 @@ export const purchaseOrdersService = {
           }
         }
       }
+    }
+
+    if (data.amountPaid !== undefined) {
+      const orderTotal = existing.items.reduce(
+        (sum, item) => sum + Number(item.unitCost) * item.quantity,
+        0,
+      )
+      const currentPaid = Number(existing.amountPaid)
+      const newPaid = currentPaid + data.amountPaid
+      const cappedPaid = Math.min(newPaid, orderTotal)
+      if (cappedPaid >= orderTotal) {
+        data.paymentStatus = 'PAID' as const
+      } else if (cappedPaid > 0) {
+        data.paymentStatus = 'PARTIALLY_PAID' as const
+      } else {
+        data.paymentStatus = 'UNPAID' as const
+      }
+      data.amountPaid = cappedPaid
     }
 
     return prisma.purchaseOrder.update({

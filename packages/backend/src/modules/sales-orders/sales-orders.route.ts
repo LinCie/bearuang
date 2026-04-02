@@ -53,6 +53,7 @@ const salesOrderSchema = z.object({
   ]),
   paymentStatus: z.enum(['UNPAID', 'PARTIALLY_PAID', 'PAID']),
   paymentMethod: z.string().nullable(),
+  amountPaid: z.string(),
   orderedAt: z.iso.datetime().nullable(),
   shippedAt: z.iso.datetime().nullable(),
   note: z.string().nullable(),
@@ -95,6 +96,7 @@ const updateSalesOrderDto = z.object({
     .enum(['CASH', 'QRIS', 'TRANSFER', 'CARD'])
     .nullable()
     .optional(),
+  amountPaid: z.number().nonnegative().optional(),
   customerId: z.string().uuid().nullable().optional(),
   warehouseId: z.string().uuid().optional(),
   guestName: z.string().nullable().optional(),
@@ -147,6 +149,7 @@ const serializeSalesOrder = (so: {
     | 'CANCELLED'
   paymentStatus: 'UNPAID' | 'PARTIALLY_PAID' | 'PAID'
   paymentMethod: string | null
+  amountPaid: { toString: () => string }
   orderedAt: Date | null
   shippedAt: Date | null
   note: string | null
@@ -163,6 +166,7 @@ const serializeSalesOrder = (so: {
 }) => {
   return {
     ...so,
+    amountPaid: so.amountPaid.toString(),
     orderedAt: so.orderedAt?.toISOString() ?? null,
     shippedAt: so.shippedAt?.toISOString() ?? null,
     createdAt: so.createdAt.toISOString(),

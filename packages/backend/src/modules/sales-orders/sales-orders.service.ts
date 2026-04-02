@@ -19,6 +19,7 @@ function buildUpdateData(data: {
   status?: SalesOrderStatus
   paymentStatus?: SalesOrderPaymentStatus
   paymentMethod?: string | null
+  amountPaid?: number
   customerId?: string | null
   warehouseId?: string
   guestName?: string | null
@@ -34,6 +35,7 @@ function buildUpdateData(data: {
     updateData.paymentStatus = data.paymentStatus
   if (data.paymentMethod !== undefined)
     updateData.paymentMethod = data.paymentMethod
+  if (data.amountPaid !== undefined) updateData.amountPaid = data.amountPaid
   if (data.customerId !== undefined) updateData.customerId = data.customerId
   if (data.warehouseId !== undefined) updateData.warehouseId = data.warehouseId
   if (data.guestName !== undefined) updateData.guestName = data.guestName
@@ -180,6 +182,12 @@ export const salesOrdersService = {
         paymentStatus: data.paymentMethod
           ? ('PAID' as const)
           : ('UNPAID' as const),
+        amountPaid: data.paymentMethod
+          ? data.items.reduce(
+              (sum, item) => sum + item.unitPrice * item.quantity,
+              0,
+            )
+          : 0,
         items: {
           create: data.items.map((item) => ({
             variantId: item.variantId,
@@ -207,6 +215,7 @@ export const salesOrdersService = {
       status?: SalesOrderStatus
       paymentStatus?: SalesOrderPaymentStatus
       paymentMethod?: string | null
+      amountPaid?: number
       customerId?: string | null
       warehouseId?: string
       guestName?: string | null
@@ -258,6 +267,28 @@ export const salesOrdersService = {
         where: { id: data.customerId, organizationId },
       })
       if (!customer) return { error: 'Customer not found' }
+    }
+
+    if (data.amountPaid !== undefined) {
+      const orderTotal = existing.items.reduce(
+        (sum, item) => sum + Number(item.unitPrice) * item.quantity,
+        0,
+      )
+      const currentPaid = Number(existing.amountPaid)
+      const newPaid = currentPaid + data.amountPaid
+      const cappedPaid = Math.min(newPaid, orderTotal)
+      const resolvedData = {
+        ...data,
+        amountPaid: cappedPaid,
+      }
+      if (cappedPaid >= orderTotal) {
+        resolvedData.paymentStatus = 'PAID' as const
+      } else if (cappedPaid > 0) {
+        resolvedData.paymentStatus = 'PARTIALLY_PAID' as const
+      } else {
+        resolvedData.paymentStatus = 'UNPAID' as const
+      }
+      Object.assign(data, resolvedData)
     }
 
     if (data.status === 'SHIPPED') {

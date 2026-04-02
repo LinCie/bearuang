@@ -48,6 +48,8 @@ const purchaseOrderSchema = z.object({
     'CANCELLED',
   ]),
   paymentStatus: z.enum(['UNPAID', 'PARTIALLY_PAID', 'PAID']),
+  paymentMethod: z.string().nullable(),
+  amountPaid: z.string(),
   orderedAt: z.iso.datetime().nullable(),
   receivedAt: z.iso.datetime().nullable(),
   note: z.string().nullable(),
@@ -75,6 +77,11 @@ const updatePurchaseOrderDto = z.object({
     .enum(['PENDING', 'CONFIRMED', 'SHIPPED', 'COMPLETED', 'CANCELLED'])
     .optional(),
   paymentStatus: z.enum(['UNPAID', 'PARTIALLY_PAID', 'PAID']).optional(),
+  paymentMethod: z
+    .enum(['CASH', 'QRIS', 'TRANSFER', 'CARD'])
+    .nullable()
+    .optional(),
+  amountPaid: z.number().nonnegative().optional(),
   supplierId: z.string().uuid().optional(),
   warehouseId: z.string().uuid().optional(),
   orderedAt: z.iso.datetime().nullable().optional(),
@@ -133,6 +140,8 @@ const serializePurchaseOrder = (po: {
     | 'COMPLETED'
     | 'CANCELLED'
   paymentStatus: 'UNPAID' | 'PARTIALLY_PAID' | 'PAID'
+  paymentMethod: string | null
+  amountPaid: { toString: () => string }
   orderedAt: Date | null
   receivedAt: Date | null
   note: string | null
@@ -149,6 +158,7 @@ const serializePurchaseOrder = (po: {
   }>
 }) => ({
   ...po,
+  amountPaid: po.amountPaid.toString(),
   orderedAt: po.orderedAt?.toISOString() ?? null,
   receivedAt: po.receivedAt?.toISOString() ?? null,
   createdAt: po.createdAt.toISOString(),

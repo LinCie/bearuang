@@ -356,6 +356,8 @@ model PurchaseOrder {
   warehouse      Warehouse                  @relation(fields: [warehouseId], references: [id])
   status         PurchaseOrderStatus        @default(PENDING)
   paymentStatus  PurchaseOrderPaymentStatus @default(UNPAID)
+  paymentMethod  String?
+  amountPaid     Decimal                   @default(0) @db.Decimal(12, 2)
   orderedAt      DateTime?
   receivedAt     DateTime?
   note           String?
@@ -398,6 +400,7 @@ model SalesOrder {
   status          SalesOrderStatus        @default(PENDING)
   paymentStatus   SalesOrderPaymentStatus @default(UNPAID)
   paymentMethod   String?
+  amountPaid      Decimal                  @default(0) @db.Decimal(12, 2)
   orderedAt       DateTime?
   shippedAt       DateTime?
   note            String?

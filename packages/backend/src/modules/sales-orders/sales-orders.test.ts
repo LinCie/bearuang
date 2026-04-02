@@ -30,6 +30,8 @@ const mockSalesOrder = {
   shippingAddress: {},
   status: 'PENDING' as const,
   paymentStatus: 'UNPAID' as const,
+  paymentMethod: null,
+  amountPaid: { toString: () => '0' },
   orderedAt: null,
   shippedAt: null,
   note: null,

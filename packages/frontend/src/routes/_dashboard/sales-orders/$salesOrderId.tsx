@@ -12,6 +12,7 @@ import {
   Loader2,
   Truck,
   User,
+  Banknote,
 } from 'lucide-react'
 import { Button } from '#components/ui/button'
 import {
@@ -22,12 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from '#components/ui/table'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '#components/ui/dropdown-menu'
 import {
   Dialog,
   DialogContent,
@@ -48,6 +43,8 @@ import { Input } from '#components/ui/input'
 import { Label } from '#components/ui/label'
 import { Textarea } from '#components/ui/textarea'
 import { Skeleton } from '#components/ui/skeleton'
+import { OrderPaymentDialog } from '#components/ui/order-payment-dialog'
+import type { PaymentMethod } from '#components/ui/order-payment-dialog'
 import {
   useSalesOrder,
   useUpdateSalesOrder,
@@ -56,11 +53,8 @@ import {
   PaymentStatusBadge,
   formatRupiah,
 } from '#modules/sales-orders/index'
+import type { UpdateSalesOrderInput } from '#modules/sales-orders/index'
 import { useStockMovementsByReference } from '#modules/stock-movements/index'
-import type {
-  SalesOrder,
-  UpdateSalesOrderInput,
-} from '#modules/sales-orders/index'
 import type { StockMovementType } from '#modules/stock-movements/index'
 import { useHasPermission } from '#lib/use-permissions'
 
@@ -144,6 +138,7 @@ function SalesOrderDetailPage() {
   const [editSheetOpen, setEditSheetOpen] = React.useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [shipDialogOpen, setShipDialogOpen] = React.useState(false)
+  const [paymentDialogOpen, setPaymentDialogOpen] = React.useState(false)
 
   // Edit form state
   const [editForm, setEditForm] = React.useState({
@@ -234,13 +229,15 @@ function SalesOrderDetailPage() {
     })
   }, [salesOrder, updateSalesOrder])
 
-  const handlePaymentStatusChange = React.useCallback(
-    async (status: SalesOrder['paymentStatus']) => {
+  const handlePaymentConfirm = React.useCallback(
+    async (data: { paymentMethod: PaymentMethod; amountPaid: number }) => {
       if (!salesOrder) return
       await updateSalesOrder.mutateAsync({
         id: salesOrder.id,
-        paymentStatus: status,
+        paymentMethod: data.paymentMethod,
+        amountPaid: data.amountPaid,
       })
+      setPaymentDialogOpen(false)
     },
     [salesOrder, updateSalesOrder],
   )
@@ -269,12 +266,18 @@ function SalesOrderDetailPage() {
     return sum + item.quantity * parseFloat(item.unitPrice)
   }, 0)
 
+  const currentAmountPaid = so.amountPaid ? parseFloat(so.amountPaid) : 0
+  const remainingAmount = Math.max(totalAmount - currentAmountPaid, 0)
+
   // Determine available actions
   const canDelete = so.status === 'PENDING'
   const canConfirm = so.status === 'PENDING'
   const canShip = so.status === 'CONFIRMED'
   const canDeliver = so.status === 'SHIPPED'
   const canComplete = so.status === 'DELIVERED'
+  const canPay =
+    canUpdate &&
+    (so.paymentStatus === 'UNPAID' || so.paymentStatus === 'PARTIALLY_PAID')
 
   // ─── Helpers ───────────────────────────────────────────────
 
@@ -438,42 +441,17 @@ function SalesOrderDetailPage() {
                     <span className="text-2xl font-bold text-foreground">
                       {formatRupiah(totalAmount)}
                     </span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full ring-offset-background transition-opacity hover:opacity-80">
-                        <PaymentStatusBadge status={so.paymentStatus} />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
-                        <DropdownMenuItem
-                          onClick={() => handlePaymentStatusChange('UNPAID')}
-                          disabled={
-                            updateSalesOrder.isPending ||
-                            so.paymentStatus === 'UNPAID'
-                          }
-                        >
-                          Belum Bayar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handlePaymentStatusChange('PARTIALLY_PAID')
-                          }
-                          disabled={
-                            updateSalesOrder.isPending ||
-                            so.paymentStatus === 'PARTIALLY_PAID'
-                          }
-                        >
-                          Dibayar Sebagian
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handlePaymentStatusChange('PAID')}
-                          disabled={
-                            updateSalesOrder.isPending ||
-                            so.paymentStatus === 'PAID'
-                          }
-                        >
-                          Lunas
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <PaymentStatusBadge status={so.paymentStatus} />
+                    {canPay && (
+                      <Button
+                        size="sm"
+                        onClick={() => setPaymentDialogOpen(true)}
+                        className="gap-2"
+                      >
+                        <Banknote className="h-4 w-4" />
+                        Bayar
+                      </Button>
+                    )}
                   </dd>
                 </div>
                 <div>
@@ -927,6 +905,16 @@ function SalesOrderDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Payment Dialog */}
+      <OrderPaymentDialog
+        open={paymentDialogOpen}
+        onOpenChange={setPaymentDialogOpen}
+        total={totalAmount}
+        remainingAmount={remainingAmount}
+        currentPaymentStatus={so.paymentStatus}
+        onConfirm={handlePaymentConfirm}
+        isProcessing={updateSalesOrder.isPending}
+      />
     </>
   )
 }
