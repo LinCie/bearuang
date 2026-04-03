@@ -1,3 +1,5 @@
+name: bearuang-prod
+
 services:
   postgres:
     image: postgres:18-alpine
