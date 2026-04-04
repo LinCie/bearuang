@@ -1,15 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import * as React from 'react'
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-} from '@tanstack/react-table'
+import { useReactTable, getCoreRowModel } from '@tanstack/react-table'
 import type { ColumnDef } from '@tanstack/react-table'
 import {
   Users,
   UserPlus,
-  Search,
   MoreHorizontal,
   UserCog,
   Trash2,
@@ -18,13 +13,11 @@ import {
   Mail,
   ShieldCheck,
   Crown,
-  ChevronLeft,
-  ChevronRight,
   Shield,
   Settings2,
 } from 'lucide-react'
 import { Button } from '#components/ui/button'
-import { Input } from '#components/ui/input'
+import { DataTable } from '#components/ui/data-table'
 import {
   Table,
   TableBody,
@@ -349,259 +342,85 @@ function MembersPage() {
   return (
     <>
       {/* Page Header */}
-      <div className="flex flex-col gap-6 mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-3xl font-semibold text-foreground tracking-tight">
-              Anggota Organisasi
-            </h2>
-            <p className="text-muted-foreground text-base mt-2 max-w-xl leading-relaxed">
-              Kelola anggota tim dan undang rekan untuk bergabung.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            {canManageMembers && (
-              <Button
-                onClick={() => setRoleManagementOpen(true)}
-                variant="outline"
-                size="lg"
-                className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
-              >
-                <Settings2 className="mr-2 h-5 w-5" />
-                Kelola Peran
-              </Button>
-            )}
-            {canInvite && (
-              <Button
-                onClick={() => setInviteSheetOpen(true)}
-                size="lg"
-                className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
-              >
-                <UserPlus className="mr-2 h-5 w-5" />
-                Undang Anggota
-              </Button>
-            )}
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h2 className="text-3xl font-semibold text-foreground tracking-tight">
+            Anggota Organisasi
+          </h2>
+          <p className="text-muted-foreground text-base mt-2 max-w-xl leading-relaxed">
+            Kelola anggota tim dan undang rekan untuk bergabung.
+          </p>
         </div>
-
-        {/* Search */}
-        <div className="relative w-full max-w-md group">
-          <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors">
-            <Search className="h-4 w-4" />
-          </div>
-          <Input
-            placeholder="Cari anggota berdasarkan nama atau email..."
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-10 pr-4 h-11 bg-card border-border/60 hover:border-border focus-visible:ring-1 focus-visible:ring-primary/30 rounded-xl shadow-sm transition-all sm:text-sm"
-            aria-label="Cari anggota"
-          />
+        <div className="flex items-center gap-3">
+          {canManageMembers && (
+            <Button
+              onClick={() => setRoleManagementOpen(true)}
+              variant="outline"
+              size="lg"
+              className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
+            >
+              <Settings2 className="mr-2 h-5 w-5" />
+              Kelola Peran
+            </Button>
+          )}
+          {canInvite && (
+            <Button
+              onClick={() => setInviteSheetOpen(true)}
+              size="lg"
+              className="shadow-sm hover:shadow-md transition-all active:scale-95 sm:w-auto w-full"
+            >
+              <UserPlus className="mr-2 h-5 w-5" />
+              Undang Anggota
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Members Table */}
-      <div className="bg-card border border-border/40 rounded-xl shadow-sm overflow-hidden ring-1 ring-black/5 dark:ring-white/5">
-        <Table className="w-full min-w-[500px]">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                key={headerGroup.id}
-                className="border-b border-border/40 bg-orange-50/40 dark:bg-orange-950/20 hover:bg-orange-50/40 dark:hover:bg-orange-950/20"
-              >
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {membersLoading ? (
-              <TableRow className="hover:bg-transparent border-none">
-                <TableCell colSpan={columns.length} className="py-20">
-                  <div className="flex flex-col items-center justify-center animate-in fade-in duration-1000">
-                    <div className="relative mb-8 mt-4 group">
-                      <div
-                        className="absolute inset-0 bg-orange-500/10 rounded-full blur-2xl animate-pulse"
-                        style={{ animationDuration: '3s' }}
-                      />
-                      <div className="relative flex items-center justify-center h-20 w-20 rounded-3xl bg-orange-50/80 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800/30 shadow-sm backdrop-blur-sm">
-                        <Users
-                          className="h-9 w-9 text-orange-500 animate-bounce"
-                          style={{ animationDuration: '1.5s' }}
-                          strokeWidth={1.5}
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-center gap-2 text-center">
-                      <h3 className="text-lg font-semibold text-foreground tracking-tight">
-                        <span className="inline-block text-orange-900 dark:text-orange-100">
-                          Memuat daftar anggota
-                        </span>
-                        <span className="inline-flex gap-0.5 ml-0.5 text-orange-500">
-                          <span
-                            className="animate-bounce"
-                            style={{
-                              animationDelay: '0ms',
-                              animationDuration: '1.5s',
-                            }}
-                          >
-                            .
-                          </span>
-                          <span
-                            className="animate-bounce"
-                            style={{
-                              animationDelay: '150ms',
-                              animationDuration: '1.5s',
-                            }}
-                          >
-                            .
-                          </span>
-                          <span
-                            className="animate-bounce"
-                            style={{
-                              animationDelay: '300ms',
-                              animationDuration: '1.5s',
-                            }}
-                          >
-                            .
-                          </span>
-                        </span>
-                      </h3>
-                      <p className="text-sm text-muted-foreground max-w-[250px] mx-auto text-balance">
-                        Sebentar ya, kami sedang mengambil daftar anggota tim
-                        Anda.
-                      </p>
-                    </div>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : members.length === 0 ? (
-              <TableRow className="hover:bg-transparent border-none">
-                <TableCell
-                  colSpan={columns.length}
-                  className="text-center py-24 whitespace-normal"
-                >
-                  <div className="flex flex-col items-center justify-center w-full max-w-full text-center animate-in fade-in zoom-in-95 duration-500">
-                    <div className="relative mb-10 group cursor-default">
-                      <div className="absolute inset-0 bg-amber-500/10 rounded-full blur-3xl" />
-                      <div className="relative flex items-center justify-center">
-                        <div className="relative h-28 w-28 rounded-2xl bg-linear-to-br from-background to-amber-50/80 dark:to-amber-900/20 border border-amber-100 dark:border-amber-900/50 flex items-center justify-center shadow-md">
-                          <Users
-                            className="h-12 w-12 text-primary"
-                            strokeWidth={1.5}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <h3 className="text-2xl font-semibold text-foreground mb-3 tracking-tight whitespace-normal">
-                      {search
-                        ? 'Tidak ada anggota yang cocok'
-                        : 'Belum ada anggota'}
-                    </h3>
-                    <p className="text-muted-foreground text-sm max-w-[420px] mx-auto text-balance whitespace-normal mb-8 leading-relaxed">
-                      {search
-                        ? `Kami tidak menemukan anggota dengan kata kunci "${search}".`
-                        : 'Undang anggota tim untuk mulai berkolaborasi mengelola bisnis Anda.'}
-                    </p>
-                    {!search && canInvite && (
-                      <Button
-                        onClick={() => setInviteSheetOpen(true)}
-                        size="lg"
-                        className="px-8 shadow-sm hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300"
-                      >
-                        <UserPlus className="mr-2 h-5 w-5" />
-                        Undang Anggota Pertama
-                      </Button>
-                    )}
-                    {search && (
-                      <Button
-                        variant="outline"
-                        onClick={() => setSearch('')}
-                        className="px-8 hover:scale-105 active:scale-95 transition-all duration-300 shadow-sm"
-                      >
-                        Bersihkan Pencarian
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  className="border-b border-border/40 hover:bg-orange-50/30 dark:hover:bg-orange-900/10 transition-colors duration-200"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Pagination */}
-      {membersMeta && membersMeta.totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between mt-8 pt-6 border-t border-border/40 text-sm text-muted-foreground gap-5 sm:gap-0 mx-2 pb-6">
-          <p className="text-center sm:text-left text-balance">
-            Menampilkan{' '}
-            <span className="text-foreground font-medium mx-1">
-              {pagination.pageIndex * pagination.pageSize + 1}
-            </span>
-            –
-            <span className="text-foreground font-medium mx-1">
-              {Math.min(
-                (pagination.pageIndex + 1) * pagination.pageSize,
-                membersMeta.total,
-              )}
-            </span>
-            dari{' '}
-            <span className="text-foreground font-medium mx-1">
-              {membersMeta.total}
-            </span>{' '}
-            anggota
-          </p>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="px-5 shadow-sm"
-              disabled={!membersMeta.hasPrev}
-              onClick={() =>
-                setPagination((p) => ({ ...p, pageIndex: p.pageIndex - 1 }))
+      <DataTable
+        table={table}
+        isLoading={membersLoading}
+        loadingState={{
+          icon: Users,
+          title: 'Memuat daftar anggota',
+          description:
+            'Sebentar ya, kami sedang mengambil daftar anggota tim Anda.',
+        }}
+        searchEmptyState={{
+          onClear: () => setSearch(''),
+          title: 'Tidak ada anggota yang cocok',
+        }}
+        emptyState={{
+          icon: Users,
+          title: 'Belum ada anggota',
+          description:
+            'Undang anggota tim untuk mulai berkolaborasi mengelola bisnis Anda.',
+          ...(canInvite && {
+            action: {
+              label: 'Undang Anggota Pertama',
+              onClick: () => setInviteSheetOpen(true),
+              icon: UserPlus,
+            },
+          }),
+        }}
+        search={search}
+        onSearchChange={handleSearchChange}
+        searchPlaceholder="Cari anggota berdasarkan nama atau email..."
+        searchAriaLabel="Cari anggota"
+        pagination={pagination}
+        onPaginationChange={setPagination}
+        meta={
+          membersMeta
+            ? {
+                total: membersMeta.total,
+                totalPages: membersMeta.totalPages,
+                hasPrev: membersMeta.hasPrev,
+                hasNext: membersMeta.hasNext,
               }
-            >
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Sebelumnya
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="px-5 shadow-sm"
-              disabled={!membersMeta.hasNext}
-              onClick={() =>
-                setPagination((p) => ({ ...p, pageIndex: p.pageIndex + 1 }))
-              }
-            >
-              Selanjutnya
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
-          </div>
-        </div>
-      )}
+            : undefined
+        }
+        itemLabel="anggota"
+      />
 
       {/* Pending Invitations */}
       {invitations.length > 0 && (
