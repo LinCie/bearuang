@@ -1,4 +1,9 @@
-import { createFileRoute, useSearch, useNavigate, Link } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  useSearch,
+  useNavigate,
+  Link,
+} from '@tanstack/react-router'
 import * as React from 'react'
 import {
   useReactTable,
@@ -6,11 +11,7 @@ import {
   getSortedRowModel,
 } from '@tanstack/react-table'
 import type { SortingState, ColumnDef } from '@tanstack/react-table'
-import {
-  Plus,
-  ArrowLeftRight,
-  Package,
-} from 'lucide-react'
+import { Plus, ArrowLeftRight, Package } from 'lucide-react'
 import { Button } from '#components/ui/button'
 import { DataTable } from '#components/ui/data-table'
 import { SortableHeader } from '#components/ui/sortable-header'
@@ -116,10 +117,7 @@ function StockMovementsPage() {
   >(null)
 
   const hasActiveFilters = Boolean(
-    filters.search ||
-      filters.warehouseId ||
-      filters.variantId ||
-      filters.type,
+    filters.search || filters.warehouseId || filters.variantId || filters.type,
   )
 
   React.useEffect(() => {
@@ -133,11 +131,7 @@ function StockMovementsPage() {
     })
   }, [debouncedSearch, navigate])
 
-  const sortBy = sorting[0]?.id as
-    | 'createdAt'
-    | 'quantity'
-    | 'type'
-    | undefined
+  const sortBy = sorting[0]?.id as 'createdAt' | 'quantity' | 'type' | undefined
   const sortOrder = sorting[0]?.desc ? 'desc' : 'asc'
 
   const handleSearchChange = (value: string) => {
@@ -236,9 +230,7 @@ function StockMovementsPage() {
       },
       {
         accessorKey: 'type',
-        header: ({ column }) => (
-          <SortableHeader column={column} title="Tipe" />
-        ),
+        header: ({ column }) => <SortableHeader column={column} title="Tipe" />,
         cell: ({ row }) => (
           <span
             className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getTypeBadgeStyles(row.original.type)}`}
@@ -296,9 +288,7 @@ function StockMovementsPage() {
         cell: ({ row }) => {
           const m = row.original
           if (!m.referenceId) {
-            return (
-              <span className="text-muted-foreground text-xs">Manual</span>
-            )
+            return <span className="text-muted-foreground text-xs">Manual</span>
           }
           const link = m.referenceType
             ? getReferenceLink(m.referenceType, m.referenceId)

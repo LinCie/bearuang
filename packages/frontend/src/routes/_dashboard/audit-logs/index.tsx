@@ -6,17 +6,10 @@ import {
   getSortedRowModel,
 } from '@tanstack/react-table'
 import type { SortingState, ColumnDef } from '@tanstack/react-table'
-import {
-  ShieldCheck,
-  KeyRound,
-  User,
-} from 'lucide-react'
+import { ShieldCheck, KeyRound, User } from 'lucide-react'
 import { DataTable } from '#components/ui/data-table'
 import { SortableHeader } from '#components/ui/sortable-header'
-import {
-  useAuditLogs,
-  AuditLogsFilters,
-} from '#modules/audit-logs/index'
+import { useAuditLogs, AuditLogsFilters } from '#modules/audit-logs/index'
 import type { AuditLog } from '#modules/audit-logs/index'
 
 export const Route = createFileRoute('/_dashboard/audit-logs/')({
@@ -182,15 +175,11 @@ function AuditLogsPage() {
       {
         id: 'authType',
         header: 'Metode Auth',
-        cell: ({ row }) => (
-          <AuthTypeBadge type={row.original.authType} />
-        ),
+        cell: ({ row }) => <AuthTypeBadge type={row.original.authType} />,
       },
       {
         id: 'userId',
-        header: () => (
-          <span className="hidden lg:table-cell">Pengguna</span>
-        ),
+        header: () => <span className="hidden lg:table-cell">Pengguna</span>,
         cell: ({ row }) => (
           <div className="hidden lg:table-cell text-sm text-muted-foreground">
             {row.original.userId
@@ -201,9 +190,7 @@ function AuditLogsPage() {
       },
       {
         id: 'ipAddress',
-        header: () => (
-          <span className="hidden xl:table-cell">IP</span>
-        ),
+        header: () => <span className="hidden xl:table-cell">IP</span>,
         cell: ({ row }) => (
           <div className="hidden xl:table-cell text-sm text-muted-foreground tabular-nums">
             {row.original.ipAddress ?? '—'}

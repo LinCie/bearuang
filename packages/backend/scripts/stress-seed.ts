@@ -398,8 +398,58 @@ async function main() {
     process.exit(1)
   }
 
+  step(2, 'Uploading 3 media files')
+  const mediaIds: string[] = []
+  {
+    const scriptDir = import.meta.dir
+    const sourceFiles = [
+      `${scriptDir}/img-1.png`,
+      `${scriptDir}/img-2.png`,
+      `${scriptDir}/img-3.jpg`,
+    ]
+
+    for (let i = 0; i < sourceFiles.length; i++) {
+      const sourceFilePath = sourceFiles[i]
+      try {
+        const file = Bun.file(sourceFilePath)
+        const contentType = getMimeTypeFromPath(sourceFilePath)
+        const uniqueFilename = `stress-${i + 1}-${faker.string.alphanumeric(6)}.${sourceFilePath.split('.').pop()}`
+        const { data: presign, status: s1 } = await apiCall<
+          HasId & { uploadUrl: string }
+        >('POST', '/uploads/presign', {
+          filename: uniqueFilename,
+          contentType: contentType,
+          size: file.size,
+          purpose: 'products',
+        })
+
+        if (s1 !== 201 || !presign) {
+          console.error(`  ✗ Failed to presign ${uniqueFilename}`)
+          continue
+        }
+
+        const uploaded = await putFile(presign.uploadUrl, file, contentType)
+        if (!uploaded) {
+          console.error(`  ✗ S3 upload failed for ${uniqueFilename}`)
+          continue
+        }
+
+        const { data: media, status: s2 } = await apiCall<HasId>(
+          'POST',
+          `/uploads/${presign.id}/confirm`,
+        )
+        if (s2 === 200 && media) {
+          mediaIds.push(media.id)
+        }
+      } catch (e: unknown) {
+        console.error(`  ✗ Upload error: ${e}`)
+      }
+    }
+    console.log(`  ✓ Media: ${mediaIds.length} uploaded\n`)
+  }
+
   const CAT_COUNT = Math.max(1, Math.floor(15 * SCALE))
-  step(2, `Creating ${CAT_COUNT} categories`)
+  step(3, `Creating ${CAT_COUNT} categories`)
   const categoryIds: string[] = []
   {
     const { data: markerCat } = await apiCall<HasId>(
@@ -431,7 +481,7 @@ async function main() {
   }
 
   const PRODUCT_COUNT = Math.max(1, Math.floor(500 * SCALE))
-  step(3, `Creating ${PRODUCT_COUNT} products`)
+  step(4, `Creating ${PRODUCT_COUNT} products`)
   const productIds: string[] = []
   {
     const items = Array.from({ length: PRODUCT_COUNT }, () => {
@@ -455,20 +505,50 @@ async function main() {
     )
   }
 
+  if (mediaIds.length > 0) {
+    step(5, `Attaching images to products (0-3 per product)`)
+    {
+      const items = productIds.flatMap((productId) => {
+        const count = randInt(1, Math.min(3, mediaIds.length))
+        const shuffled = [...mediaIds].sort(() => Math.random() - 0.5)
+        return shuffled.slice(0, count).map((mediaId) => ({
+          productId,
+          mediaId,
+          altText: faker.lorem.words(3),
+        }))
+      })
+
+      const r = await runBatch(
+        items,
+        10,
+        async ({ productId, mediaId, altText }) => {
+          await apiCall('POST', `/products/${productId}/images`, {
+            mediaId,
+            altText,
+          })
+        },
+      )
+      track(r)
+      console.log(
+        `  ✓ Product images: ${r.ok} created${r.fail > 0 ? `, ${r.fail} failed` : ''}\n`,
+      )
+    }
+  }
+
   const VARIANT_COUNT = Math.max(1, Math.floor(1500 * SCALE))
-  step(4, `Creating ~${VARIANT_COUNT} variants`)
+  step(6, `Creating ~${VARIANT_COUNT} variants`)
   const variantIds: string[] = []
   {
-    const variantsPerProduct = VARIANT_COUNT / productIds.length
+    const variantsPerProduct = Math.floor(VARIANT_COUNT / productIds.length)
     const items: Array<{ productId: string; body: Record<string, unknown> }> =
       []
 
     for (const productId of productIds) {
       const count = Math.max(
         1,
-        Math.round(variantsPerProduct + (Math.random() - 0.5) * 2),
+        variantsPerProduct + (Math.random() > 0.5 ? 1 : 0),
       )
-      for (let v = 0; v < count && items.length < VARIANT_COUNT; v++) {
+      for (let v = 0; v < count; v++) {
         items.push({
           productId,
           body: {
@@ -497,117 +577,18 @@ async function main() {
     )
   }
 
-  const PRODUCT_IMAGE_COUNT = Math.max(0, Math.floor(100 * SCALE))
-  const VARIANT_IMAGE_COUNT = Math.max(0, Math.floor(200 * SCALE))
-  const TOTAL_IMAGE_COUNT = PRODUCT_IMAGE_COUNT + VARIANT_IMAGE_COUNT
-
-  step(5, `Uploading ${TOTAL_IMAGE_COUNT} media files via S3`)
-  const mediaIds: string[] = []
-  {
-    const scriptDir = import.meta.dir
-    const sourceFiles = [
-      `${scriptDir}/img-1.png`,
-      `${scriptDir}/img-2.png`,
-      `${scriptDir}/img-3.jpg`,
-    ]
-
-    // Upload enough media files for all images (each media can only be used once due to @@unique constraint)
-    for (let i = 0; i < TOTAL_IMAGE_COUNT; i++) {
-      const sourceFilePath = sourceFiles[i % sourceFiles.length]
-      try {
-        const file = Bun.file(sourceFilePath)
-        const contentType = getMimeTypeFromPath(sourceFilePath)
-        const uniqueFilename = `stress-${i + 1}-${faker.string.alphanumeric(6)}.${sourceFilePath.split('.').pop()}`
-        const { data: presign, status: s1 } = await apiCall<
-          HasId & { uploadUrl: string }
-        >('POST', '/uploads/presign', {
-          filename: uniqueFilename,
-          contentType: contentType,
-          size: file.size,
-          purpose: 'products',
-        })
-
-        if (s1 !== 201 || !presign) {
-          console.error(`  ✗ Failed to presign ${uniqueFilename}`)
-          continue
-        }
-
-        const uploaded = await putFile(presign.uploadUrl, file, contentType)
-        if (!uploaded) {
-          console.error(`  ✗ S3 upload failed for ${uniqueFilename}`)
-          continue
-        }
-
-        const { data: media, status: s2 } = await apiCall<HasId>(
-          'POST',
-          `/uploads/${presign.id}/confirm`,
-        )
-        if (s2 === 200 && media) {
-          mediaIds.push(media.id)
-          if ((i + 1) % 50 === 0 || i === TOTAL_IMAGE_COUNT - 1) {
-            process.stdout.write(
-              `    [${i + 1}/${TOTAL_IMAGE_COUNT}] uploaded\r`,
-            )
-          }
-        }
-      } catch (e: unknown) {
-        console.error(`  ✗ Upload error: ${e}`)
-      }
-    }
-    console.log(`\n  ✓ Media: ${mediaIds.length} uploaded\n`)
-  }
-
-  // Create a shuffled copy of mediaIds to assign uniquely (each media can only be used once)
-  const availableMediaIds = [...mediaIds].sort(() => Math.random() - 0.5)
-  let mediaIndex = 0
-
-  if (availableMediaIds.length > 0 && PRODUCT_IMAGE_COUNT > 0) {
-    step(
-      6,
-      `Creating ${Math.min(PRODUCT_IMAGE_COUNT, availableMediaIds.length)} product images`,
-    )
+  if (mediaIds.length > 0) {
+    step(7, `Attaching images to variants (0-3 per variant)`)
     {
-      const targetProducts = [...productIds]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, Math.min(PRODUCT_IMAGE_COUNT, availableMediaIds.length))
-      const items = targetProducts.map((productId) => ({
-        productId,
-        mediaId: availableMediaIds[mediaIndex++],
-        altText: faker.lorem.words(3),
-      }))
-
-      const r = await runBatch(
-        items,
-        10,
-        async ({ productId, mediaId, altText }) => {
-          await apiCall('POST', `/products/${productId}/images`, {
-            mediaId,
-            altText,
-          })
-        },
-      )
-      track(r)
-      console.log(
-        `  ✓ Product images: ${r.ok} created${r.fail > 0 ? `, ${r.fail} failed` : ''}\n`,
-      )
-    }
-  }
-
-  if (mediaIndex < availableMediaIds.length && VARIANT_IMAGE_COUNT > 0) {
-    const remainingMediaCount = availableMediaIds.length - mediaIndex
-    step(
-      7,
-      `Creating ${Math.min(VARIANT_IMAGE_COUNT, remainingMediaCount)} variant images`,
-    )
-    {
-      const targetVariants = [...variantIds]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, Math.min(VARIANT_IMAGE_COUNT, remainingMediaCount))
-      const items = targetVariants.map((variantId) => ({
-        variantId,
-        mediaId: availableMediaIds[mediaIndex++],
-        altText: faker.lorem.words(3),
-      }))
+      const items = variantIds.flatMap((variantId) => {
+        const count = randInt(1, Math.min(3, mediaIds.length))
+        const shuffled = [...mediaIds].sort(() => Math.random() - 0.5)
+        return shuffled.slice(0, count).map((mediaId) => ({
+          variantId,
+          mediaId,
+          altText: faker.lorem.words(3),
+        }))
+      })
 
       const r = await runBatch(
         items,
