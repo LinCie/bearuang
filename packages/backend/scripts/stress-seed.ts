@@ -398,54 +398,44 @@ async function main() {
     process.exit(1)
   }
 
-  step(2, 'Uploading 3 media files')
-  const mediaIds: string[] = []
-  {
-    const scriptDir = import.meta.dir
-    const sourceFiles = [
-      `${scriptDir}/img-1.png`,
-      `${scriptDir}/img-2.png`,
-      `${scriptDir}/img-3.jpg`,
-    ]
+  step(2, 'Preparing source images')
+  const scriptDir = import.meta.dir
+  const sourceFiles = [`${scriptDir}/img-1.png`] as const
 
-    for (let i = 0; i < sourceFiles.length; i++) {
-      const sourceFilePath = sourceFiles[i]
-      try {
-        const file = Bun.file(sourceFilePath)
-        const contentType = getMimeTypeFromPath(sourceFilePath)
-        const uniqueFilename = `stress-${i + 1}-${faker.string.alphanumeric(6)}.${sourceFilePath.split('.').pop()}`
-        const { data: presign, status: s1 } = await apiCall<
-          HasId & { uploadUrl: string }
-        >('POST', '/uploads/presign', {
-          filename: uniqueFilename,
-          contentType: contentType,
-          size: file.size,
-          purpose: 'products',
-        })
-
-        if (s1 !== 201 || !presign) {
-          console.error(`  ✗ Failed to presign ${uniqueFilename}`)
-          continue
-        }
-
-        const uploaded = await putFile(presign.uploadUrl, file, contentType)
-        if (!uploaded) {
-          console.error(`  ✗ S3 upload failed for ${uniqueFilename}`)
-          continue
-        }
-
-        const { data: media, status: s2 } = await apiCall<HasId>(
-          'POST',
-          `/uploads/${presign.id}/confirm`,
-        )
-        if (s2 === 200 && media) {
-          mediaIds.push(media.id)
-        }
-      } catch (e: unknown) {
-        console.error(`  ✗ Upload error: ${e}`)
-      }
+  for (const f of sourceFiles) {
+    if (!(await Bun.file(f).exists())) {
+      console.error(`  ✗ Missing source file: ${f}`)
+      process.exit(1)
     }
-    console.log(`  ✓ Media: ${mediaIds.length} uploaded\n`)
+  }
+  console.log(`  ✓ ${sourceFiles.length} source images ready\n`)
+
+  async function uploadFreshImage(): Promise<string | null> {
+    const sourceFilePath = pick(sourceFiles)
+    const file = Bun.file(sourceFilePath)
+    const contentType = getMimeTypeFromPath(sourceFilePath)
+    const ext = sourceFilePath.split('.').pop()
+    const uniqueFilename = `stress-${faker.string.alphanumeric(8)}.${ext}`
+
+    const { data: presign, status: s1 } = await apiCall<
+      HasId & { uploadUrl: string }
+    >('POST', '/uploads/presign', {
+      filename: uniqueFilename,
+      contentType,
+      size: file.size,
+      purpose: 'products',
+    })
+
+    if (s1 !== 201 || !presign) return null
+
+    const uploaded = await putFile(presign.uploadUrl, file, contentType)
+    if (!uploaded) return null
+
+    const { data: media, status: s2 } = await apiCall<HasId>(
+      'POST',
+      `/uploads/${presign.id}/confirm`,
+    )
+    return s2 === 200 && media ? media.id : null
   }
 
   const CAT_COUNT = Math.max(1, Math.floor(15 * SCALE))
@@ -505,34 +495,20 @@ async function main() {
     )
   }
 
-  if (mediaIds.length > 0) {
-    step(5, `Attaching images to products (0-3 per product)`)
-    {
-      const items = productIds.flatMap((productId) => {
-        const count = randInt(1, Math.min(3, mediaIds.length))
-        const shuffled = [...mediaIds].sort(() => Math.random() - 0.5)
-        return shuffled.slice(0, count).map((mediaId) => ({
-          productId,
-          mediaId,
-          altText: faker.lorem.words(3),
-        }))
+  step(5, `Uploading & attaching images to ${productIds.length} products (1 each)`)
+  {
+    const r = await runBatch(productIds, 10, async (productId) => {
+      const mediaId = await uploadFreshImage()
+      if (!mediaId) throw new Error(`upload failed for product ${productId}`)
+      await apiCall('POST', `/products/${productId}/images`, {
+        mediaId,
+        altText: faker.lorem.words(3),
       })
-
-      const r = await runBatch(
-        items,
-        10,
-        async ({ productId, mediaId, altText }) => {
-          await apiCall('POST', `/products/${productId}/images`, {
-            mediaId,
-            altText,
-          })
-        },
-      )
-      track(r)
-      console.log(
-        `  ✓ Product images: ${r.ok} created${r.fail > 0 ? `, ${r.fail} failed` : ''}\n`,
-      )
-    }
+    })
+    track(r)
+    console.log(
+      `  ✓ Product images: ${r.ok} created${r.fail > 0 ? `, ${r.fail} failed` : ''}\n`,
+    )
   }
 
   const VARIANT_COUNT = Math.max(1, Math.floor(1500 * SCALE))
@@ -577,34 +553,20 @@ async function main() {
     )
   }
 
-  if (mediaIds.length > 0) {
-    step(7, `Attaching images to variants (0-3 per variant)`)
-    {
-      const items = variantIds.flatMap((variantId) => {
-        const count = randInt(1, Math.min(3, mediaIds.length))
-        const shuffled = [...mediaIds].sort(() => Math.random() - 0.5)
-        return shuffled.slice(0, count).map((mediaId) => ({
-          variantId,
-          mediaId,
-          altText: faker.lorem.words(3),
-        }))
+  step(7, `Uploading & attaching images to ${variantIds.length} variants (1 each)`)
+  {
+    const r = await runBatch(variantIds, 10, async (variantId) => {
+      const mediaId = await uploadFreshImage()
+      if (!mediaId) throw new Error(`upload failed for variant ${variantId}`)
+      await apiCall('POST', `/variants/${variantId}/images`, {
+        mediaId,
+        altText: faker.lorem.words(3),
       })
-
-      const r = await runBatch(
-        items,
-        10,
-        async ({ variantId, mediaId, altText }) => {
-          await apiCall('POST', `/variants/${variantId}/images`, {
-            mediaId,
-            altText,
-          })
-        },
-      )
-      track(r)
-      console.log(
-        `  ✓ Variant images: ${r.ok} created${r.fail > 0 ? `, ${r.fail} failed` : ''}\n`,
-      )
-    }
+    })
+    track(r)
+    console.log(
+      `  ✓ Variant images: ${r.ok} created${r.fail > 0 ? `, ${r.fail} failed` : ''}\n`,
+    )
   }
 
   const WH_COUNT = Math.max(1, Math.floor(5 * SCALE))
