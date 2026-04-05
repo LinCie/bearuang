@@ -5,7 +5,8 @@ import { useOfflineVariants } from '../hooks/use-offline-variants'
 import { useVariantLookup } from '../hooks/use-variant-lookup'
 import type { CartItem } from '../hooks/use-pos-cart'
 import type { VariantWithProduct } from 'backend/src/modules/variants/variants.route'
-import { useSession } from '#lib/auth-client'
+import { useQuery } from '@tanstack/react-query'
+import { sessionQueryOptions } from '#lib/session'
 
 interface PosProductSearchProps {
   onAddToCart: (variant: VariantWithProduct) => void
@@ -21,10 +22,8 @@ export function PosProductSearch({
   const barcodeTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const searchInputRef = React.useRef<HTMLInputElement>(null)
   const { lookupBySku, isLooking } = useVariantLookup()
-  const { data: sessionData } = useSession()
-  const orgId = sessionData
-    ? (sessionData.session.activeOrganizationId ?? undefined)
-    : undefined
+  const { data: sessionData } = useQuery(sessionQueryOptions)
+  const orgId = sessionData?.session.activeOrganizationId ?? undefined
 
   React.useEffect(() => {
     return () => {

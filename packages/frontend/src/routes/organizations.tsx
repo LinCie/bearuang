@@ -14,8 +14,10 @@ import {
   Crown,
   Users,
 } from 'lucide-react'
-import { authClient, useListOrganizations } from '#lib/auth-client'
+import { authClient } from '#lib/auth-client'
+import { useQuery } from '@tanstack/react-query'
 import { sessionQueryOptions } from '#lib/session'
+import { listOrganizationsQueryOptions } from '#lib/auth-query-options'
 import { PendingComponent } from '#components/ui/pending-component'
 import { AuthLayout } from '#components/layouts/auth-layout'
 import { Button } from '#components/ui/button'
@@ -44,12 +46,16 @@ import {
   DialogFooter,
 } from '#components/ui/dialog'
 import { cn } from '#lib/utils'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/organizations')({
   pendingComponent: PendingComponent,
   beforeLoad: async ({ context, location }) => {
-    const session =
-      await context.queryClient.ensureQueryData(sessionQueryOptions)
+    const session = await context.queryClient
+      .ensureQueryData(sessionQueryOptions)
+      .catch(() =>
+        context.queryClient.getQueryData(sessionQueryOptions.queryKey),
+      )
 
     if (!session) {
       throw redirect({
@@ -89,7 +95,7 @@ function OrganizationsPage() {
     data: organizations,
     isPending,
     error: organizationsError,
-  } = useListOrganizations()
+  } = useQuery(listOrganizationsQueryOptions)
   const [sheetOpen, setSheetOpen] = React.useState(false)
   const [serverError, setServerError] = React.useState<string | null>(null)
   const [slugManuallyEdited, setSlugManuallyEdited] = React.useState(false)
@@ -112,21 +118,25 @@ function OrganizationsPage() {
       if (value.metadata.businessType) {
         metadata.businessType = value.metadata.businessType
       }
-      const { data: org, error } = await authClient.organization.create({
-        name: value.name,
-        slug: value.slug,
-        metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
-      })
-      if (error) {
-        setServerError(error.message ?? 'Terjadi kesalahan. Coba lagi.')
-        return
+      try {
+        const { data: org, error } = await authClient.organization.create({
+          name: value.name,
+          slug: value.slug,
+          metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
+        })
+        if (error) {
+          setServerError(error.message ?? 'Terjadi kesalahan. Coba lagi.')
+          return
+        }
+        await authClient.organization.setActive({ organizationId: org.id })
+        await queryClient.invalidateQueries({ queryKey: ['session'] })
+        await queryClient.fetchQuery(sessionQueryOptions)
+        await router.invalidate()
+        setSheetOpen(false)
+        router.navigate({ to: '/' })
+      } catch {
+        toast.error('Gagal membuat organisasi. Silakan coba lagi.')
       }
-      await authClient.organization.setActive({ organizationId: org.id })
-      await queryClient.invalidateQueries({ queryKey: ['session'] })
-      await queryClient.fetchQuery(sessionQueryOptions)
-      await router.invalidate()
-      setSheetOpen(false)
-      router.navigate({ to: '/' })
     },
   })
 
@@ -161,6 +171,7 @@ function OrganizationsPage() {
       await router.invalidate()
       router.navigate({ to: '/' })
     } catch {
+      toast.error('Gagal menerima undangan. Silakan coba lagi.')
       setProcessingInvitationId(null)
     }
   }
@@ -175,9 +186,13 @@ function OrganizationsPage() {
 
   const handleRejectConfirm = async () => {
     if (!rejectingInvitation) return
-    await rejectInvitation.mutateAsync(rejectingInvitation.id)
-    setRejectDialogOpen(false)
-    setRejectingInvitation(null)
+    try {
+      await rejectInvitation.mutateAsync(rejectingInvitation.id)
+      setRejectDialogOpen(false)
+      setRejectingInvitation(null)
+    } catch {
+      toast.error('Gagal menolak undangan. Silakan coba lagi.')
+    }
   }
 
   const handleSelectOrganization = async (organizationId: string) => {
@@ -190,6 +205,7 @@ function OrganizationsPage() {
       await router.invalidate()
       router.navigate({ to: '/' })
     } catch {
+      toast.error('Gagal beralih organisasi. Silakan coba lagi.')
       setSelectingOrgId(null)
     }
   }

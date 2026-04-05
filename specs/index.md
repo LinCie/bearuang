@@ -25,6 +25,7 @@ Complete specification index for all feature modules in the BearUang monorepo.
 | [Sync](./sync/spec-v1.md) | v1 | Offline Sync — Initial/delta sync, batch mutations, conflict detection |
 | [POS](./pos/spec-v1.md) | v1 | Point of Sale — Offline-capable cart, checkout, receipt generation |
 | [Offline-First](./offline-first/spec-v1.md) | v1 | Offline-First Architecture — Service Worker, Dexie, mutation queue |
+| [Offline-First](./offline-first/spec-v2.md) | v2 | Offline Auth Persistence — TanStack Query persist, dual-fetch elimination, offline-safe route guards |
 
 ## Cross-Module Dependencies
 

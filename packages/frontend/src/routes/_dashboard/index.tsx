@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useSession } from '#lib/auth-client'
+import { useQuery } from '@tanstack/react-query'
+import { sessionQueryOptions } from '#lib/session'
 import { ArrowRight, ChevronDown, ClipboardList, Sparkles } from 'lucide-react'
 import {
   useDashboardSummary,
@@ -22,7 +23,7 @@ export const Route = createFileRoute('/_dashboard/')({
 const PRESETS: OrdersPreset[] = ['today', 'this-week', 'this-month']
 
 function DashboardPage() {
-  const { data: sessionData } = useSession()
+  const { data: sessionData } = useQuery(sessionQueryOptions)
   const userName = sessionData?.user.name || 'User'
   const firstName = userName.split(' ')[0]
   const [preset, setPreset] = useState<OrdersPreset>('today')

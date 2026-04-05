@@ -30,6 +30,7 @@ import type {
 import { useDebounce } from '#hooks/use-debounce'
 import { useHasPermission } from '#lib/use-permissions'
 import { api } from '#lib/api'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_dashboard/products/')({
   component: ProductsPage,
@@ -143,16 +144,20 @@ function ProductsPage() {
       }
       await updateProduct.mutateAsync(input)
 
-      for (const imageId of values.removedImageIds) {
-        await api
-          .products({ id: editingProduct.id })
-          .images({ imageId })
-          .delete()
-      }
-      for (const media of values.pendingImages) {
-        await api
-          .products({ id: editingProduct.id })
-          .images.post({ mediaId: media.id })
+      try {
+        for (const imageId of values.removedImageIds) {
+          await api
+            .products({ id: editingProduct.id })
+            .images({ imageId })
+            .delete()
+        }
+        for (const media of values.pendingImages) {
+          await api
+            .products({ id: editingProduct.id })
+            .images.post({ mediaId: media.id })
+        }
+      } catch {
+        toast.error('Gagal memperbarui gambar produk. Silakan coba lagi.')
       }
       queryClient.invalidateQueries({ queryKey: productKeys.lists() })
     } else {
@@ -165,10 +170,14 @@ function ProductsPage() {
       }
       const created = await createProduct.mutateAsync(input)
 
-      for (const media of values.pendingImages) {
-        await api
-          .products({ id: created.id })
-          .images.post({ mediaId: media.id })
+      try {
+        for (const media of values.pendingImages) {
+          await api
+            .products({ id: created.id })
+            .images.post({ mediaId: media.id })
+        }
+      } catch {
+        toast.error('Gagal menambahkan gambar produk. Silakan coba lagi.')
       }
       queryClient.invalidateQueries({ queryKey: productKeys.lists() })
     }

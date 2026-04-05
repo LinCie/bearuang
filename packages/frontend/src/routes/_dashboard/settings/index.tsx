@@ -11,12 +11,13 @@ import {
   Check,
   Loader2,
 } from 'lucide-react'
+import { authClient } from '#lib/auth-client'
+import { useQuery } from '@tanstack/react-query'
+import { sessionQueryOptions } from '#lib/session'
 import {
-  authClient,
-  useSession,
-  useActiveOrganization,
-  useActiveMember,
-} from '#lib/auth-client'
+  activeMemberQueryOptions,
+  activeOrganizationQueryOptions,
+} from '#lib/auth-query-options'
 import { Button } from '#components/ui/button'
 import { Input } from '#components/ui/input'
 import { Label } from '#components/ui/label'
@@ -35,6 +36,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '#components/ui/alert-dialog'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_dashboard/settings/')({
   component: SettingsPage,
@@ -100,7 +102,7 @@ function ReadOnlyField({
 // ─── User Profile Section ──────────────────────────────────
 
 function UserProfileSection() {
-  const { data: sessionData } = useSession()
+  const { data: sessionData } = useQuery(sessionQueryOptions)
   const router = useRouter()
   const queryClient = router.options.context.queryClient
 
@@ -471,7 +473,7 @@ function ChangePasswordSection() {
 // ─── Organization Info Section ─────────────────────────────
 
 function OrganizationInfoSection({ isAdmin }: { isAdmin: boolean }) {
-  const { data: org, isPending } = useActiveOrganization()
+  const { data: org, isPending } = useQuery(activeOrganizationQueryOptions)
   const router = useRouter()
   const queryClient = router.options.context.queryClient
 
@@ -491,23 +493,27 @@ function OrganizationInfoSection({ isAdmin }: { isAdmin: boolean }) {
       setServerError(null)
       setSuccessMessage(null)
 
-      const { error } = await authClient.organization.update({
-        data: {
-          name: value.name,
-          slug: value.slug,
-          logo: value.logo || undefined,
-        },
-      })
+      try {
+        const { error } = await authClient.organization.update({
+          data: {
+            name: value.name,
+            slug: value.slug,
+            logo: value.logo || undefined,
+          },
+        })
 
-      if (error) {
-        setServerError(
-          error.message ?? 'Gagal memperbarui organisasi. Silakan coba lagi.',
-        )
-        return
+        if (error) {
+          setServerError(
+            error.message ?? 'Gagal memperbarui organisasi. Silakan coba lagi.',
+          )
+          return
+        }
+
+        await queryClient.invalidateQueries({ queryKey: ['session'] })
+        setSuccessMessage('Wajah organisasi berhasil disegarkan 🚀')
+      } catch {
+        toast.error('Gagal memperbarui organisasi. Silakan coba lagi.')
       }
-
-      await queryClient.invalidateQueries({ queryKey: ['session'] })
-      setSuccessMessage('Wajah organisasi berhasil disegarkan 🚀')
     },
   })
 
@@ -734,7 +740,7 @@ function OrganizationInfoSection({ isAdmin }: { isAdmin: boolean }) {
 function DangerZoneSection() {
   const router = useRouter()
   const queryClient = router.options.context.queryClient
-  const { data: org } = useActiveOrganization()
+  const { data: org } = useQuery(activeOrganizationQueryOptions)
   const [isDeleting, setIsDeleting] = React.useState(false)
   const [deleteError, setDeleteError] = React.useState<string | null>(null)
 
@@ -760,6 +766,7 @@ function DangerZoneSection() {
       await queryClient.invalidateQueries({ queryKey: ['session'] })
       router.navigate({ to: '/organizations' })
     } catch {
+      toast.error('Gagal menghapus organisasi. Silakan coba lagi.')
       setDeleteError('Terjadi kesalahan jaringan. Silakan coba lagi nanti.')
       setIsDeleting(false)
     }
@@ -831,7 +838,7 @@ function DangerZoneSection() {
 // ─── Main Page ─────────────────────────────────────────────
 
 function SettingsPage() {
-  const { data: activeMember } = useActiveMember()
+  const { data: activeMember } = useQuery(activeMemberQueryOptions)
   const isAdmin =
     activeMember?.role === 'owner' || activeMember?.role === 'admin'
 

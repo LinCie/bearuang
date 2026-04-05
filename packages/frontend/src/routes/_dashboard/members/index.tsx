@@ -41,7 +41,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from '#components/ui/dialog'
-import { useActiveMember } from '#lib/auth-client'
+import { useQuery } from '@tanstack/react-query'
+import { activeMemberQueryOptions } from '#lib/auth-query-options'
 import { useHasPermission } from '#lib/use-permissions'
 import { cn } from '#lib/utils'
 import { useDebounce } from '#hooks/use-debounce'
@@ -143,7 +144,7 @@ function MembersPage() {
     React.useState<Invitation | null>(null)
 
   // Active member (for self-check in actions column)
-  const { data: activeMember } = useActiveMember()
+  const { data: activeMember } = useQuery(activeMemberQueryOptions)
 
   const canInvite = useHasPermission('invitation:create')
   const canManageMembers = useHasPermission('member:update')

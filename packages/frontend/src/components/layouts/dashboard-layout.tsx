@@ -19,7 +19,10 @@ import {
   ScrollText,
   Tag,
 } from 'lucide-react'
-import { signOut, useSession } from '#lib/auth-client'
+import { signOut } from '#lib/auth-client'
+import { toast } from 'sonner'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { sessionQueryOptions } from '#lib/session'
 import { usePermissions } from '#lib/use-permissions'
 import { useSyncInit } from '#hooks/use-sync-init'
 import { OfflineIndicator } from '#components/ui/offline-indicator'
@@ -168,11 +171,12 @@ function NavItemLink({ item, isActive }: { item: NavItem; isActive: boolean }) {
 }
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { data: sessionData } = useSession()
+  const { data: sessionData } = useQuery(sessionQueryOptions)
   const userName = sessionData?.user.name || 'User'
   const userEmail = sessionData?.user.email || ''
   const firstName = userName.split(' ')[0]
   const router = useRouter()
+  const queryClient = useQueryClient()
   const routerState = useRouterState()
   const currentPath = routerState.location.pathname
   const greeting = useTimeGreeting()
@@ -182,11 +186,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   const filteredMainNav = MAIN_NAV.filter(
     (item): item is NavItem =>
-      !item.permission || !!permissions?.viewResources.has(item.permission),
+      !item.permission ||
+      !!permissions?.viewResources.includes(item.permission),
   )
   const filteredSecondaryNav = SECONDARY_NAV.filter(
     (item): item is NavItem =>
-      !item.permission || !!permissions?.viewResources.has(item.permission),
+      !item.permission ||
+      !!permissions?.viewResources.includes(item.permission),
   )
 
   async function handleSignOut() {
@@ -194,8 +200,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     setIsSigningOut(true)
     try {
       await signOut()
+      queryClient.removeQueries({ queryKey: ['session'] })
+      queryClient.removeQueries({ queryKey: ['permissions'] })
+      queryClient.removeQueries({ queryKey: ['active-member'] })
+      queryClient.removeQueries({ queryKey: ['active-organization'] })
+      queryClient.removeQueries({ queryKey: ['organizations'] })
       router.navigate({ to: '/signin' })
     } catch {
+      toast.error('Gagal keluar. Periksa koneksi internet Anda.')
       setIsSigningOut(false)
     }
   }

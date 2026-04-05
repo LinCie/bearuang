@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { useSession } from '#lib/auth-client'
+import { useQuery } from '@tanstack/react-query'
+import { sessionQueryOptions } from '#lib/session'
 import {
   syncAllModels,
   startBackgroundSync,
@@ -8,7 +9,7 @@ import {
 import { clearOrgData } from '#lib/db'
 
 export function useSyncInit(): void {
-  const { data: sessionData } = useSession()
+  const { data: sessionData } = useQuery(sessionQueryOptions)
   const orgId = sessionData ? sessionData.session.activeOrganizationId : null
   const prevOrgId = React.useRef<string | null>(null)
   const isSynced = React.useRef(false)

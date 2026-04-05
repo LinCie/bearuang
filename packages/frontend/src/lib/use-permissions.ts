@@ -2,15 +2,15 @@ import { queryOptions, useQuery } from '@tanstack/react-query'
 import { api } from './api'
 
 interface PermissionsData {
-  viewResources: Set<string>
-  allPermissions: Set<string>
+  viewResources: string[]
+  allPermissions: string[]
 }
 
 async function fetchPermissions(): Promise<PermissionsData> {
   const { data } = await api.permissions.get()
   return {
-    viewResources: new Set(data?.viewResources ?? []),
-    allPermissions: new Set(data?.permissions ?? []),
+    viewResources: data?.viewResources ?? [],
+    allPermissions: data?.permissions ?? [],
   }
 }
 
@@ -19,6 +19,7 @@ export const permissionsQueryOptions = () =>
     queryKey: ['permissions'],
     queryFn: fetchPermissions,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    networkMode: 'offlineFirst',
   })
 
 export function usePermissions() {
@@ -32,5 +33,5 @@ export function usePermissions() {
  */
 export function useHasPermission(permission: string): boolean {
   const { data } = usePermissions()
-  return data?.allPermissions.has(permission) ?? false
+  return data?.allPermissions.includes(permission) ?? false
 }

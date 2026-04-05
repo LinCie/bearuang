@@ -495,7 +495,10 @@ async function main() {
     )
   }
 
-  step(5, `Uploading & attaching images to ${productIds.length} products (1 each)`)
+  step(
+    5,
+    `Uploading & attaching images to ${productIds.length} products (1 each)`,
+  )
   {
     const r = await runBatch(productIds, 10, async (productId) => {
       const mediaId = await uploadFreshImage()
@@ -553,7 +556,10 @@ async function main() {
     )
   }
 
-  step(7, `Uploading & attaching images to ${variantIds.length} variants (1 each)`)
+  step(
+    7,
+    `Uploading & attaching images to ${variantIds.length} variants (1 each)`,
+  )
   {
     const r = await runBatch(variantIds, 10, async (variantId) => {
       const mediaId = await uploadFreshImage()

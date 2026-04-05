@@ -22,8 +22,11 @@ const ROUTE_PERMISSION_MAP: Record<string, string> = {
 export const Route = createFileRoute('/_dashboard')({
   pendingComponent: PendingComponent,
   beforeLoad: async ({ context, location }) => {
-    const session =
-      await context.queryClient.ensureQueryData(sessionQueryOptions)
+    const session = await context.queryClient
+      .ensureQueryData(sessionQueryOptions)
+      .catch(() =>
+        context.queryClient.getQueryData(sessionQueryOptions.queryKey),
+      )
 
     if (!session) {
       throw redirect({
@@ -40,16 +43,21 @@ export const Route = createFileRoute('/_dashboard')({
     }
 
     // Check view permission for the current route
-    const permissions = await context.queryClient.ensureQueryData(
-      permissionsQueryOptions(),
-    )
+    const permissions = await context.queryClient
+      .ensureQueryData(permissionsQueryOptions())
+      .catch(() =>
+        context.queryClient.getQueryData(permissionsQueryOptions().queryKey),
+      )
     const requiredResource = Object.entries(ROUTE_PERMISSION_MAP).find(
       ([route]) =>
         location.pathname === route ||
         location.pathname.startsWith(route + '/'),
     )?.[1]
 
-    if (requiredResource && !permissions.viewResources.has(requiredResource)) {
+    if (
+      requiredResource &&
+      !permissions?.viewResources.includes(requiredResource)
+    ) {
       throw redirect({ to: '/' })
     }
 
