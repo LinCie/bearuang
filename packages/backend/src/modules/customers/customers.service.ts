@@ -1,5 +1,9 @@
 import { prisma } from '#integrations/prisma'
 
+const activeFilter = { isActive: true } as const
+const inactiveFilter = { isActive: false } as const
+const defaultOrderBy = { createdAt: 'desc' } as const
+
 export const customersService = {
   async listCustomers(
     organizationId: string,
@@ -31,7 +35,7 @@ export const customersService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: 'desc' },
+          : defaultOrderBy,
       }),
       prisma.customer.count({ where }),
     ])
@@ -52,7 +56,7 @@ export const customersService = {
   ) {
     const where = {
       organizationId,
-      isActive: false,
+      ...inactiveFilter,
       ...(params?.search && {
         OR: [
           { name: { contains: params.search, mode: 'insensitive' as const } },
@@ -67,7 +71,7 @@ export const customersService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: 'desc' },
+          : defaultOrderBy,
       }),
       prisma.customer.count({ where }),
     ])
@@ -76,12 +80,12 @@ export const customersService = {
 
   async restoreCustomer(organizationId: string, id: string) {
     const existing = await prisma.customer.findFirst({
-      where: { id, organizationId, isActive: false },
+      where: { id, organizationId, ...inactiveFilter },
     })
     if (!existing) return null
     return prisma.customer.update({
       where: { id },
-      data: { isActive: true },
+      data: activeFilter,
     })
   },
 
@@ -133,7 +137,7 @@ export const customersService = {
     if (!existing) return null
     return prisma.customer.update({
       where: { id },
-      data: { isActive: false },
+      data: inactiveFilter,
     })
   },
 }

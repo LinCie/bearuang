@@ -15,6 +15,20 @@ const STATUS_TRANSITIONS: Record<PurchaseOrderStatus, PurchaseOrderStatus[]> = {
 
 const TERMINAL_STATUSES: PurchaseOrderStatus[] = ['COMPLETED', 'CANCELLED']
 
+const purchaseOrderInclude = {
+  supplier: { select: { id: true, name: true } },
+  warehouse: { select: { id: true, name: true } },
+  items: {
+    include: {
+      variant: { select: { id: true, sku: true, name: true } },
+    },
+  },
+} as const
+
+const purchaseOrderItemsInclude = { items: true } as const
+
+const purchaseOrderDefaultOrderBy = { createdAt: 'desc' } as const
+
 export const purchaseOrdersService = {
   async listPurchaseOrders(
     organizationId: string,
@@ -45,16 +59,8 @@ export const purchaseOrdersService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: 'desc' },
-        include: {
-          supplier: { select: { id: true, name: true } },
-          warehouse: { select: { id: true, name: true } },
-          items: {
-            include: {
-              variant: { select: { id: true, sku: true, name: true } },
-            },
-          },
-        },
+          : purchaseOrderDefaultOrderBy,
+        include: purchaseOrderInclude,
       }),
       prisma.purchaseOrder.count({ where }),
     ])
@@ -64,15 +70,7 @@ export const purchaseOrdersService = {
   async getPurchaseOrder(organizationId: string, id: string) {
     return prisma.purchaseOrder.findFirst({
       where: { id, organizationId },
-      include: {
-        supplier: { select: { id: true, name: true } },
-        warehouse: { select: { id: true, name: true } },
-        items: {
-          include: {
-            variant: { select: { id: true, sku: true, name: true } },
-          },
-        },
-      },
+      include: purchaseOrderInclude,
     })
   },
 
@@ -105,15 +103,7 @@ export const purchaseOrdersService = {
           })),
         },
       },
-      include: {
-        supplier: { select: { id: true, name: true } },
-        warehouse: { select: { id: true, name: true } },
-        items: {
-          include: {
-            variant: { select: { id: true, sku: true, name: true } },
-          },
-        },
-      },
+      include: purchaseOrderInclude,
     })
   },
 
@@ -133,7 +123,7 @@ export const purchaseOrdersService = {
   ) {
     const existing = await prisma.purchaseOrder.findFirst({
       where: { id, organizationId },
-      include: { items: true },
+      include: purchaseOrderItemsInclude,
     })
     if (!existing) return { error: 'not_found' as const }
 
@@ -185,15 +175,7 @@ export const purchaseOrdersService = {
     return prisma.purchaseOrder.update({
       where: { id },
       data,
-      include: {
-        supplier: { select: { id: true, name: true } },
-        warehouse: { select: { id: true, name: true } },
-        items: {
-          include: {
-            variant: { select: { id: true, sku: true, name: true } },
-          },
-        },
-      },
+      include: purchaseOrderInclude,
     })
   },
 
@@ -204,7 +186,7 @@ export const purchaseOrdersService = {
   ) {
     const order = await prisma.purchaseOrder.findFirst({
       where: { id, organizationId },
-      include: { items: true },
+      include: purchaseOrderItemsInclude,
     })
     if (!order) return { error: 'not_found' as const }
 
@@ -255,15 +237,7 @@ export const purchaseOrdersService = {
 
     return prisma.purchaseOrder.findFirst({
       where: { id },
-      include: {
-        supplier: { select: { id: true, name: true } },
-        warehouse: { select: { id: true, name: true } },
-        items: {
-          include: {
-            variant: { select: { id: true, sku: true, name: true } },
-          },
-        },
-      },
+      include: purchaseOrderInclude,
     })
   },
 

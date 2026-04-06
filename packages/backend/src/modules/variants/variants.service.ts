@@ -1,14 +1,29 @@
 import { Prisma } from '#generated/prisma/client'
 import { prisma } from '#integrations/prisma'
 
+const variantImagesInclude = {
+  images: { include: { media: true }, orderBy: { sortOrder: 'asc' as const } },
+} as const
+
+const variantWithProductInclude = {
+  product: { select: { name: true } },
+  images: { include: { media: true }, orderBy: { sortOrder: 'asc' as const } },
+} as const
+
+const mediaInclude = { media: true } as const
+
+const variantListOrderBy = { createdAt: 'asc' as const } as const
+
+const variantDefaultOrderBy = { createdAt: 'desc' as const } as const
+
+const variantSortOrderMax = { sortOrder: true } as const
+
 export const variantsService = {
   async listVariantsByProduct(organizationId: string, productId: string) {
     return prisma.productVariant.findMany({
       where: { productId, organizationId, deletedAt: null },
-      include: {
-        images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
-      },
-      orderBy: { createdAt: 'asc' },
+      include: variantImagesInclude,
+      orderBy: variantListOrderBy,
     })
   },
 
@@ -43,15 +58,12 @@ export const variantsService = {
     const [data, total] = await prisma.$transaction([
       prisma.productVariant.findMany({
         where,
-        include: {
-          product: { select: { name: true } },
-          images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
-        },
+        include: variantWithProductInclude,
         skip: params?.skip ? Number(params.skip) : undefined,
         take: params?.take ? Number(params.take) : 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: 'desc' },
+          : variantDefaultOrderBy,
       }),
       prisma.productVariant.count({ where }),
     ])
@@ -89,15 +101,12 @@ export const variantsService = {
     const [data, total] = await prisma.$transaction([
       prisma.productVariant.findMany({
         where,
-        include: {
-          product: { select: { name: true } },
-          images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
-        },
+        include: variantWithProductInclude,
         skip: params?.skip ? Number(params.skip) : undefined,
         take: params?.take ? Number(params.take) : 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: 'desc' },
+          : variantDefaultOrderBy,
       }),
       prisma.productVariant.count({ where }),
     ])
@@ -114,10 +123,7 @@ export const variantsService = {
   async getVariant(organizationId: string, id: string) {
     return prisma.productVariant.findFirst({
       where: { id, organizationId, deletedAt: null },
-      include: {
-        product: { select: { name: true } },
-        images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
-      },
+      include: variantWithProductInclude,
     })
   },
 
@@ -143,9 +149,7 @@ export const variantsService = {
         organizationId,
         productId,
       },
-      include: {
-        images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
-      },
+      include: variantImagesInclude,
     })
   },
 
@@ -192,7 +196,7 @@ export const variantsService = {
 
     const maxOrder = await prisma.variantImage.aggregate({
       where: { variantId },
-      _max: { sortOrder: true },
+      _max: variantSortOrderMax,
     })
 
     return prisma.variantImage.create({
@@ -202,17 +206,14 @@ export const variantsService = {
         altText: data.altText,
         sortOrder: (maxOrder._max.sortOrder ?? -1) + 1,
       },
-      include: { media: true },
+      include: mediaInclude,
     })
   },
 
   async lookupBySku(organizationId: string, sku: string) {
     return prisma.productVariant.findFirst({
       where: { sku, organizationId, deletedAt: null, isActive: true },
-      include: {
-        product: { select: { name: true } },
-        images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
-      },
+      include: variantWithProductInclude,
     })
   },
 

@@ -1,5 +1,28 @@
 import { prisma } from '#integrations/prisma'
 
+const sortOrderAscOrderBy = { sortOrder: 'asc' } as const
+
+const createdAtDescOrderBy = { createdAt: 'desc' } as const
+
+const defaultCategoryOrderBy = [
+  { sortOrder: 'asc' },
+  { createdAt: 'desc' },
+] as [{ sortOrder: 'asc' }, { createdAt: 'desc' }]
+
+const trashedCategoryInclude = {
+  parent: { select: { id: true, name: true, slug: true } },
+} as const
+
+const categoryInclude = {
+  parent: { select: { id: true, name: true, slug: true } },
+  children: {
+    where: { deletedAt: null },
+    select: { id: true, name: true, slug: true, sortOrder: true },
+    orderBy: sortOrderAscOrderBy,
+  },
+  _count: { select: { products: true } },
+} as const
+
 export const productCategoriesService = {
   async listProductCategories(
     organizationId: string,
@@ -36,20 +59,12 @@ export const productCategoriesService = {
     const [data, total] = await prisma.$transaction([
       prisma.productCategory.findMany({
         where,
-        include: {
-          parent: { select: { id: true, name: true, slug: true } },
-          children: {
-            where: { deletedAt: null },
-            select: { id: true, name: true, slug: true, sortOrder: true },
-            orderBy: { sortOrder: 'asc' },
-          },
-          _count: { select: { products: true } },
-        },
+        include: categoryInclude,
         skip: params?.skip,
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+          : defaultCategoryOrderBy,
       }),
       prisma.productCategory.count({ where }),
     ])
@@ -88,14 +103,12 @@ export const productCategoriesService = {
     const [data, total] = await prisma.$transaction([
       prisma.productCategory.findMany({
         where,
-        include: {
-          parent: { select: { id: true, name: true, slug: true } },
-        },
+        include: trashedCategoryInclude,
         skip: params?.skip,
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: 'desc' },
+          : createdAtDescOrderBy,
       }),
       prisma.productCategory.count({ where }),
     ])
@@ -106,15 +119,7 @@ export const productCategoriesService = {
   async getProductCategory(organizationId: string, id: string) {
     return prisma.productCategory.findFirst({
       where: { id, organizationId, deletedAt: null },
-      include: {
-        parent: { select: { id: true, name: true, slug: true } },
-        children: {
-          where: { deletedAt: null },
-          select: { id: true, name: true, slug: true, sortOrder: true },
-          orderBy: { sortOrder: 'asc' },
-        },
-        _count: { select: { products: true } },
-      },
+      include: categoryInclude,
     })
   },
 
@@ -131,15 +136,7 @@ export const productCategoriesService = {
   ) {
     return prisma.productCategory.create({
       data: { ...data, organizationId },
-      include: {
-        parent: { select: { id: true, name: true, slug: true } },
-        children: {
-          where: { deletedAt: null },
-          select: { id: true, name: true, slug: true, sortOrder: true },
-          orderBy: { sortOrder: 'asc' },
-        },
-        _count: { select: { products: true } },
-      },
+      include: categoryInclude,
     })
   },
 

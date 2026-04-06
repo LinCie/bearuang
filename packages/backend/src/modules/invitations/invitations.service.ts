@@ -1,6 +1,12 @@
 import { prisma } from '#integrations/prisma'
 import { auth } from '#integrations/auth'
 
+const invitationInclude = {
+  organization: { select: { name: true } },
+} as const
+
+const defaultOrderBy = { createdAt: 'desc' } as const
+
 export const invitationsService = {
   async listInvitations(
     organizationId: string,
@@ -31,7 +37,7 @@ export const invitationsService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: 'desc' },
+          : defaultOrderBy,
       }),
       prisma.invitation.count({ where }),
     ])
@@ -84,12 +90,8 @@ export const invitationsService = {
         email,
         status: 'pending',
       },
-      include: {
-        organization: {
-          select: { name: true },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
+      include: invitationInclude,
+      orderBy: defaultOrderBy,
     })
   },
 }

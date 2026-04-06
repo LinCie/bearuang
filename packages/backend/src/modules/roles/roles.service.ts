@@ -1,5 +1,7 @@
 import { prisma } from '#integrations/prisma'
 
+const defaultOrderBy = { createdAt: 'desc' } as const
+
 export interface RoleWithPermissions {
   id: string
   role: string
@@ -71,7 +73,7 @@ export const rolesService = {
   async listRoles(organizationId: string): Promise<RoleWithPermissions[]> {
     const rows = await prisma.organizationRole.findMany({
       where: { organizationId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: defaultOrderBy,
     })
 
     return rows.map((row) => ({

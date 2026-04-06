@@ -1,5 +1,7 @@
 import { prisma } from '#integrations/prisma'
 
+const DEFAULT_ORDER = { createdAt: 'desc' } as const
+
 export const suppliersService = {
   async listSuppliers(
     organizationId: string,
@@ -35,7 +37,7 @@ export const suppliersService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: 'desc' },
+          : DEFAULT_ORDER,
       }),
       prisma.supplier.count({ where }),
     ])

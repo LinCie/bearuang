@@ -48,6 +48,20 @@ function buildUpdateData(data: {
   return updateData
 }
 
+const salesOrderInclude = {
+  customer: { select: { id: true, name: true } },
+  warehouse: { select: { id: true, name: true } },
+  items: {
+    include: {
+      variant: { select: { id: true, sku: true, name: true } },
+    },
+  },
+} as const
+
+const salesOrderItemsInclude = { items: true } as const
+
+const defaultOrderBy = { createdAt: 'desc' } as const
+
 export const salesOrdersService = {
   async listSalesOrders(
     organizationId: string,
@@ -94,16 +108,8 @@ export const salesOrdersService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: 'desc' },
-        include: {
-          customer: { select: { id: true, name: true } },
-          warehouse: { select: { id: true, name: true } },
-          items: {
-            include: {
-              variant: { select: { id: true, sku: true, name: true } },
-            },
-          },
-        },
+          : defaultOrderBy,
+        include: salesOrderInclude,
       }),
       prisma.salesOrder.count({ where }),
     ])
@@ -113,15 +119,7 @@ export const salesOrdersService = {
   async getSalesOrder(organizationId: string, id: string) {
     return prisma.salesOrder.findFirst({
       where: { id, organizationId },
-      include: {
-        customer: { select: { id: true, name: true } },
-        warehouse: { select: { id: true, name: true } },
-        items: {
-          include: {
-            variant: { select: { id: true, sku: true, name: true } },
-          },
-        },
-      },
+      include: salesOrderInclude,
     })
   },
 
@@ -196,15 +194,7 @@ export const salesOrdersService = {
           })),
         },
       },
-      include: {
-        customer: { select: { id: true, name: true } },
-        warehouse: { select: { id: true, name: true } },
-        items: {
-          include: {
-            variant: { select: { id: true, sku: true, name: true } },
-          },
-        },
-      },
+      include: salesOrderInclude,
     })
   },
 
@@ -228,7 +218,7 @@ export const salesOrdersService = {
   ) {
     const existing = await prisma.salesOrder.findFirst({
       where: { id, organizationId },
-      include: { items: true },
+      include: salesOrderItemsInclude,
     })
     if (!existing) return { error: 'not_found' as const }
 
@@ -315,15 +305,7 @@ export const salesOrdersService = {
         return tx.salesOrder.update({
           where: { id },
           data: { ...buildUpdateData(data), shippedAt: new Date() },
-          include: {
-            customer: { select: { id: true, name: true } },
-            warehouse: { select: { id: true, name: true } },
-            items: {
-              include: {
-                variant: { select: { id: true, sku: true, name: true } },
-              },
-            },
-          },
+          include: salesOrderInclude,
         })
       })
     }
@@ -352,15 +334,7 @@ export const salesOrdersService = {
         return tx.salesOrder.update({
           where: { id },
           data: buildUpdateData(data),
-          include: {
-            customer: { select: { id: true, name: true } },
-            warehouse: { select: { id: true, name: true } },
-            items: {
-              include: {
-                variant: { select: { id: true, sku: true, name: true } },
-              },
-            },
-          },
+          include: salesOrderInclude,
         })
       })
     }
@@ -368,15 +342,7 @@ export const salesOrdersService = {
     return prisma.salesOrder.update({
       where: { id },
       data: buildUpdateData(data),
-      include: {
-        customer: { select: { id: true, name: true } },
-        warehouse: { select: { id: true, name: true } },
-        items: {
-          include: {
-            variant: { select: { id: true, sku: true, name: true } },
-          },
-        },
-      },
+      include: salesOrderInclude,
     })
   },
 

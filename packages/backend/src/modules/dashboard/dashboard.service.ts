@@ -116,6 +116,31 @@ function computeOrdersVerdict(
   return 'normal'
 }
 
+const orderItemsRevenueSelect = {
+  items: { select: { quantity: true, unitPrice: true } },
+} as const
+
+const recentOrderInclude = {
+  customer: { select: { id: true, name: true } },
+  items: {
+    take: 1,
+    include: { variant: { select: { id: true, name: true } } },
+  },
+} as const
+
+const productSimpleSelect = {
+  product: { select: { name: true } },
+} as const
+
+const orderStatusItemsSelect = {
+  status: true,
+  items: { select: { quantity: true, unitPrice: true } },
+} as const
+
+const recentOrderOrderBy = { createdAt: 'desc' } as const
+
+const lowStockOrderBy = { stock: 'asc' } as const
+
 export const dashboardService = {
   /**
    * Get summary metrics for the dashboard.
@@ -131,11 +156,7 @@ export const dashboardService = {
         status: { in: ['COMPLETED', 'DELIVERED'] },
         createdAt: { gte: weekStart },
       },
-      select: {
-        items: {
-          select: { quantity: true, unitPrice: true },
-        },
-      },
+      select: orderItemsRevenueSelect,
     })
 
     const weeklySales = weeklyOrders.reduce((total, order) => {
@@ -153,11 +174,7 @@ export const dashboardService = {
         status: { in: ['COMPLETED', 'DELIVERED'] },
         createdAt: { gte: monthStart },
       },
-      select: {
-        items: {
-          select: { quantity: true, unitPrice: true },
-        },
-      },
+      select: orderItemsRevenueSelect,
     })
 
     const monthlyRevenue = monthlyOrders.reduce((total, order) => {
@@ -198,17 +215,9 @@ export const dashboardService = {
   async getRecentOrders(organizationId: string) {
     const orders = await prisma.salesOrder.findMany({
       where: { organizationId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: recentOrderOrderBy,
       take: 5,
-      include: {
-        customer: { select: { id: true, name: true } },
-        items: {
-          take: 1,
-          include: {
-            variant: { select: { id: true, name: true } },
-          },
-        },
-      },
+      include: recentOrderInclude,
     })
 
     return orders.map((order) => {
@@ -237,10 +246,7 @@ export const dashboardService = {
           status: { not: 'CANCELLED' },
           createdAt: { gte: current.start, lt: current.end },
         },
-        select: {
-          status: true,
-          items: { select: { quantity: true, unitPrice: true } },
-        },
+        select: orderStatusItemsSelect,
       }),
       prisma.salesOrder.findMany({
         where: {
@@ -248,10 +254,7 @@ export const dashboardService = {
           status: { not: 'CANCELLED' },
           createdAt: { gte: previous.start, lt: previous.end },
         },
-        select: {
-          status: true,
-          items: { select: { quantity: true, unitPrice: true } },
-        },
+        select: orderStatusItemsSelect,
       }),
     ])
 
@@ -296,9 +299,9 @@ export const dashboardService = {
         }),
         prisma.productVariant.findMany({
           where: { ...baseWhere, stock: { lte: 5 } },
-          orderBy: { stock: 'asc' },
+          orderBy: lowStockOrderBy,
           take: 5,
-          include: { product: { select: { name: true } } },
+          include: productSimpleSelect,
         }),
       ])
 

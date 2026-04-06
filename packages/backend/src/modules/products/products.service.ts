@@ -31,6 +31,14 @@ const trashedProductInclude = {
   images: { include: { media: true }, orderBy: { sortOrder: 'asc' } },
 } as const
 
+const mediaInclude = { media: true } as const
+
+const sortOrderMax = { sortOrder: true } as const
+
+const idSelect = { id: true } as const
+
+const defaultOrderBy = { createdAt: 'desc' } as const
+
 export const productsService = {
   async listProducts(
     organizationId: string,
@@ -71,7 +79,7 @@ export const productsService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: 'desc' },
+          : defaultOrderBy,
       }),
       prisma.product.count({ where }),
     ])
@@ -113,7 +121,7 @@ export const productsService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: 'desc' },
+          : defaultOrderBy,
       }),
       prisma.product.count({ where }),
     ])
@@ -195,7 +203,7 @@ export const productsService = {
   ) {
     const maxSort = await prisma.productImage.aggregate({
       where: { productId },
-      _max: { sortOrder: true },
+      _max: sortOrderMax,
     })
     return prisma.productImage.create({
       data: {
@@ -204,7 +212,7 @@ export const productsService = {
         altText: data.altText,
         sortOrder: (maxSort._max.sortOrder ?? -1) + 1,
       },
-      include: { media: true },
+      include: mediaInclude,
     })
   },
 
@@ -240,7 +248,7 @@ export const productsService = {
   ) {
     const maxSort = await prisma.variantImage.aggregate({
       where: { variantId },
-      _max: { sortOrder: true },
+      _max: sortOrderMax,
     })
     return prisma.variantImage.create({
       data: {
@@ -249,7 +257,7 @@ export const productsService = {
         altText: data.altText,
         sortOrder: (maxSort._max.sortOrder ?? -1) + 1,
       },
-      include: { media: true },
+      include: mediaInclude,
     })
   },
 
@@ -297,7 +305,7 @@ export const productsService = {
     while (frontier.length > 0) {
       const children = await prisma.productCategory.findMany({
         where: { parentId: { in: frontier }, deletedAt: null },
-        select: { id: true },
+        select: idSelect,
       })
       if (children.length === 0) break
       const childIds = children.map((c) => c.id)
@@ -330,7 +338,7 @@ export const productsService = {
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: 'desc' },
+          : defaultOrderBy,
       }),
       prisma.product.count({ where }),
     ])

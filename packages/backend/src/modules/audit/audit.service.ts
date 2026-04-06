@@ -1,5 +1,7 @@
 import { prisma } from '#integrations/prisma'
 
+const DEFAULT_ORDER = { createdAt: 'desc' } as const
+
 export const auditService = {
   async listAuditLogs(
     organizationId: string,
@@ -22,7 +24,7 @@ export const auditService = {
     const [data, total] = await prisma.$transaction([
       prisma.auditLog.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: DEFAULT_ORDER,
         skip: params?.skip,
         take: params?.take ?? 50,
       }),

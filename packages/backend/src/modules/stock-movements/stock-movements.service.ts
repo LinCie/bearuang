@@ -1,6 +1,13 @@
 import { prisma } from '#integrations/prisma'
 import { StockMovementType } from '#generated/prisma/client'
 
+const movementInclude = {
+  variant: { select: { id: true, sku: true, name: true } },
+  warehouse: { select: { id: true, name: true } },
+} as const
+
+const movementDefaultOrderBy = { createdAt: 'desc' as const }
+
 export const stockMovementService = {
   async listMovements(
     organizationId: string,
@@ -45,26 +52,12 @@ export const stockMovementService = {
     const [data, total] = await prisma.$transaction([
       prisma.stockMovement.findMany({
         where,
-        include: {
-          variant: {
-            select: {
-              id: true,
-              sku: true,
-              name: true,
-            },
-          },
-          warehouse: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
+        include: movementInclude,
         skip: params?.skip,
         take: params?.take ?? 50,
         orderBy: params?.orderBy
           ? { [params.orderBy.field]: params.orderBy.order }
-          : { createdAt: 'desc' },
+          : movementDefaultOrderBy,
       }),
       prisma.stockMovement.count({ where }),
     ])
@@ -74,21 +67,7 @@ export const stockMovementService = {
   async getMovement(organizationId: string, id: string) {
     return prisma.stockMovement.findFirst({
       where: { id, organizationId },
-      include: {
-        variant: {
-          select: {
-            id: true,
-            sku: true,
-            name: true,
-          },
-        },
-        warehouse: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
+      include: movementInclude,
     })
   },
 
@@ -115,14 +94,7 @@ export const stockMovementService = {
       const [movement] = await Promise.all([
         tx.stockMovement.create({
           data: { ...data, organizationId },
-          include: {
-            variant: {
-              select: { id: true, sku: true, name: true },
-            },
-            warehouse: {
-              select: { id: true, name: true },
-            },
-          },
+          include: movementInclude,
         }),
         tx.productVariant.updateMany({
           where: { id: data.variantId, organizationId },

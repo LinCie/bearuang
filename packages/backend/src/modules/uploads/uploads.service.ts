@@ -1,6 +1,8 @@
 import { prisma } from '#integrations/prisma'
 import { presignPut, deleteObject, MAX_FILE_SIZE } from '#integrations/s3'
 
+const DEFAULT_ORDER = { createdAt: 'desc' } as const
+
 export const uploadsService = {
   async presignUpload(
     organizationId: string,
@@ -65,7 +67,7 @@ export const uploadsService = {
         where,
         skip: params?.skip,
         take: params?.take ?? 50,
-        orderBy: { createdAt: 'desc' },
+        orderBy: DEFAULT_ORDER,
       }),
       prisma.media.count({ where }),
     ])

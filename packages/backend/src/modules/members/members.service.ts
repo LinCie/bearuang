@@ -1,6 +1,10 @@
 import { prisma } from '#integrations/prisma'
 import { auth } from '#integrations/auth'
 
+const memberInclude = {
+  user: { select: { id: true, name: true, email: true, image: true } },
+} as const
+
 export const membersService = {
   async listMembers(
     organizationId: string,
@@ -40,9 +44,7 @@ export const membersService = {
     const [data, total] = await prisma.$transaction([
       prisma.member.findMany({
         where,
-        include: {
-          user: { select: { id: true, name: true, email: true, image: true } },
-        },
+        include: memberInclude,
         skip: params?.skip,
         take: params?.take ?? 50,
         orderBy: params?.orderBy
@@ -57,9 +59,7 @@ export const membersService = {
   async getMember(organizationId: string, id: string) {
     return prisma.member.findFirst({
       where: { id, organizationId },
-      include: {
-        user: { select: { id: true, name: true, email: true, image: true } },
-      },
+      include: memberInclude,
     })
   },
 
