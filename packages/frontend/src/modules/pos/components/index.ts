@@ -1,4 +1,5 @@
 export { PosProductSearch } from './pos-product-search'
+export { PosBarcodeScanner } from './pos-barcode-scanner'
 export { PosCart } from './pos-cart'
 export { PosCheckoutPanel } from './pos-checkout-panel'
 export { PosPaymentDialog } from './pos-payment-dialog'

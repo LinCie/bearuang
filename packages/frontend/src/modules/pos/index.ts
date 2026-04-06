@@ -1,5 +1,6 @@
 export {
   PosProductSearch,
+  PosBarcodeScanner,
   PosCart,
   PosCheckoutPanel,
   PosPaymentDialog,

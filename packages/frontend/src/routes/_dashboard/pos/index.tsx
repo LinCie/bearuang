@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import { ScanBarcode, Search } from 'lucide-react'
 import { usePosCart } from '#modules/pos/hooks/use-pos-cart'
 import { api } from '#lib/api'
 import { useOfflineMutation } from '#hooks/use-offline-mutation'
@@ -10,6 +11,7 @@ import {
 } from '#lib/mutation-queue'
 import {
   PosProductSearch,
+  PosBarcodeScanner,
   PosCart,
   PosCheckoutPanel,
   PosPaymentDialog,
@@ -18,6 +20,7 @@ import {
 import type { PaymentMethod } from '#modules/pos/index'
 import { SyncStatusBadge } from '#components/ui/sync-status-badge'
 import { ConflictDialog } from '#components/ui/conflict-dialog'
+import { Button } from '#components/ui/button'
 import type { MutationQueueItem } from '#lib/db'
 import { toast } from 'sonner'
 import type { SalesOrder } from '#modules/sales-orders/hooks/use-sales-orders'
@@ -71,6 +74,7 @@ function POSPage() {
     },
   })
 
+  const [scanMode, setScanMode] = React.useState(false)
   const [paymentOpen, setPaymentOpen] = React.useState(false)
   const [receiptOpen, setReceiptOpen] = React.useState(false)
   const [createdOrder, setCreatedOrder] = React.useState<SalesOrder | null>(
@@ -236,12 +240,31 @@ function POSPage() {
     <div className="relative -mx-4 md:-mx-10 -my-8 flex flex-col h-[calc(100vh-3.5rem)]">
       <div className="flex flex-col lg:flex-row flex-1 min-h-0">
         <div className="flex-1 flex flex-col p-4 gap-4 overflow-hidden lg:border-r lg:border-border/10 min-h-0">
-          <div className="flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <h1 className="text-xl font-bold text-primary/90">Kasir</h1>
+            <Button
+              variant={scanMode ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setScanMode((v) => !v)}
+              className="gap-1.5"
+            >
+              {scanMode ? (
+                <ScanBarcode className="w-4 h-4" />
+              ) : (
+                <Search className="w-4 h-4" />
+              )}
+              <span className="hidden sm:inline text-xs">
+                {scanMode ? 'Mode Scan' : 'Mode Cari'}
+              </span>
+            </Button>
             <SyncStatusBadge onClick={handleShowConflicts} />
           </div>
           <div className="flex-1 min-h-0">
-            <PosProductSearch onAddToCart={addItem} cartItems={items} />
+            {scanMode ? (
+              <PosBarcodeScanner onAddToCart={addItem} cartItems={items} />
+            ) : (
+              <PosProductSearch onAddToCart={addItem} cartItems={items} />
+            )}
           </div>
         </div>
 
