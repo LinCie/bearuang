@@ -63,13 +63,13 @@ const MAIN_NAV: NavItem[] = [
   { icon: Home, label: 'Home', to: '/' },
   {
     icon: Monitor,
-    label: 'POS',
-    to: '/pos',
+    label: 'Chekout',
+    to: '/checkout',
     permission: 'salesOrder',
   },
   {
     icon: MessageSquare,
-    label: 'Chat AI',
+    label: 'Chat',
     to: '/chat',
     permission: 'salesOrder',
   },

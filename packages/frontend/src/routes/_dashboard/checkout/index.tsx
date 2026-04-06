@@ -29,7 +29,7 @@ import { salesOrderKeys } from '#modules/sales-orders/hooks/use-sales-orders'
 import { variantKeys } from '#modules/products/hooks/use-variants'
 import { auditLogKeys } from '#modules/audit-logs/hooks/use-audit-logs'
 
-export const Route = createFileRoute('/_dashboard/pos/')({
+export const Route = createFileRoute('/_dashboard/checkout/')({
   component: POSPage,
 })
 

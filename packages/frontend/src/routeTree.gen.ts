@@ -25,9 +25,9 @@ import { Route as DashboardSalesOrdersIndexRouteImport } from './routes/_dashboa
 import { Route as DashboardPurchaseOrdersIndexRouteImport } from './routes/_dashboard/purchase-orders/index'
 import { Route as DashboardProductsIndexRouteImport } from './routes/_dashboard/products/index'
 import { Route as DashboardProductCategoriesIndexRouteImport } from './routes/_dashboard/product-categories/index'
-import { Route as DashboardPosIndexRouteImport } from './routes/_dashboard/pos/index'
 import { Route as DashboardMembersIndexRouteImport } from './routes/_dashboard/members/index'
 import { Route as DashboardCustomersIndexRouteImport } from './routes/_dashboard/customers/index'
+import { Route as DashboardCheckoutIndexRouteImport } from './routes/_dashboard/checkout/index'
 import { Route as DashboardChatIndexRouteImport } from './routes/_dashboard/chat/index'
 import { Route as DashboardAuditLogsIndexRouteImport } from './routes/_dashboard/audit-logs/index'
 import { Route as DashboardApiKeysIndexRouteImport } from './routes/_dashboard/api-keys/index'
@@ -130,11 +130,6 @@ const DashboardProductCategoriesIndexRoute =
     path: '/',
     getParentRoute: () => DashboardProductCategoriesRouteRoute,
   } as any)
-const DashboardPosIndexRoute = DashboardPosIndexRouteImport.update({
-  id: '/pos/',
-  path: '/pos/',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
 const DashboardMembersIndexRoute = DashboardMembersIndexRouteImport.update({
   id: '/members/',
   path: '/members/',
@@ -143,6 +138,11 @@ const DashboardMembersIndexRoute = DashboardMembersIndexRouteImport.update({
 const DashboardCustomersIndexRoute = DashboardCustomersIndexRouteImport.update({
   id: '/customers/',
   path: '/customers/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardCheckoutIndexRoute = DashboardCheckoutIndexRouteImport.update({
+  id: '/checkout/',
+  path: '/checkout/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardChatIndexRoute = DashboardChatIndexRouteImport.update({
@@ -253,9 +253,9 @@ export interface FileRoutesByFullPath {
   '/api-keys/': typeof DashboardApiKeysIndexRoute
   '/audit-logs/': typeof DashboardAuditLogsIndexRoute
   '/chat/': typeof DashboardChatIndexRoute
+  '/checkout/': typeof DashboardCheckoutIndexRoute
   '/customers/': typeof DashboardCustomersIndexRoute
   '/members/': typeof DashboardMembersIndexRoute
-  '/pos/': typeof DashboardPosIndexRoute
   '/product-categories/': typeof DashboardProductCategoriesIndexRoute
   '/products/': typeof DashboardProductsIndexRoute
   '/purchase-orders/': typeof DashboardPurchaseOrdersIndexRoute
@@ -285,9 +285,9 @@ export interface FileRoutesByTo {
   '/api-keys': typeof DashboardApiKeysIndexRoute
   '/audit-logs': typeof DashboardAuditLogsIndexRoute
   '/chat': typeof DashboardChatIndexRoute
+  '/checkout': typeof DashboardCheckoutIndexRoute
   '/customers': typeof DashboardCustomersIndexRoute
   '/members': typeof DashboardMembersIndexRoute
-  '/pos': typeof DashboardPosIndexRoute
   '/product-categories': typeof DashboardProductCategoriesIndexRoute
   '/products': typeof DashboardProductsIndexRoute
   '/purchase-orders': typeof DashboardPurchaseOrdersIndexRoute
@@ -322,9 +322,9 @@ export interface FileRoutesById {
   '/_dashboard/api-keys/': typeof DashboardApiKeysIndexRoute
   '/_dashboard/audit-logs/': typeof DashboardAuditLogsIndexRoute
   '/_dashboard/chat/': typeof DashboardChatIndexRoute
+  '/_dashboard/checkout/': typeof DashboardCheckoutIndexRoute
   '/_dashboard/customers/': typeof DashboardCustomersIndexRoute
   '/_dashboard/members/': typeof DashboardMembersIndexRoute
-  '/_dashboard/pos/': typeof DashboardPosIndexRoute
   '/_dashboard/product-categories/': typeof DashboardProductCategoriesIndexRoute
   '/_dashboard/products/': typeof DashboardProductsIndexRoute
   '/_dashboard/purchase-orders/': typeof DashboardPurchaseOrdersIndexRoute
@@ -359,9 +359,9 @@ export interface FileRouteTypes {
     | '/api-keys/'
     | '/audit-logs/'
     | '/chat/'
+    | '/checkout/'
     | '/customers/'
     | '/members/'
-    | '/pos/'
     | '/product-categories/'
     | '/products/'
     | '/purchase-orders/'
@@ -391,9 +391,9 @@ export interface FileRouteTypes {
     | '/api-keys'
     | '/audit-logs'
     | '/chat'
+    | '/checkout'
     | '/customers'
     | '/members'
-    | '/pos'
     | '/product-categories'
     | '/products'
     | '/purchase-orders'
@@ -427,9 +427,9 @@ export interface FileRouteTypes {
     | '/_dashboard/api-keys/'
     | '/_dashboard/audit-logs/'
     | '/_dashboard/chat/'
+    | '/_dashboard/checkout/'
     | '/_dashboard/customers/'
     | '/_dashboard/members/'
-    | '/_dashboard/pos/'
     | '/_dashboard/product-categories/'
     | '/_dashboard/products/'
     | '/_dashboard/purchase-orders/'
@@ -564,13 +564,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProductCategoriesIndexRouteImport
       parentRoute: typeof DashboardProductCategoriesRouteRoute
     }
-    '/_dashboard/pos/': {
-      id: '/_dashboard/pos/'
-      path: '/pos'
-      fullPath: '/pos/'
-      preLoaderRoute: typeof DashboardPosIndexRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
     '/_dashboard/members/': {
       id: '/_dashboard/members/'
       path: '/members'
@@ -583,6 +576,13 @@ declare module '@tanstack/react-router' {
       path: '/customers'
       fullPath: '/customers/'
       preLoaderRoute: typeof DashboardCustomersIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/_dashboard/checkout/': {
+      id: '/_dashboard/checkout/'
+      path: '/checkout'
+      fullPath: '/checkout/'
+      preLoaderRoute: typeof DashboardCheckoutIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/_dashboard/chat/': {
@@ -761,9 +761,9 @@ interface DashboardRouteRouteChildren {
   DashboardApiKeysIndexRoute: typeof DashboardApiKeysIndexRoute
   DashboardAuditLogsIndexRoute: typeof DashboardAuditLogsIndexRoute
   DashboardChatIndexRoute: typeof DashboardChatIndexRoute
+  DashboardCheckoutIndexRoute: typeof DashboardCheckoutIndexRoute
   DashboardCustomersIndexRoute: typeof DashboardCustomersIndexRoute
   DashboardMembersIndexRoute: typeof DashboardMembersIndexRoute
-  DashboardPosIndexRoute: typeof DashboardPosIndexRoute
   DashboardPurchaseOrdersIndexRoute: typeof DashboardPurchaseOrdersIndexRoute
   DashboardSalesOrdersIndexRoute: typeof DashboardSalesOrdersIndexRoute
   DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute
@@ -789,9 +789,9 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardApiKeysIndexRoute: DashboardApiKeysIndexRoute,
   DashboardAuditLogsIndexRoute: DashboardAuditLogsIndexRoute,
   DashboardChatIndexRoute: DashboardChatIndexRoute,
+  DashboardCheckoutIndexRoute: DashboardCheckoutIndexRoute,
   DashboardCustomersIndexRoute: DashboardCustomersIndexRoute,
   DashboardMembersIndexRoute: DashboardMembersIndexRoute,
-  DashboardPosIndexRoute: DashboardPosIndexRoute,
   DashboardPurchaseOrdersIndexRoute: DashboardPurchaseOrdersIndexRoute,
   DashboardSalesOrdersIndexRoute: DashboardSalesOrdersIndexRoute,
   DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,
