@@ -14,6 +14,7 @@ const ROUTE_PERMISSION_MAP: Record<string, string> = {
   '/purchase-orders': 'purchaseOrder',
   '/sales-orders': 'salesOrder',
   '/pos': 'salesOrder',
+  '/chat': 'salesOrder',
   '/members': 'member',
   '/api-keys': 'apiKey',
   '/audit-logs': 'auditLog',

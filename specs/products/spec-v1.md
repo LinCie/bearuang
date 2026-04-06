@@ -566,6 +566,7 @@ BearUang targets Indonesian businesses (bearuang = "bear money" in Indonesian). 
 ### Data Dependencies
 - **DAT-001**: **StockMovement** - Manages variant stock levels; any module creating stock adjustments must go through this service
 - **DAT-002**: **PurchaseOrderItem / SalesOrderItem** - Reference variants; cascading delete from variant is blocked by these relations at the DB level
+- **DAT-003**: **AI Assistant** - Consumes `productsService` and `variantsService` methods directly via tool calling; write operations through AI still produce audit logs and respect RBAC. See [AI spec](../ai/spec-v1.md).
 
 ### Technology Platform Dependencies
 - **PLT-001**: **Elysia.js** - HTTP framework with TypeBox/Zod integration and Eden Treaty client generation
@@ -955,3 +956,4 @@ N/A — This is the initial specification.
 - DataTable component: `packages/frontend/src/components/ui/data-table.tsx`
 - MultiFileUpload component: `packages/frontend/src/modules/uploads/components/multi-file-upload.tsx`
 - Offline sync: `packages/frontend/src/lib/sync.ts`, `packages/frontend/src/lib/db.ts`
+- AI Assistant: `specs/ai/spec-v1.md` — downstream consumer of products/variants/categories services via LLM tool calling

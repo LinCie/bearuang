@@ -26,6 +26,7 @@ Complete specification index for all feature modules in the BearUang monorepo.
 | [POS](./pos/spec-v1.md) | v1 | Point of Sale — Offline-capable cart, checkout, receipt generation |
 | [Offline-First](./offline-first/spec-v1.md) | v1 | Offline-First Architecture — Service Worker, Dexie, mutation queue |
 | [Offline-First](./offline-first/spec-v2.md) | v2 | Offline Auth Persistence — TanStack Query persist, dual-fetch elimination, offline-safe route guards |
+| [AI Assistant](./ai/spec-v1.md) | v1 | AI Assistant — Natural language interface for products with OpenAI-compatible tool calling, RBAC, write confirmation |
 
 ## Cross-Module Dependencies
 
@@ -61,4 +62,8 @@ sync ──── offline-first (architecture)                            │
                                                                   │
 pos ──── sales-orders, products/variants, customers, warehouses   │
         └── Uses offline sync infrastructure                      │
+                                                                  │
+ai ──── products (tools), product-categories (tools)              │
+        ├── permissions (RBAC per tool)                           │
+        └── llm integration (reusable, env-configured)            │
 ```

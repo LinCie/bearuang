@@ -22,6 +22,7 @@ import { uploadsRoute } from '#modules/uploads/uploads.route'
 import { auditRoute } from '#modules/audit/audit.route'
 import { productCategoriesRoute } from '#modules/product-categories/product-categories.route'
 import { syncRoute } from '#modules/sync/sync.route'
+import { aiRoute } from '#modules/ai/ai.route'
 
 const app = new Elysia()
   .onError(({ error }) => {
@@ -88,6 +89,10 @@ const app = new Elysia()
             name: 'Product Categories',
             description: 'Product category management endpoints',
           },
+          {
+            name: 'AI',
+            description: 'AI assistant endpoints',
+          },
         ],
       },
       mapJsonSchema: { zod: z.toJSONSchema },
@@ -124,6 +129,7 @@ const app = new Elysia()
   .use(auditRoute)
   .use(productCategoriesRoute)
   .use(syncRoute)
+  .use(aiRoute)
   .get('/health', () => 'ok')
   .listen(Number(process.env.PORT) || 8000)
 

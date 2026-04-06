@@ -28,6 +28,7 @@ import { Route as DashboardProductCategoriesIndexRouteImport } from './routes/_d
 import { Route as DashboardPosIndexRouteImport } from './routes/_dashboard/pos/index'
 import { Route as DashboardMembersIndexRouteImport } from './routes/_dashboard/members/index'
 import { Route as DashboardCustomersIndexRouteImport } from './routes/_dashboard/customers/index'
+import { Route as DashboardChatIndexRouteImport } from './routes/_dashboard/chat/index'
 import { Route as DashboardAuditLogsIndexRouteImport } from './routes/_dashboard/audit-logs/index'
 import { Route as DashboardApiKeysIndexRouteImport } from './routes/_dashboard/api-keys/index'
 import { Route as DashboardWarehousesWarehouseIdRouteImport } from './routes/_dashboard/warehouses/$warehouseId'
@@ -144,6 +145,11 @@ const DashboardCustomersIndexRoute = DashboardCustomersIndexRouteImport.update({
   path: '/customers/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardChatIndexRoute = DashboardChatIndexRouteImport.update({
+  id: '/chat/',
+  path: '/chat/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardAuditLogsIndexRoute = DashboardAuditLogsIndexRouteImport.update({
   id: '/audit-logs/',
   path: '/audit-logs/',
@@ -246,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/warehouses/$warehouseId': typeof DashboardWarehousesWarehouseIdRoute
   '/api-keys/': typeof DashboardApiKeysIndexRoute
   '/audit-logs/': typeof DashboardAuditLogsIndexRoute
+  '/chat/': typeof DashboardChatIndexRoute
   '/customers/': typeof DashboardCustomersIndexRoute
   '/members/': typeof DashboardMembersIndexRoute
   '/pos/': typeof DashboardPosIndexRoute
@@ -277,6 +284,7 @@ export interface FileRoutesByTo {
   '/warehouses/$warehouseId': typeof DashboardWarehousesWarehouseIdRoute
   '/api-keys': typeof DashboardApiKeysIndexRoute
   '/audit-logs': typeof DashboardAuditLogsIndexRoute
+  '/chat': typeof DashboardChatIndexRoute
   '/customers': typeof DashboardCustomersIndexRoute
   '/members': typeof DashboardMembersIndexRoute
   '/pos': typeof DashboardPosIndexRoute
@@ -313,6 +321,7 @@ export interface FileRoutesById {
   '/_dashboard/warehouses/$warehouseId': typeof DashboardWarehousesWarehouseIdRoute
   '/_dashboard/api-keys/': typeof DashboardApiKeysIndexRoute
   '/_dashboard/audit-logs/': typeof DashboardAuditLogsIndexRoute
+  '/_dashboard/chat/': typeof DashboardChatIndexRoute
   '/_dashboard/customers/': typeof DashboardCustomersIndexRoute
   '/_dashboard/members/': typeof DashboardMembersIndexRoute
   '/_dashboard/pos/': typeof DashboardPosIndexRoute
@@ -349,6 +358,7 @@ export interface FileRouteTypes {
     | '/warehouses/$warehouseId'
     | '/api-keys/'
     | '/audit-logs/'
+    | '/chat/'
     | '/customers/'
     | '/members/'
     | '/pos/'
@@ -380,6 +390,7 @@ export interface FileRouteTypes {
     | '/warehouses/$warehouseId'
     | '/api-keys'
     | '/audit-logs'
+    | '/chat'
     | '/customers'
     | '/members'
     | '/pos'
@@ -415,6 +426,7 @@ export interface FileRouteTypes {
     | '/_dashboard/warehouses/$warehouseId'
     | '/_dashboard/api-keys/'
     | '/_dashboard/audit-logs/'
+    | '/_dashboard/chat/'
     | '/_dashboard/customers/'
     | '/_dashboard/members/'
     | '/_dashboard/pos/'
@@ -571,6 +583,13 @@ declare module '@tanstack/react-router' {
       path: '/customers'
       fullPath: '/customers/'
       preLoaderRoute: typeof DashboardCustomersIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/_dashboard/chat/': {
+      id: '/_dashboard/chat/'
+      path: '/chat'
+      fullPath: '/chat/'
+      preLoaderRoute: typeof DashboardChatIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/_dashboard/audit-logs/': {
@@ -741,6 +760,7 @@ interface DashboardRouteRouteChildren {
   DashboardVariantsVariantIdRoute: typeof DashboardVariantsVariantIdRoute
   DashboardApiKeysIndexRoute: typeof DashboardApiKeysIndexRoute
   DashboardAuditLogsIndexRoute: typeof DashboardAuditLogsIndexRoute
+  DashboardChatIndexRoute: typeof DashboardChatIndexRoute
   DashboardCustomersIndexRoute: typeof DashboardCustomersIndexRoute
   DashboardMembersIndexRoute: typeof DashboardMembersIndexRoute
   DashboardPosIndexRoute: typeof DashboardPosIndexRoute
@@ -768,6 +788,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardVariantsVariantIdRoute: DashboardVariantsVariantIdRoute,
   DashboardApiKeysIndexRoute: DashboardApiKeysIndexRoute,
   DashboardAuditLogsIndexRoute: DashboardAuditLogsIndexRoute,
+  DashboardChatIndexRoute: DashboardChatIndexRoute,
   DashboardCustomersIndexRoute: DashboardCustomersIndexRoute,
   DashboardMembersIndexRoute: DashboardMembersIndexRoute,
   DashboardPosIndexRoute: DashboardPosIndexRoute,
