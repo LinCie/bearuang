@@ -14,7 +14,9 @@ export const auditLogSchema = z.object({
   id: z.string(),
   organizationId: z.string(),
   userId: z.string().nullable(),
+  user: z.object({ name: z.string() }).nullable(),
   apiKeyId: z.string().nullable(),
+  apiKey: z.object({ name: z.string().nullable() }).nullable(),
   authType: z.string(),
   model: z.string(),
   operation: z.string(),
@@ -40,7 +42,9 @@ const serializeAuditLog = (log: {
   id: string
   organizationId: string
   userId: string | null
+  user: { name: string } | null
   apiKeyId: string | null
+  apiKey: { name: string | null } | null
   authType: string
   model: string
   operation: string

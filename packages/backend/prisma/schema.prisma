@@ -19,13 +19,15 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
-
+  
   members     Member[]
   invitations Invitation[]
+  auditLogs   AuditLog[]
 
   @@unique([email])
   @@map("user")
 }
+
 
 model Session {
   id        String   @id
@@ -149,6 +151,7 @@ model Apikey {
   updatedAt           DateTime
   permissions         String?
   metadata            String?
+  auditLogs           AuditLog[]
 
   @@index([configId])
   @@index([referenceId])
@@ -497,7 +500,9 @@ model AuditLog {
   id             String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   organizationId String
   userId         String?
+  user           User?    @relation(fields: [userId], references: [id])
   apiKeyId       String?
+  apiKey         Apikey?  @relation(fields: [apiKeyId], references: [id])
   authType       String
   model          String
   operation      String

@@ -24,6 +24,10 @@ export const auditService = {
     const [data, total] = await prisma.$transaction([
       prisma.auditLog.findMany({
         where,
+        include: {
+          user: { select: { name: true } },
+          apiKey: { select: { name: true } },
+        },
         orderBy: DEFAULT_ORDER,
         skip: params?.skip,
         take: params?.take ?? 50,

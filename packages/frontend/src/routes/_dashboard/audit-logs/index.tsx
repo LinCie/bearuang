@@ -180,14 +180,17 @@ function AuditLogsPage() {
       {
         id: 'userId',
         header: () => <span className="hidden lg:table-cell">Pengguna</span>,
-        cell: ({ row }) => (
-          <div className="hidden lg:table-cell text-sm text-muted-foreground">
-            {row.original.userId
-              ? row.original.userId.slice(0, 8) + '...'
-              : '—'}
-          </div>
-        ),
+        cell: ({ row }) => {
+          const log = row.original
+          const name = log.user?.name || log.apiKey?.name || log.userId || '—'
+          return (
+            <div className="hidden lg:table-cell text-sm text-muted-foreground">
+              {name}
+            </div>
+          )
+        },
       },
+
       {
         id: 'ipAddress',
         header: () => <span className="hidden xl:table-cell">IP</span>,
