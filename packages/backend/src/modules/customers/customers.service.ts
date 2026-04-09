@@ -5,6 +5,14 @@ const inactiveFilter = { isActive: false } as const
 const defaultOrderBy = { createdAt: 'desc' } as const
 
 export const customersService = {
+  /**
+   * Lists active customers for an organization.
+   * @param organizationId - Organization identifier.
+   * @param params - Pagination, search and filter parameters.
+   * @returns The paginated list of customers and total count.
+   * @usage Used in customers.route.ts, customers.ai.ts
+   * @sideEffects None (Read-only)
+   */
   async listCustomers(
     organizationId: string,
     params?: {
@@ -42,6 +50,14 @@ export const customersService = {
     return { data, total }
   },
 
+  /**
+   * Lists inactive (soft-deleted) customers for an organization.
+   * @param organizationId - Organization identifier.
+   * @param params - Pagination, search and sorting parameters.
+   * @returns The paginated list of trashed customers and total count.
+   * @usage Used in customers.route.ts, customers.ai.ts
+   * @sideEffects None (Read-only)
+   */
   async listTrashedCustomers(
     organizationId: string,
     params?: {
@@ -78,6 +94,14 @@ export const customersService = {
     return { data, total }
   },
 
+  /**
+   * Restores an inactive (soft-deleted) customer.
+   * @param organizationId - Organization identifier.
+   * @param id - Customer identifier.
+   * @returns The restored customer record or null if not found.
+   * @usage Used in customers.route.ts, customers.ai.ts
+   * @sideEffects Updates isActive to true in customers table.
+   */
   async restoreCustomer(organizationId: string, id: string) {
     const existing = await prisma.customer.findFirst({
       where: { id, organizationId, ...inactiveFilter },
@@ -89,12 +113,28 @@ export const customersService = {
     })
   },
 
+  /**
+   * Retrieves a single customer.
+   * @param organizationId - Organization identifier.
+   * @param id - Customer identifier.
+   * @returns The customer record or null if not found.
+   * @usage Used in customers.route.ts, customers.ai.ts
+   * @sideEffects None (Read-only)
+   */
   async getCustomer(organizationId: string, id: string) {
     return prisma.customer.findFirst({
       where: { id, organizationId },
     })
   },
 
+  /**
+   * Creates a new customer.
+   * @param organizationId - Organization identifier.
+   * @param data - Customer creation data.
+   * @returns The created customer record.
+   * @usage Used in customers.route.ts, customers.ai.ts
+   * @sideEffects Creates a new record in the customers table.
+   */
   async createCustomer(
     organizationId: string,
     data: {
@@ -109,6 +149,15 @@ export const customersService = {
     })
   },
 
+  /**
+   * Updates an existing customer.
+   * @param organizationId - Organization identifier.
+   * @param id - Customer identifier.
+   * @param data - Customer update data.
+   * @returns The updated customer record or null if not found.
+   * @usage Used in customers.route.ts, customers.ai.ts
+   * @sideEffects Updates an existing record in the customers table.
+   */
   async updateCustomer(
     organizationId: string,
     id: string,
@@ -130,6 +179,14 @@ export const customersService = {
     })
   },
 
+  /**
+   * Soft deletes a customer by setting isActive to false.
+   * @param organizationId - Organization identifier.
+   * @param id - Customer identifier.
+   * @returns The deactivated customer record or null if not found.
+   * @usage Used in customers.route.ts, customers.ai.ts
+   * @sideEffects Updates isActive to false in customers table.
+   */
   async deleteCustomer(organizationId: string, id: string) {
     const existing = await prisma.customer.findFirst({
       where: { id, organizationId },

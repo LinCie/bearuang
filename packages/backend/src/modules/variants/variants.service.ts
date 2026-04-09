@@ -19,6 +19,14 @@ const variantDefaultOrderBy = { createdAt: 'desc' as const } as const
 const variantSortOrderMax = { sortOrder: true } as const
 
 export const variantsService = {
+  /**
+   * Lists active variants for a specific product.
+   * @param organizationId - Organization identifier.
+   * @param productId - Product identifier.
+   * @returns Array of variant records with images.
+   * @usage Used in variants.route.ts
+   * @sideEffects None (Read-only)
+   */
   async listVariantsByProduct(organizationId: string, productId: string) {
     return prisma.productVariant.findMany({
       where: { productId, organizationId, deletedAt: null },
@@ -27,6 +35,14 @@ export const variantsService = {
     })
   },
 
+  /**
+   * Lists active variants for an organization with pagination and search.
+   * @param organizationId - Organization identifier.
+   * @param params - Pagination, search and sorting parameters.
+   * @returns The paginated list of variants and total count.
+   * @usage Used in variants.route.ts
+   * @sideEffects None (Read-only)
+   */
   async listVariants(
     organizationId: string,
     params?: {
@@ -70,6 +86,14 @@ export const variantsService = {
     return { data, total }
   },
 
+  /**
+   * Lists soft-deleted variants for an organization with pagination and search.
+   * @param organizationId - Organization identifier.
+   * @param params - Pagination, search and sorting parameters.
+   * @returns The paginated list of trashed variants and total count.
+   * @usage Used in variants.route.ts
+   * @sideEffects None (Read-only)
+   */
   async listTrashedVariants(
     organizationId: string,
     params?: {
@@ -113,6 +137,14 @@ export const variantsService = {
     return { data, total }
   },
 
+  /**
+   * Restores a soft-deleted variant.
+   * @param organizationId - Organization identifier.
+   * @param id - Variant identifier.
+   * @returns The number of restored records.
+   * @usage Used in variants.route.ts
+   * @sideEffects Resets deletedAt to null in productVariant table.
+   */
   async restoreVariant(organizationId: string, id: string) {
     return prisma.productVariant.updateMany({
       where: { id, organizationId, deletedAt: { not: null } },
@@ -120,6 +152,14 @@ export const variantsService = {
     })
   },
 
+  /**
+   * Retrieves a single active variant.
+   * @param organizationId - Organization identifier.
+   * @param id - Variant identifier.
+   * @returns The variant record or null if not found.
+   * @usage Used in variants.route.ts
+   * @sideEffects None (Read-only)
+   */
   async getVariant(organizationId: string, id: string) {
     return prisma.productVariant.findFirst({
       where: { id, organizationId, deletedAt: null },
@@ -127,6 +167,15 @@ export const variantsService = {
     })
   },
 
+  /**
+   * Creates a new variant for a product.
+   * @param organizationId - Organization identifier.
+   * @param productId - Product identifier.
+   * @param data - Variant creation data (sku, name, price, unit, attributes, isActive).
+   * @returns The created variant record with images.
+   * @usage Used in variants.route.ts, variants.ai.ts
+   * @sideEffects Creates a new record in productVariant table.
+   */
   async createVariant(
     organizationId: string,
     productId: string,
@@ -153,6 +202,15 @@ export const variantsService = {
     })
   },
 
+  /**
+   * Updates an active variant.
+   * @param organizationId - Organization identifier.
+   * @param id - Variant identifier.
+   * @param data - Variant update data (sku, name, price, unit, attributes, isActive).
+   * @returns The number of updated records.
+   * @usage Used in variants.route.ts, variants.ai.ts
+   * @sideEffects Updates an existing record in productVariant table.
+   */
   async updateVariant(
     organizationId: string,
     id: string,
@@ -177,6 +235,15 @@ export const variantsService = {
     })
   },
 
+  /**
+   * Soft deletes a variant (sets deletedAt timestamp).
+   * @param organizationId - Organization identifier.
+   * @param id - Variant identifier.
+   * @returns The number of deleted records.
+   * @usage Used in variants.route.ts, variants.ai.ts
+   * @sideEffects Sets deletedAt in productVariant table. Does NOT cascade to related records.
+   *             Note: Stock movements and order references to this variant may still exist.
+   */
   async deleteVariant(organizationId: string, id: string) {
     return prisma.productVariant.updateMany({
       where: { id, organizationId, deletedAt: null },
@@ -184,6 +251,15 @@ export const variantsService = {
     })
   },
 
+  /**
+   * Adds an image to a variant.
+   * @param organizationId - Organization identifier.
+   * @param variantId - Variant identifier.
+   * @param data - Image media ID and optional alt text.
+   * @returns The created variant image record.
+   * @usage Used in variants.route.ts
+   * @sideEffects Creates a new record in variantImage table and calculates sortOrder.
+   */
   async addVariantImage(
     organizationId: string,
     variantId: string,
@@ -210,6 +286,14 @@ export const variantsService = {
     })
   },
 
+  /**
+   * Looks up an active variant by SKU.
+   * @param organizationId - Organization identifier.
+   * @param sku - Stock keeping unit identifier.
+   * @returns The variant record or null if not found.
+   * @usage Used in variants.route.ts (for POS/barcode lookups)
+   * @sideEffects None (Read-only)
+   */
   async lookupBySku(organizationId: string, sku: string) {
     return prisma.productVariant.findFirst({
       where: { sku, organizationId, deletedAt: null, isActive: true },
@@ -217,6 +301,15 @@ export const variantsService = {
     })
   },
 
+  /**
+   * Removes an image from a variant.
+   * @param organizationId - Organization identifier.
+   * @param variantId - Variant identifier.
+   * @param imageId - Variant image identifier.
+   * @returns The number of deleted records.
+   * @usage Used in variants.route.ts
+   * @sideEffects Deletes a record from the variantImage table.
+   */
   async removeVariantImage(
     organizationId: string,
     variantId: string,

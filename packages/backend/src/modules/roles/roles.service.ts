@@ -69,6 +69,10 @@ export const rolesService = {
   /**
    * List all custom roles for an organization with their aggregated permissions.
    * Stores one row per role with permissions as a JSON object.
+   * @param organizationId - Organization identifier.
+   * @returns Array of roles with their permissions.
+   * @usage Used in roles.route.ts
+   * @sideEffects None (Read-only)
    */
   async listRoles(organizationId: string): Promise<RoleWithPermissions[]> {
     const rows = await prisma.organizationRole.findMany({
@@ -87,6 +91,11 @@ export const rolesService = {
 
   /**
    * Get a specific custom role with its permissions.
+   * @param organizationId - Organization identifier.
+   * @param role - Role name to retrieve.
+   * @returns The role with permissions or null if not found.
+   * @usage Used in roles.route.ts
+   * @sideEffects None (Read-only)
    */
   async getRole(
     organizationId: string,
@@ -111,6 +120,11 @@ export const rolesService = {
    * Create a new custom role with permissions.
    * Stores one row per role with permissions as a JSON object,
    * matching the format better-auth expects for dynamic access control.
+   * @param organizationId - Organization identifier.
+   * @param data - Role creation data containing role name and permissions array.
+   * @returns The created role with permissions.
+   * @usage Used in roles.route.ts
+   * @sideEffects Creates a new record in the organizationRole table.
    */
   async createRole(
     organizationId: string,
@@ -140,6 +154,12 @@ export const rolesService = {
 
   /**
    * Update a custom role's name and/or permissions.
+   * @param organizationId - Organization identifier.
+   * @param roleName - Current role name to update.
+   * @param data - Role update data containing optional new role name and/or permissions array.
+   * @returns The updated role with permissions, or null if role not found.
+   * @usage Used in roles.route.ts
+   * @sideEffects Deletes and recreates role record in organizationRole table when permissions change; updates role name in organizationRole table when only name changes.
    */
   async updateRole(
     organizationId: string,
@@ -219,6 +239,11 @@ export const rolesService = {
 
   /**
    * Delete a custom role and all its permissions.
+   * @param organizationId - Organization identifier.
+   * @param roleName - Role name to delete.
+   * @returns True if a role was deleted, false if not found.
+   * @usage Used in roles.route.ts
+   * @sideEffects Deletes records from the organizationRole table.
    */
   async deleteRole(organizationId: string, roleName: string): Promise<boolean> {
     const result = await prisma.organizationRole.deleteMany({

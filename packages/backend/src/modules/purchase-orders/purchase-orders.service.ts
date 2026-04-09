@@ -30,6 +30,14 @@ const purchaseOrderItemsInclude = { items: true } as const
 const purchaseOrderDefaultOrderBy = { createdAt: 'desc' } as const
 
 export const purchaseOrdersService = {
+  /**
+   * Lists purchase orders for an organization.
+   * @param organizationId - Organization identifier.
+   * @param params - Pagination, filtering and sorting parameters.
+   * @returns The paginated list of purchase orders and total count.
+   * @usage Used in purchase-orders.route.ts, purchase-orders.ai.ts
+   * @sideEffects None (Read-only)
+   */
   async listPurchaseOrders(
     organizationId: string,
     params?: {
@@ -67,6 +75,14 @@ export const purchaseOrdersService = {
     return { data, total }
   },
 
+  /**
+   * Retrieves a single purchase order.
+   * @param organizationId - Organization identifier.
+   * @param id - Purchase order identifier.
+   * @returns The purchase order record or null if not found.
+   * @usage Used in purchase-orders.route.ts, purchase-orders.ai.ts
+   * @sideEffects None (Read-only)
+   */
   async getPurchaseOrder(organizationId: string, id: string) {
     return prisma.purchaseOrder.findFirst({
       where: { id, organizationId },
@@ -74,6 +90,14 @@ export const purchaseOrdersService = {
     })
   },
 
+  /**
+   * Creates a new purchase order.
+   * @param organizationId - Organization identifier.
+   * @param data - Purchase order creation data including supplier, warehouse, and items.
+   * @returns The created purchase order record.
+   * @usage Used in purchase-orders.route.ts, purchase-orders.ai.ts
+   * @sideEffects Creates new records in purchaseOrder and purchaseOrderItem tables.
+   */
   async createPurchaseOrder(
     organizationId: string,
     data: {
@@ -107,6 +131,15 @@ export const purchaseOrdersService = {
     })
   },
 
+  /**
+   * Updates a purchase order.
+   * @param organizationId - Organization identifier.
+   * @param id - Purchase order identifier.
+   * @param data - Purchase order update data including status, payment, supplier, and warehouse changes.
+   * @returns The updated purchase order record, or an error object if not found or transition invalid.
+   * @usage Used in purchase-orders.route.ts, purchase-orders.ai.ts
+   * @sideEffects Updates records in purchaseOrder table. May create stockMovement records if amountPaid changes.
+   */
   async updatePurchaseOrder(
     organizationId: string,
     id: string,
@@ -179,6 +212,15 @@ export const purchaseOrdersService = {
     })
   },
 
+  /**
+   * Receives items against a purchase order and updates stock.
+   * @param organizationId - Organization identifier.
+   * @param id - Purchase order identifier.
+   * @param receivedItems - Array of items received with their quantities.
+   * @returns The updated purchase order record, or an error object if not found or order not receivable.
+   * @usage Used in purchase-orders.route.ts, purchase-orders.ai.ts
+   * @sideEffects Updates purchaseOrderItem.receivedQty, creates stockMovement records (IN type), updates productVariant.stock, and sets purchaseOrder status to RECEIVED.
+   */
   async receivePurchaseOrder(
     organizationId: string,
     id: string,
@@ -241,6 +283,14 @@ export const purchaseOrdersService = {
     })
   },
 
+  /**
+   * Deletes a purchase order.
+   * @param organizationId - Organization identifier.
+   * @param id - Purchase order identifier.
+   * @returns The deleted purchase order record, or an error object if not found or not deletable.
+   * @usage Used in purchase-orders.route.ts, purchase-orders.ai.ts
+   * @sideEffects Deletes a record from the purchaseOrder table.
+   */
   async deletePurchaseOrder(organizationId: string, id: string) {
     const existing = await prisma.purchaseOrder.findFirst({
       where: { id, organizationId },

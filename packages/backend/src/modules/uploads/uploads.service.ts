@@ -4,6 +4,14 @@ import { presignPut, deleteObject, MAX_FILE_SIZE } from '#integrations/s3'
 const DEFAULT_ORDER = { createdAt: 'desc' } as const
 
 export const uploadsService = {
+  /**
+   * Creates a presigned URL for direct S3 upload and a corresponding media record.
+   * @param organizationId - Organization identifier.
+   * @param input - Upload parameters including filename, contentType, size, and optional purpose.
+   * @returns The created media record and a presigned upload URL.
+   * @usage Used in uploads.route.ts
+   * @sideEffects Creates a new record in the media table.
+   */
   async presignUpload(
     organizationId: string,
     input: {
@@ -42,6 +50,14 @@ export const uploadsService = {
     return { media, uploadUrl: url }
   },
 
+  /**
+   * Confirms an upload by ensuring the media record exists and belongs to the organization.
+   * @param organizationId - Organization identifier.
+   * @param id - Media identifier.
+   * @returns The media record or null if not found.
+   * @usage Used in uploads.route.ts
+   * @sideEffects None (Read-only)
+   */
   async confirmUpload(organizationId: string, id: string) {
     const media = await prisma.media.findFirst({
       where: { id, organizationId },
@@ -50,6 +66,14 @@ export const uploadsService = {
     return prisma.media.findUniqueOrThrow({ where: { id } })
   },
 
+  /**
+   * Lists media items for an organization with optional filtering and pagination.
+   * @param organizationId - Organization identifier.
+   * @param params - Optional pagination (skip, take) and purpose filter.
+   * @returns The paginated list of media records and total count.
+   * @usage Used in uploads.route.ts
+   * @sideEffects None (Read-only)
+   */
   async listMedia(
     organizationId: string,
     params?: {
@@ -74,12 +98,28 @@ export const uploadsService = {
     return { data, total }
   },
 
+  /**
+   * Retrieves a single media item.
+   * @param organizationId - Organization identifier.
+   * @param id - Media identifier.
+   * @returns The media record or null if not found.
+   * @usage Used in uploads.route.ts
+   * @sideEffects None (Read-only)
+   */
   async getMedia(organizationId: string, id: string) {
     return prisma.media.findFirst({
       where: { id, organizationId },
     })
   },
 
+  /**
+   * Deletes a media record and its associated S3 object.
+   * @param organizationId - Organization identifier.
+   * @param id - Media identifier.
+   * @returns The deleted media record or null if not found.
+   * @usage Used in uploads.route.ts
+   * @sideEffects Deletes a record from the media table and removes the S3 object.
+   */
   async deleteMedia(organizationId: string, id: string) {
     const media = await prisma.media.findFirst({
       where: { id, organizationId },

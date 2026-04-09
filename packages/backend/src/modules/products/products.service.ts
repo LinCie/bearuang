@@ -40,6 +40,14 @@ const idSelect = { id: true } as const
 const defaultOrderBy = { createdAt: 'desc' } as const
 
 export const productsService = {
+  /**
+   * Lists active products for an organization.
+   * @param organizationId - Organization identifier.
+   * @param params - Pagination, search and category filter parameters.
+   * @returns The paginated list of products and total count.
+   * @usage Used in products.route.ts, products.ai.ts
+   * @sideEffects None (Read-only)
+   */
   async listProducts(
     organizationId: string,
     params?: {
@@ -86,6 +94,14 @@ export const productsService = {
     return { data, total }
   },
 
+  /**
+   * Lists soft-deleted products for an organization.
+   * @param organizationId - Organization identifier.
+   * @param params - Pagination, search and sorting parameters.
+   * @returns The paginated list of trashed products and total count.
+   * @usage Used in products.route.ts
+   * @sideEffects None (Read-only)
+   */
   async listTrashedProducts(
     organizationId: string,
     params?: {
@@ -128,6 +144,14 @@ export const productsService = {
     return { data, total }
   },
 
+  /**
+   * Retrieves a single active product.
+   * @param organizationId - Organization identifier.
+   * @param id - Product identifier.
+   * @returns The product record or null if not found.
+   * @usage Used in products.route.ts, products.ai.ts, variants.ai.ts
+   * @sideEffects None (Read-only)
+   */
   async getProduct(organizationId: string, id: string) {
     return prisma.product.findFirst({
       where: { id, organizationId, deletedAt: null },
@@ -135,6 +159,14 @@ export const productsService = {
     })
   },
 
+  /**
+   * Creates a new product.
+   * @param organizationId - Organization identifier.
+   * @param data - Product creation data.
+   * @returns The created product record.
+   * @usage Used in products.route.ts, products.ai.ts
+   * @sideEffects Creates a new record in the products table.
+   */
   async createProduct(
     organizationId: string,
     data: {
@@ -151,6 +183,15 @@ export const productsService = {
     })
   },
 
+  /**
+   * Updates an active product.
+   * @param organizationId - Organization identifier.
+   * @param id - Product identifier.
+   * @param data - Product update data.
+   * @returns The number of updated records.
+   * @usage Used in products.route.ts, products.ai.ts
+   * @sideEffects Updates an existing record in the products table.
+   */
   async updateProduct(
     organizationId: string,
     id: string,
@@ -168,6 +209,14 @@ export const productsService = {
     })
   },
 
+  /**
+   * Soft deletes a product and all its associated variants.
+   * @param organizationId - Organization identifier.
+   * @param id - Product identifier.
+   * @returns A promise that resolves when deletion is complete.
+   * @usage Used in products.route.ts, products.ai.ts
+   * @sideEffects Updates deletedAt in products and productVariant tables.
+   */
   async deleteProduct(organizationId: string, id: string) {
     const now = new Date()
 
@@ -183,6 +232,14 @@ export const productsService = {
     ])
   },
 
+  /**
+   * Restores a soft-deleted product and its associated variants.
+   * @param organizationId - Organization identifier.
+   * @param id - Product identifier.
+   * @returns A promise that resolves when restoration is complete.
+   * @usage Used in products.route.ts, products.ai.ts
+   * @sideEffects Resets deletedAt to null in products and productVariant tables.
+   */
   async restoreProduct(organizationId: string, id: string) {
     await prisma.$transaction([
       prisma.product.updateMany({
@@ -196,6 +253,15 @@ export const productsService = {
     ])
   },
 
+  /**
+   * Adds an image to a product.
+   * @param _organizationId - Organization identifier.
+   * @param productId - Product identifier.
+   * @param data - Image media ID and optional alt text.
+   * @returns The created product image record.
+   * @usage Used in products.route.ts
+   * @sideEffects Creates a new record in productImage table and calculates sortOrder.
+   */
   async addProductImage(
     _organizationId: string,
     productId: string,
@@ -216,6 +282,15 @@ export const productsService = {
     })
   },
 
+  /**
+   * Removes an image from a product.
+   * @param _organizationId - Organization identifier.
+   * @param productId - Product identifier.
+   * @param imageId - Product image identifier.
+   * @returns The number of deleted records.
+   * @usage Used in products.route.ts
+   * @sideEffects Deletes a record from the productImage table.
+   */
   async removeProductImage(
     _organizationId: string,
     productId: string,
@@ -226,6 +301,15 @@ export const productsService = {
     })
   },
 
+  /**
+   * Updates the sort order of product images.
+   * @param _organizationId - Organization identifier.
+   * @param productId - Product identifier.
+   * @param imageIds - Ordered list of image identifiers.
+   * @returns A promise that resolves when reordering is complete.
+   * @usage Used in products.route.ts
+   * @sideEffects Updates sortOrder in productImage table.
+   */
   async reorderProductImages(
     _organizationId: string,
     productId: string,
@@ -241,51 +325,15 @@ export const productsService = {
     )
   },
 
-  async addVariantImage(
-    _organizationId: string,
-    variantId: string,
-    data: { mediaId: string; altText?: string },
-  ) {
-    const maxSort = await prisma.variantImage.aggregate({
-      where: { variantId },
-      _max: sortOrderMax,
-    })
-    return prisma.variantImage.create({
-      data: {
-        variantId,
-        mediaId: data.mediaId,
-        altText: data.altText,
-        sortOrder: (maxSort._max.sortOrder ?? -1) + 1,
-      },
-      include: mediaInclude,
-    })
-  },
-
-  async removeVariantImage(
-    _organizationId: string,
-    variantId: string,
-    imageId: string,
-  ) {
-    return prisma.variantImage.deleteMany({
-      where: { id: imageId, variantId },
-    })
-  },
-
-  async reorderVariantImages(
-    _organizationId: string,
-    variantId: string,
-    imageIds: string[],
-  ) {
-    await prisma.$transaction(
-      imageIds.map((id, index) =>
-        prisma.variantImage.updateMany({
-          where: { id, variantId },
-          data: { sortOrder: index },
-        }),
-      ),
-    )
-  },
-
+  /**
+   * Lists products within a category and all its descendants.
+   * @param organizationId - Organization identifier.
+   * @param rootCategoryId - The root category identifier to start traversal from.
+   * @param params - Pagination, search and sorting parameters.
+   * @returns The paginated list of products and total count.
+   * @usage Used in product-categories.route.ts
+   * @sideEffects None (Read-only, performs category tree traversal).
+   */
   async listProductsByCategoryTree(
     organizationId: string,
     rootCategoryId: string,

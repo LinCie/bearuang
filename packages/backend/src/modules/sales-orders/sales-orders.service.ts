@@ -63,6 +63,14 @@ const salesOrderItemsInclude = { items: true } as const
 const defaultOrderBy = { createdAt: 'desc' } as const
 
 export const salesOrdersService = {
+  /**
+   * Lists sales orders for an organization with optional filters.
+   * @param organizationId - Organization identifier.
+   * @param params - Pagination, search, status, and payment status filter parameters.
+   * @returns The paginated list of sales orders and total count.
+   * @usage Used in sales-orders.route.ts, sales-orders.ai.ts, sync.route.ts
+   * @sideEffects None (Read-only)
+   */
   async listSalesOrders(
     organizationId: string,
     params?: {
@@ -116,6 +124,14 @@ export const salesOrdersService = {
     return { data, total }
   },
 
+  /**
+   * Retrieves a single sales order by ID.
+   * @param organizationId - Organization identifier.
+   * @param id - Sales order identifier.
+   * @returns The sales order record or null if not found.
+   * @usage Used in sales-orders.route.ts, sales-orders.ai.ts
+   * @sideEffects None (Read-only)
+   */
   async getSalesOrder(organizationId: string, id: string) {
     return prisma.salesOrder.findFirst({
       where: { id, organizationId },
@@ -123,6 +139,14 @@ export const salesOrdersService = {
     })
   },
 
+  /**
+   * Creates a new sales order.
+   * @param organizationId - Organization identifier.
+   * @param data - Sales order creation data including customer/guest info, warehouse, and line items.
+   * @returns The created sales order record, or an error object if validation fails.
+   * @usage Used in sales-orders.route.ts, sales-orders.ai.ts, sync.route.ts
+   * @sideEffects Creates new records in salesOrder and salesOrderItem tables.
+   */
   async createSalesOrder(
     organizationId: string,
     data: {
@@ -198,6 +222,15 @@ export const salesOrdersService = {
     })
   },
 
+  /**
+   * Updates an existing sales order with status transition validation.
+   * @param organizationId - Organization identifier.
+   * @param id - Sales order identifier.
+   * @param data - Sales order update data (status, payment, customer, etc.).
+   * @returns The updated sales order record, or an error object if validation fails.
+   * @usage Used in sales-orders.route.ts, sales-orders.ai.ts, sync.route.ts
+   * @sideEffects Updates records in salesOrder table; creates stockMovement and updates productVariant stock when status transitions to SHIPPED or CANCELLED from SHIPPED.
+   */
   async updateSalesOrder(
     organizationId: string,
     id: string,
@@ -346,6 +379,14 @@ export const salesOrdersService = {
     })
   },
 
+  /**
+   * Deletes a sales order. Only PENDING or CANCELLED orders can be deleted.
+   * @param organizationId - Organization identifier.
+   * @param id - Sales order identifier.
+   * @returns The deleted sales order record, or an error object if validation fails.
+   * @usage Used in sales-orders.route.ts, sales-orders.ai.ts
+   * @sideEffects Deletes a record from the salesOrder table.
+   */
   async deleteSalesOrder(organizationId: string, id: string) {
     const existing = await prisma.salesOrder.findFirst({
       where: { id, organizationId },

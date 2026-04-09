@@ -144,6 +144,10 @@ const lowStockOrderBy = { stock: 'asc' } as const
 export const dashboardService = {
   /**
    * Get summary metrics for the dashboard.
+   * @param organizationId - Organization identifier.
+   * @returns Object containing weeklySales, monthlyRevenue, pendingPickup count, and activeCustomers count.
+   * @usage Used in dashboard.route.ts
+   * @sideEffects None (Read-only)
    */
   async getSummary(organizationId: string) {
     const weekStart = getWeekStartMonday()
@@ -211,6 +215,10 @@ export const dashboardService = {
 
   /**
    * Get the 5 most recent sales orders with customer and first item info.
+   * @param organizationId - Organization identifier.
+   * @returns Array of recent orders with customer name, first item name, status, total price, and creation date.
+   * @usage Used in dashboard.route.ts
+   * @sideEffects None (Read-only)
    */
   async getRecentOrders(organizationId: string) {
     const orders = await prisma.salesOrder.findMany({
@@ -236,6 +244,14 @@ export const dashboardService = {
     })
   },
 
+  /**
+   * Get sales orders report for a time period with comparison to previous period.
+   * @param organizationId - Organization identifier.
+   * @param preset - Time period preset ('today', 'this-week', or 'this-month').
+   * @returns Report with verdict, current/previous revenue, change percentage, and order counts.
+   * @usage Used in dashboard.route.ts
+   * @sideEffects None (Read-only)
+   */
   async getOrdersReport(organizationId: string, preset: OrdersPreset) {
     const { current, previous } = getDateRange(preset)
 
@@ -283,6 +299,13 @@ export const dashboardService = {
     }
   },
 
+  /**
+   * Get stock report with inventory health verdict and low stock items.
+   * @param organizationId - Organization identifier.
+   * @returns Report with verdict, total variants count, out of stock count, low stock count, percentage, and top 5 low stock items.
+   * @usage Used in dashboard.route.ts
+   * @sideEffects None (Read-only)
+   */
   async getStockReport(organizationId: string) {
     const baseWhere = {
       organizationId,

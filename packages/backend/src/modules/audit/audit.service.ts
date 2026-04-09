@@ -3,6 +3,14 @@ import { prisma } from '#integrations/prisma'
 const DEFAULT_ORDER = { createdAt: 'desc' } as const
 
 export const auditService = {
+  /**
+   * Lists audit logs for an organization.
+   * @param organizationId - Organization identifier.
+   * @param params - Pagination, filtering, and sorting parameters.
+   * @returns The paginated list of audit logs and total count.
+   * @usage Used in audit.route.ts
+   * @sideEffects None (Read-only)
+   */
   async listAuditLogs(
     organizationId: string,
     params?: {

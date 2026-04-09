@@ -9,6 +9,14 @@ const movementInclude = {
 const movementDefaultOrderBy = { createdAt: 'desc' as const }
 
 export const stockMovementService = {
+  /**
+   * Lists stock movements for an organization with optional filters.
+   * @param organizationId - Organization identifier.
+   * @param params - Pagination, search, and filter parameters.
+   * @returns The paginated list of stock movements and total count.
+   * @usage Used in stock-movements.route.ts
+   * @sideEffects None (Read-only)
+   */
   async listMovements(
     organizationId: string,
     params?: {
@@ -64,6 +72,14 @@ export const stockMovementService = {
     return { data, total }
   },
 
+  /**
+   * Retrieves a single stock movement.
+   * @param organizationId - Organization identifier.
+   * @param id - Stock movement identifier.
+   * @returns The stock movement record or null if not found.
+   * @usage Used in stock-movements.route.ts
+   * @sideEffects None (Read-only)
+   */
   async getMovement(organizationId: string, id: string) {
     return prisma.stockMovement.findFirst({
       where: { id, organizationId },
@@ -71,6 +87,14 @@ export const stockMovementService = {
     })
   },
 
+  /**
+   * Creates a new stock movement and atomically updates the variant's stock cache.
+   * @param organizationId - Organization identifier.
+   * @param data - Stock movement creation data.
+   * @returns The created stock movement record.
+   * @usage Used in stock-movements.route.ts
+   * @sideEffects Creates a new record in the stockMovement table and updates stock in productVariant table.
+   */
   async createMovement(
     organizationId: string,
     data: {
@@ -106,6 +130,14 @@ export const stockMovementService = {
     })
   },
 
+  /**
+   * Deletes a stock movement and reverses its effect on the variant stock cache.
+   * @param organizationId - Organization identifier.
+   * @param id - Stock movement identifier.
+   * @returns The deleted stock movement record or null if not found.
+   * @usage Used in stock-movements.route.ts
+   * @sideEffects Deletes a record from the stockMovement table and reverses stock update in productVariant table.
+   */
   async deleteMovement(organizationId: string, id: string) {
     return prisma.$transaction(async (tx) => {
       const movement = await tx.stockMovement.findFirst({

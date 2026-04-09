@@ -24,6 +24,14 @@ const categoryInclude = {
 } as const
 
 export const productCategoriesService = {
+  /**
+   * Lists active product categories for an organization.
+   * @param organizationId - Organization identifier.
+   * @param params - Pagination, search, parent filter and sorting parameters.
+   * @returns The paginated list of categories and total count.
+   * @usage Used in product-categories.route.ts, categories.ai.ts
+   * @sideEffects None (Read-only)
+   */
   async listProductCategories(
     organizationId: string,
     params?: {
@@ -72,6 +80,14 @@ export const productCategoriesService = {
     return { data, total }
   },
 
+  /**
+   * Lists soft-deleted product categories for an organization.
+   * @param organizationId - Organization identifier.
+   * @param params - Pagination, search and sorting parameters.
+   * @returns The paginated list of trashed categories and total count.
+   * @usage Used in product-categories.route.ts
+   * @sideEffects None (Read-only)
+   */
   async listTrashedProductCategories(
     organizationId: string,
     params?: {
@@ -116,6 +132,14 @@ export const productCategoriesService = {
     return { data, total }
   },
 
+  /**
+   * Retrieves a single active product category.
+   * @param organizationId - Organization identifier.
+   * @param id - Category identifier.
+   * @returns The category record or null if not found.
+   * @usage Used in product-categories.route.ts, categories.ai.ts
+   * @sideEffects None (Read-only)
+   */
   async getProductCategory(organizationId: string, id: string) {
     return prisma.productCategory.findFirst({
       where: { id, organizationId, deletedAt: null },
@@ -123,6 +147,14 @@ export const productCategoriesService = {
     })
   },
 
+  /**
+   * Creates a new product category.
+   * @param organizationId - Organization identifier.
+   * @param data - Category creation data.
+   * @returns The created category record.
+   * @usage Used in product-categories.route.ts, categories.ai.ts
+   * @sideEffects Creates a new record in the productCategory table.
+   */
   async createProductCategory(
     organizationId: string,
     data: {
@@ -140,6 +172,15 @@ export const productCategoriesService = {
     })
   },
 
+  /**
+   * Updates an active product category.
+   * @param organizationId - Organization identifier.
+   * @param id - Category identifier.
+   * @param data - Category update data.
+   * @returns The number of updated records.
+   * @usage Used in product-categories.route.ts, categories.ai.ts
+   * @sideEffects Updates existing records in the productCategory table.
+   */
   async updateProductCategory(
     organizationId: string,
     id: string,
@@ -158,6 +199,14 @@ export const productCategoriesService = {
     })
   },
 
+  /**
+   * Soft deletes a product category and reassigns its relationships.
+   * @param organizationId - Organization identifier.
+   * @param id - Category identifier.
+   * @returns A promise that resolves when deletion is complete.
+   * @usage Used in product-categories.route.ts, categories.ai.ts
+   * @sideEffects Updates productCategory (sets parentId=null for child categories), product (sets categoryId=null for products), and soft-deletes the category (sets deletedAt).
+   */
   async deleteProductCategory(organizationId: string, id: string) {
     const now = new Date()
 
@@ -177,6 +226,14 @@ export const productCategoriesService = {
     ])
   },
 
+  /**
+   * Restores a soft-deleted product category.
+   * @param organizationId - Organization identifier.
+   * @param id - Category identifier.
+   * @returns The number of restored records.
+   * @usage Used in product-categories.route.ts, categories.ai.ts
+   * @sideEffects Resets deletedAt to null in the productCategory table.
+   */
   async restoreProductCategory(organizationId: string, id: string) {
     return prisma.productCategory.updateMany({
       where: { id, organizationId, deletedAt: { not: null } },
