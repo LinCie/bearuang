@@ -7,11 +7,11 @@ import { logger } from '#libraries/utilities'
 
 const chatMessageSchema = z.object({
   role: z.enum(['user', 'assistant']),
-  content: z.string().max(2000),
+  content: z.string().max(10000),
 })
 
 const chatRequestDto = z.object({
-  message: z.string().min(1).max(2000),
+  message: z.string().min(1).max(10000),
   messages: z.array(chatMessageSchema).max(20).optional(),
   confirmedWriteTools: z.array(z.string()).optional(),
 })

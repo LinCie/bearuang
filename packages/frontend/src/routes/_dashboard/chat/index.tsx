@@ -13,6 +13,11 @@ import {
   Plus,
   Package,
   Tags,
+  Truck,
+  ShoppingCart,
+  Warehouse,
+  Users,
+  Receipt,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Markdown from 'react-markdown'
@@ -45,6 +50,46 @@ const SUGGESTED_PROMPTS = [
     icon: Package,
     message: 'Tampilkan variant dan stok produk',
   },
+  {
+    label: 'Cari supplier',
+    icon: Truck,
+    message: 'Cari supplier',
+  },
+  {
+    label: 'Buat purchase order',
+    icon: ShoppingCart,
+    message: 'Buat purchase order baru',
+  },
+  {
+    label: 'Lihat gudang',
+    icon: Warehouse,
+    message: 'Tampilkan daftar gudang',
+  },
+  {
+    label: 'Buat gudang baru',
+    icon: Warehouse,
+    message: 'Buat gudang baru',
+  },
+  {
+    label: 'Cari pelanggan',
+    icon: Users,
+    message: 'Cari pelanggan',
+  },
+  {
+    label: 'Buat pelanggan baru',
+    icon: Users,
+    message: 'Buat pelanggan baru',
+  },
+  {
+    label: 'Cari sales order',
+    icon: Receipt,
+    message: 'Cari sales order',
+  },
+  {
+    label: 'Buat sales order',
+    icon: Receipt,
+    message: 'Buat sales order baru',
+  },
 ] as const
 
 const TOOL_LABELS: Record<string, string> = {
@@ -55,10 +100,42 @@ const TOOL_LABELS: Record<string, string> = {
   delete_product: 'Hapus Produk',
   restore_product: 'Pulihkan Produk',
   list_categories: 'Daftar Kategori',
+  get_category: 'Detail Kategori',
+  create_category: 'Buat Kategori',
+  update_category: 'Update Kategori',
+  delete_category: 'Hapus Kategori',
+  restore_category: 'Pulihkan Kategori',
   get_product_variants: 'Variant Produk',
   create_variant: 'Buat Variant',
   update_variant: 'Update Variant',
   delete_variant: 'Hapus Variant',
+  search_suppliers: 'Cari Supplier',
+  get_supplier: 'Detail Supplier',
+  create_supplier: 'Buat Supplier',
+  update_supplier: 'Update Supplier',
+  delete_supplier: 'Hapus Supplier',
+  search_purchase_orders: 'Cari Purchase Order',
+  get_purchase_order: 'Detail Purchase Order',
+  create_purchase_order: 'Buat Purchase Order',
+  update_purchase_order: 'Update Purchase Order',
+  receive_purchase_order: 'Terima Barang PO',
+  delete_purchase_order: 'Hapus Purchase Order',
+  list_warehouses: 'Daftar Gudang',
+  get_warehouse: 'Detail Gudang',
+  create_warehouse: 'Buat Gudang',
+  update_warehouse: 'Update Gudang',
+  delete_warehouse: 'Hapus Gudang',
+  search_customers: 'Cari Pelanggan',
+  get_customer: 'Detail Pelanggan',
+  create_customer: 'Buat Pelanggan',
+  update_customer: 'Update Pelanggan',
+  delete_customer: 'Hapus Pelanggan',
+  restore_customer: 'Pulihkan Pelanggan',
+  search_sales_orders: 'Cari Sales Order',
+  get_sales_order: 'Detail Sales Order',
+  create_sales_order: 'Buat Sales Order',
+  update_sales_order: 'Update Sales Order',
+  delete_sales_order: 'Hapus Sales Order',
 }
 
 function humanizeTool(tool: string): string {
@@ -144,9 +221,10 @@ function ChatPage() {
       })
     } else if (responseData.type === 'action_result') {
       setActionResults(responseData.actionResults)
+      setMessages((prev) => [...prev, assistantMsg])
+    } else {
+      setMessages((prev) => [...prev, assistantMsg])
     }
-
-    setMessages((prev) => [...prev, assistantMsg])
   }
 
   function resetState() {
@@ -195,7 +273,16 @@ function ChatPage() {
       content: 'Ya, lanjutkan.',
     }
 
-    setMessages((prev) => [...prev, confirmMsg])
+    // Add the AI's confirmation message to the history before user's response
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: pendingConfirmation.reply,
+      },
+      confirmMsg,
+    ])
     resetState()
     bumpScroll()
 
@@ -214,6 +301,11 @@ function ChatPage() {
     setPendingConfirmation(null)
     setMessages((prev) => [
       ...prev,
+      {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: pendingConfirmation.reply,
+      },
       { id: crypto.randomUUID(), role: 'user', content: 'Batal.' },
     ])
     bumpScroll()
@@ -224,9 +316,7 @@ function ChatPage() {
       <div className="flex items-center justify-between px-4 md:px-8 py-3 shrink-0 border-b border-border/10">
         <div className="flex items-center gap-2.5">
           <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-          <h1 className="text-xl font-bold text-primary/90">
-            Asisten Inventaris
-          </h1>
+          <h1 className="text-xl font-bold text-primary/90">AI Assistant</h1>
         </div>
       </div>
 

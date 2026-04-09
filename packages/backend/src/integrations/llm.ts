@@ -3,6 +3,7 @@ import type {
   ChatCompletionMessageParam,
   ChatCompletionMessageFunctionToolCall,
 } from 'openai/resources/chat/completions'
+import { logger } from '#libraries/utilities'
 
 export interface ToolDefinition {
   type: 'function'
@@ -175,7 +176,43 @@ export async function runToolLoop(
     const { message, finish_reason } = choice
     const cleanContent = stripThoughtTags(message.content ?? '')
 
+    logger.debug(
+      {
+        iteration: i,
+        finish_reason,
+        hasToolCalls: !!message.tool_calls?.length,
+        content: cleanContent.substring(0, 100),
+      },
+      'LLM response received',
+    )
+
     if (finish_reason === 'stop') {
+      // If we have pending actions but AI claims success, ensure confirmation message
+      if (pendingActions.length > 0) {
+        const confirmationMessage =
+          pendingActions.length === 1
+            ? `Saya memerlukan konfirmasi Anda untuk melakukan operasi "${pendingActions[0].tool}". Mohon konfirmasi melalui tombol yang tersedia.`
+            : `Saya memerlukan konfirmasi Anda untuk melakukan ${pendingActions.length} operasi. Mohon konfirmasi melalui tombol yang tersedia.`
+        logger.debug(
+          { pendingActions: pendingActions.map((a) => a.tool) },
+          'Overriding AI reply with confirmation message',
+        )
+        return { reply: confirmationMessage, pendingActions, actionResults }
+      }
+
+      // If we have action results, log them for debugging
+      if (actionResults.length > 0) {
+        logger.debug(
+          {
+            actionResults: actionResults.map((r) => ({
+              tool: r.tool,
+              success: r.success,
+            })),
+          },
+          'Returning with action results',
+        )
+      }
+
       return { reply: cleanContent, pendingActions, actionResults }
     }
 
@@ -230,6 +267,10 @@ export async function runToolLoop(
 
         if (writeToolNames.has(toolName) && !confirmedSet.has(toolName)) {
           pendingActions.push({ tool: toolName, args })
+          logger.debug(
+            { tool: toolName, args },
+            'Write tool requires confirmation, adding to pending',
+          )
           return makeToolResult(
             tc,
             JSON.stringify({
@@ -242,7 +283,12 @@ export async function runToolLoop(
         }
 
         try {
+          logger.debug({ tool: toolName, args }, 'Executing tool')
           const result = await executeTool(toolName, args, toolContext)
+          logger.debug(
+            { tool: toolName, result: result.substring(0, 200) },
+            'Tool execution completed',
+          )
           let parsed: unknown
           try {
             parsed = JSON.parse(result)
