@@ -31,9 +31,5 @@
   },
   "overrides": {
     "@tanstack/query-core": "5.95.2"
-  },
-  "dependencies": {
-    "@tanstack/query-async-storage-persister": "^5.96.2",
-    "@tanstack/react-query-persist-client": "^5.96.2"
   }
 }

@@ -4,10 +4,6 @@
   "workspaces": {
     "": {
       "name": "bearuang",
-      "dependencies": {
-        "@tanstack/query-async-storage-persister": "^5.96.2",
-        "@tanstack/react-query-persist-client": "^5.96.2",
-      },
       "devDependencies": {
         "turbo": "^2.5.0",
       },
