@@ -159,7 +159,11 @@ export async function runToolLoop(
   ]
 
   function stripThoughtTags(text: string): string {
-    return text.replace(/<thought>[\s\S]*?<\/thought>/g, '').trim()
+    return text
+      .replace(/<thought>[\s\S]*?<\/thought>/g, '')
+      .replace(/<thinking>[\s\S]*?<\/thinking>/g, '')
+      .replace(/<think>[\s\S]*?<\/think>/g, '')
+      .trim()
   }
 
   for (let i = 0; i < maxIterations; i++) {
