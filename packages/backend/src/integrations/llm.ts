@@ -235,13 +235,35 @@ export async function runToolLoop(
       throw new Error('LLM response was truncated (max tokens reached)')
     }
 
-    if (finish_reason !== 'tool_calls' && finish_reason !== 'function_call') {
-      if (finish_reason === 'content_filter') {
-        throw new Error('LLM response blocked by content filter')
+    // Handle null/undefined finish_reason - treat as incomplete response
+    if (finish_reason === null || finish_reason === undefined) {
+      // If we have content, return it; otherwise ask the model to continue
+      if (cleanContent && cleanContent.trim().length > 0) {
+        logger.debug(
+          { contentLength: cleanContent.length },
+          'LLM returned null finish_reason with content, treating as complete',
+        )
+        return { reply: cleanContent, pendingActions, actionResults }
       }
-      throw new Error(
-        `Unexpected LLM finish_reason: ${finish_reason ?? 'null'}`,
+      // No content and no finish_reason - ask model to generate response
+      logger.debug(
+        'LLM returned null finish_reason with no content, asking to continue',
       )
+      messages.push({
+        role: 'user',
+        content: 'Mohon lengkapi respons Anda.',
+      })
+      continue
+    }
+
+    // Handle content filter
+    if (finish_reason === 'content_filter') {
+      throw new Error('LLM response blocked by content filter')
+    }
+
+    // Handle unexpected finish_reason values
+    if (finish_reason !== 'tool_calls' && finish_reason !== 'function_call') {
+      throw new Error(`Unexpected LLM finish_reason: ${finish_reason}`)
     }
 
     const toolCalls =
