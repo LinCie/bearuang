@@ -160,6 +160,21 @@ export const productsService = {
   },
 
   /**
+   * Retrieves a single active product by its slug.
+   * @param organizationId - Organization identifier.
+   * @param slug - Product slug.
+   * @returns The product record or null if not found.
+   * @usage Used in products.route.ts
+   * @sideEffects None (Read-only)
+   */
+  async lookupBySlug(organizationId: string, slug: string) {
+    return prisma.product.findFirst({
+      where: { slug, organizationId, deletedAt: null },
+      include: productInclude,
+    })
+  },
+
+  /**
    * Creates a new product.
    * @param organizationId - Organization identifier.
    * @param data - Product creation data.

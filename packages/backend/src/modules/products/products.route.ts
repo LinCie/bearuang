@@ -134,6 +134,10 @@ const productIdParam = z.object({
   id: z.string().uuid(),
 })
 
+const slugParam = z.object({
+  slug: z.string().regex(slugRegex),
+})
+
 const addImageDto = z.object({
   mediaId: z.string(),
   altText: z.string().optional(),
@@ -367,6 +371,31 @@ export const productsRoute = new Elysia({
       detail: {
         summary: 'Get a product',
         description: 'Retrieves the details of a specific product by its ID.',
+      },
+    },
+  )
+  .get(
+    '/slug/:slug',
+    async ({ organization, params, status }) => {
+      const product = await productsService.lookupBySlug(
+        organization.id,
+        params.slug,
+      )
+      if (!product) return status(404, { message: 'Product not found' })
+      return serializeProduct(product)
+    },
+    {
+      requireAuth: true,
+      requireOrg: true,
+      requirePermission: { product: ['view'] },
+      params: slugParam,
+      response: {
+        200: productSchema,
+        404: errorResponse,
+      },
+      detail: {
+        summary: 'Get a product by slug',
+        description: 'Retrieves the details of a specific product by its slug.',
       },
     },
   )

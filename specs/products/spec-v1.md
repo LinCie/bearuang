@@ -123,6 +123,7 @@ This specification defines:
 | GET | `/products/trashed` | List soft-deleted products | `product:view` | `{ data: Product[], meta: PaginationMeta }` |
 | POST | `/products/:id/restore` | Restore soft-deleted product | `product:delete` | `{ message }` |
 | GET | `/products/:id` | Get product detail (with variants and images) | `product:view` | `Product` |
+| GET | `/products/slug/:slug` | Get product by slug | `product:view` | `Product` |
 | PATCH | `/products/:id` | Update product | `product:update` | `{ message }` |
 | DELETE | `/products/:id` | Soft-delete product (cascades to variants) | `product:delete` | `{ message }` |
 | POST | `/products/:id/images` | Add image to product | `product:update` | `201 ProductImage` |
