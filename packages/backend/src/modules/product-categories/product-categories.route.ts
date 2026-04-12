@@ -97,15 +97,14 @@ export const updateProductCategoryDto = z.object({
   isActive: z.boolean().optional(),
 })
 
+const categoryListExtensions = z.object({
+  search: z.string().optional(),
+  parentId: z.union([z.string().uuid(), z.literal('null')]).optional(),
+})
+
 export const listProductCategoriesQuery = paginationQuery
   .merge(sortQuery(['name', 'createdAt', 'updatedAt', 'sortOrder']))
-  .extend({
-    search: z.string().optional(),
-    parentId: z
-      .union([z.string().uuid(), z.literal('null')])
-      .transform((v) => (v === 'null' ? null : v))
-      .optional(),
-  })
+  .merge(categoryListExtensions)
 
 export type ProductCategory = z.infer<typeof productCategorySchema>
 export type TrashedProductCategory = z.infer<
@@ -176,7 +175,7 @@ export const productCategoriesRoute = new Elysia({
           skip,
           take,
           search,
-          parentId,
+          parentId: parentId === 'null' ? null : parentId,
           orderBy: sortBy
             ? { field: sortBy, order: sortOrder ?? 'desc' }
             : undefined,

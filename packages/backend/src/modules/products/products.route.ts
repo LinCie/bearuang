@@ -115,15 +115,14 @@ export const updateProductDto = z.object({
   categoryId: z.string().uuid().nullable().optional(),
 })
 
+const productListExtensions = z.object({
+  search: z.string().optional(),
+  categoryId: z.union([z.string().uuid(), z.literal('null')]).optional(),
+})
+
 export const listProductsQuery = paginationQuery
   .merge(sortQuery(['name', 'createdAt', 'updatedAt']))
-  .extend({
-    search: z.string().optional(),
-    categoryId: z
-      .union([z.string().uuid(), z.literal('null')])
-      .transform((v) => (v === 'null' ? null : v))
-      .optional(),
-  })
+  .merge(productListExtensions)
 
 export type Product = z.infer<typeof productSchema>
 export type ProductVariant = z.infer<typeof variantSchema>
@@ -227,7 +226,7 @@ export const productsRoute = new Elysia({
           skip,
           take,
           search,
-          categoryId,
+          categoryId: categoryId === 'null' ? null : categoryId,
           orderBy: sortBy
             ? { field: sortBy, order: sortOrder ?? 'desc' }
             : undefined,

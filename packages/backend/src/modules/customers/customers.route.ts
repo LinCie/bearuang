@@ -39,16 +39,14 @@ export const updateCustomerDto = z.object({
   isActive: z.boolean().optional(),
 })
 
+const customerListExtensions = z.object({
+  search: z.string().optional(),
+  isActive: z.union([z.literal('true'), z.literal('false')]).optional(),
+})
+
 export const listCustomersQuery = paginationQuery
-  .extend(sortQuery(['name', 'createdAt', 'updatedAt']).shape)
-  .extend({
-    search: z.string().optional(),
-    isActive: z
-      .string()
-      .transform((v) => v === 'true')
-      .pipe(z.boolean())
-      .optional(),
-  })
+  .merge(sortQuery(['name', 'createdAt', 'updatedAt']))
+  .merge(customerListExtensions)
 
 export type Customer = z.infer<typeof customerSchema>
 export type CreateCustomerInput = z.infer<typeof createCustomerDto>
@@ -91,7 +89,12 @@ export const customersRoute = new Elysia({
           skip,
           take,
           search,
-          isActive,
+          isActive:
+            isActive === 'true'
+              ? true
+              : isActive === 'false'
+                ? false
+                : undefined,
           orderBy: sortBy
             ? { field: sortBy, order: sortOrder ?? 'desc' }
             : undefined,

@@ -39,16 +39,14 @@ export const updateSupplierDto = z.object({
   isActive: z.boolean().optional(),
 })
 
+const supplierListExtensions = z.object({
+  search: z.string().optional(),
+  isActive: z.union([z.literal('true'), z.literal('false')]).optional(),
+})
+
 export const listSuppliersQuery = paginationQuery
-  .extend(sortQuery(['name', 'createdAt', 'updatedAt']).shape)
-  .extend({
-    search: z.string().optional(),
-    isActive: z
-      .string()
-      .transform((v) => v === 'true')
-      .pipe(z.boolean())
-      .optional(),
-  })
+  .merge(sortQuery(['name', 'createdAt', 'updatedAt']))
+  .merge(supplierListExtensions)
 
 export type Supplier = z.infer<typeof supplierSchema>
 export type CreateSupplierInput = z.infer<typeof createSupplierDto>
@@ -91,7 +89,12 @@ export const suppliersRoute = new Elysia({
           skip,
           take,
           search,
-          isActive,
+          isActive:
+            isActive === 'true'
+              ? true
+              : isActive === 'false'
+                ? false
+                : undefined,
           orderBy: sortBy
             ? { field: sortBy, order: sortOrder ?? 'desc' }
             : undefined,
