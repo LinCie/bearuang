@@ -204,7 +204,7 @@ export async function runToolLoop(
         return { reply: confirmationMessage, pendingActions, actionResults }
       }
 
-      // If we have action results, log them for debugging
+      // If we have action results, ensure we have a non-empty reply
       if (actionResults.length > 0) {
         logger.debug(
           {
@@ -212,9 +212,20 @@ export async function runToolLoop(
               tool: r.tool,
               success: r.success,
             })),
+            hasContent: cleanContent.length > 0,
           },
           'Returning with action results',
         )
+
+        // If LLM returned empty content after tool execution, ask it to summarize
+        if (!cleanContent || cleanContent.trim().length === 0) {
+          messages.push({
+            role: 'user',
+            content:
+              'Berikan ringkasan singkat tentang apa yang telah dilakukan berdasarkan hasil tool di atas.',
+          })
+          continue
+        }
       }
 
       return { reply: cleanContent, pendingActions, actionResults }
@@ -225,7 +236,12 @@ export async function runToolLoop(
     }
 
     if (finish_reason !== 'tool_calls' && finish_reason !== 'function_call') {
-      return { reply: cleanContent, pendingActions, actionResults }
+      if (finish_reason === 'content_filter') {
+        throw new Error('LLM response blocked by content filter')
+      }
+      throw new Error(
+        `Unexpected LLM finish_reason: ${finish_reason ?? 'null'}`,
+      )
     }
 
     const toolCalls =
