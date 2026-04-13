@@ -27,6 +27,7 @@ import {
   VariantFormSheet,
   DeleteDialog,
 } from '#modules/products/index'
+import { MarkdownRenderer } from '#components/ui/markdown-renderer'
 import type {
   UpdateProductInput,
   CreateVariantInput,
@@ -267,9 +268,10 @@ function ProductDetailPage() {
               Deskripsi Produk
             </h2>
             {product.description ? (
-              <p className="text-base text-foreground leading-relaxed whitespace-pre-wrap max-w-3xl">
-                {product.description}
-              </p>
+              <MarkdownRenderer
+                content={product.description}
+                className="text-base text-foreground leading-relaxed max-w-3xl"
+              />
             ) : (
               <div className="flex flex-col gap-3 py-4">
                 <p className="text-muted-foreground text-sm">

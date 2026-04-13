@@ -3,7 +3,7 @@ import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
 import { Button } from '#components/ui/button'
 import { Input } from '#components/ui/input'
-import { Textarea } from '#components/ui/textarea'
+import { RichTextEditor } from '#components/ui/rich-text-editor'
 import { Label } from '#components/ui/label'
 import { Checkbox } from '#components/ui/checkbox'
 import {
@@ -48,11 +48,7 @@ const productSchema = z.object({
       slugRegex,
       'Slug hanya boleh berisi huruf kecil, angka, strip, dan garis bawah',
     ),
-  description: z
-    .string()
-    .trim()
-    .max(500, 'Deskripsi maksimal 500 karakter')
-    .optional(),
+  description: z.string().trim().optional(),
   categoryId: z.string().nullable(),
   isActive: z.boolean(),
 })
@@ -269,14 +265,10 @@ export function ProductFormSheet({
                 <Label htmlFor={field.name} className="font-medium">
                   Deskripsi
                 </Label>
-                <Textarea
-                  id={field.name}
-                  placeholder="Ceritakan sedikit tentang produk ini (opsional)..."
+                <RichTextEditor
                   value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  rows={3}
-                  className="resize-none"
+                  onChange={field.handleChange}
+                  className="min-h-[120px]"
                 />
               </div>
             )}
