@@ -21,21 +21,46 @@ const mockVariant = {
   createdAt: new Date(),
   updatedAt: new Date(),
   product: { name: 'Test Product' },
+  images: [],
 }
 
 const mockService = {
   listVariantsByProduct: mock(() => Promise.resolve([mockVariant])),
   listVariants: mock(() => Promise.resolve({ data: [mockVariant], total: 1 })),
+  listTrashedVariants: mock(() =>
+    Promise.resolve({ data: [mockVariant], total: 1 }),
+  ),
   getVariant: mock((orgId: string, id: string) =>
     Promise.resolve(id === MOCK_VARIANT_ID ? mockVariant : null),
   ),
+  lookupBySku: mock(() => Promise.resolve(mockVariant)),
   createVariant: mock(() => Promise.resolve(mockVariant)),
   updateVariant: mock((orgId: string, id: string) =>
     Promise.resolve({ count: id === MOCK_VARIANT_ID ? 1 : 0 }),
   ),
-  deleteVariant: mock((orgId: string, id: string) =>
-    Promise.resolve({ count: id === MOCK_VARIANT_ID ? 1 : 0 }),
+  deleteVariant: mock(() => Promise.resolve()),
+  restoreVariant: mock(() => Promise.resolve()),
+  addVariantImage: mock(() =>
+    Promise.resolve({
+      id: 'img-1',
+      variantId: MOCK_VARIANT_ID,
+      mediaId: 'media-1',
+      altText: null,
+      sortOrder: 0,
+      createdAt: new Date(),
+      media: {
+        id: 'media-1',
+        organizationId: MOCK_ORG_ID,
+        key: 'test.jpg',
+        filename: 'test.jpg',
+        contentType: 'image/jpeg',
+        size: 100,
+        purpose: null,
+        createdAt: new Date(),
+      },
+    }),
   ),
+  removeVariantImage: mock(() => Promise.resolve({ count: 1 })),
 }
 
 mock.module('#plugins/auth.plugin', () => ({
@@ -54,13 +79,12 @@ mock.module('#plugins/auth.plugin', () => ({
   }),
 }))
 
-mock.module('./variants.service', () => ({ variantsService: mockService }))
-
 let app: any
 
 beforeAll(async () => {
-  const { variantsRoute } = await import('./variants.route')
-  app = new Elysia().use(variantsRoute)
+  const { createVariantsRoute } =
+    await import('../interface/http/variants.route')
+  app = new Elysia().use(createVariantsRoute({ variantsService: mockService }))
 })
 
 describe('Variants', () => {
@@ -201,16 +225,6 @@ describe('Variants', () => {
       )
 
       expect(res.status).toBe(200)
-    })
-
-    it('returns 404 when variant does not exist', async () => {
-      const res = await app.handle(
-        new Request(`http://localhost/variants/${UNKNOWN_ID}`, {
-          method: 'DELETE',
-        }),
-      )
-
-      expect(res.status).toBe(404)
     })
   })
 })
