@@ -5,7 +5,10 @@ import { productsService } from '#modules/products/products.service'
 import { getPublicUrl } from '#integrations/s3'
 import { logAudit } from '#libraries/audit-logger'
 
-function serializeVariant(v: Record<string, unknown>): Record<string, unknown> {
+function serializeVariant<T extends object>(
+  variant: T,
+): Record<string, unknown> {
+  const v = variant as Record<string, unknown>
   const result = { ...v }
   if (v.price && typeof v.price === 'object' && 'toNumber' in v.price) {
     result.price = (v.price as { toNumber: () => number }).toNumber()

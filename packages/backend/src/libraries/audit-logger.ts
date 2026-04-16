@@ -12,6 +12,11 @@ interface AuditInput {
 }
 
 async function logAudit(input: AuditInput): Promise<void> {
+  const databaseUrl = process.env.DATABASE_URL
+  if (typeof databaseUrl !== 'string' || databaseUrl.length === 0) {
+    return
+  }
+
   try {
     await prisma.$executeRaw`
       INSERT INTO "audit_log" ("id", "organizationId", "userId", "apiKeyId", "authType", "model", "operation", "args", "createdAt")

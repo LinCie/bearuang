@@ -7,6 +7,8 @@ const MOCK_PRODUCT_ID = 'b1dcf8a6-7e1a-4f5d-a3c2-8e7f1b2c3d4e'
 const mockProduct = {
   id: MOCK_PRODUCT_ID,
   organizationId: MOCK_ORG_ID,
+  categoryId: null,
+  category: null,
   name: 'Test Product',
   slug: 'test-product',
   description: 'A test product',
@@ -15,18 +17,52 @@ const mockProduct = {
   createdAt: new Date(),
   updatedAt: new Date(),
   variants: [],
+  images: [],
 }
 
 const mockService = {
   listProducts: mock(() => Promise.resolve({ data: [mockProduct], total: 1 })),
+  listTrashedProducts: mock(() =>
+    Promise.reject(
+      new Error('listTrashedProducts should not be called in this test'),
+    ),
+  ),
   getProduct: mock((orgId: string, id: string) =>
     Promise.resolve(id === MOCK_PRODUCT_ID ? mockProduct : null),
+  ),
+  lookupBySlug: mock(() =>
+    Promise.reject(new Error('lookupBySlug should not be called in this test')),
   ),
   createProduct: mock(() => Promise.resolve(mockProduct)),
   updateProduct: mock((orgId: string, id: string) =>
     Promise.resolve({ count: id === MOCK_PRODUCT_ID ? 1 : 0 }),
   ),
   deleteProduct: mock(() => Promise.resolve()),
+  restoreProduct: mock(() =>
+    Promise.reject(
+      new Error('restoreProduct should not be called in this test'),
+    ),
+  ),
+  addProductImage: mock(() =>
+    Promise.reject(
+      new Error('addProductImage should not be called in this test'),
+    ),
+  ),
+  removeProductImage: mock(() =>
+    Promise.reject(
+      new Error('removeProductImage should not be called in this test'),
+    ),
+  ),
+  reorderProductImages: mock(() =>
+    Promise.reject(
+      new Error('reorderProductImages should not be called in this test'),
+    ),
+  ),
+  listProductsByCategoryTree: mock(() =>
+    Promise.reject(
+      new Error('listProductsByCategoryTree should not be called in this test'),
+    ),
+  ),
 }
 
 mock.module('#plugins/auth.plugin', () => ({
@@ -45,13 +81,12 @@ mock.module('#plugins/auth.plugin', () => ({
   }),
 }))
 
-mock.module('./products.service', () => ({ productsService: mockService }))
-
 let app: any
 
 beforeAll(async () => {
-  const { productsRoute } = await import('./products.route')
-  app = new Elysia().use(productsRoute)
+  const { createProductsRoute } =
+    await import('../interface/http/products.route')
+  app = new Elysia().use(createProductsRoute({ productsService: mockService }))
 })
 
 describe('Products', () => {
