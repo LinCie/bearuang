@@ -2,6 +2,51 @@
 
 This document provides essential information for agentic coding agents working in the BearUang repository. You are an expert TypeScript developer working with Bun runtime and Elysia. This project is an API.
 
+---
+
+# 🚨 SERENA MCP TOOLS — MANDATORY COMPLIANCE
+
+**VIOLATIONS OF THESE RULES ARE GROUNDS FOR IMMEDIATE CORRECTION. ALL AGENTS MUST COMPLY.**
+
+## Codebase Exploration — YOU MUST USE SERENA MCP
+
+**NEVER** use `ls`, `cat`, `grep`, `find`, `head`, `tail`, `read`, or `glob` as your first approach to exploring code. **ALWAYS** use Serena MCP tools first. Serena provides symbol-level intelligence that basic text search cannot match.
+
+### Required Setup (MUST DO FIRST)
+- **MUST** activate the project using `serena_activate_project` with `project: "bearuang"` before using any serena tools
+
+### Mandatory Serena Tools for Exploration
+| Tool | Purpose | When to Use |
+|------|---------|-------------|
+| `serena_find_symbol` | Locate functions, classes, variables by name | Finding specific symbols |
+| `serena_find_referencing_symbols` | Find all usages of a symbol | Tracing symbol references |
+| `serena_get_symbols_overview` | Get file structure before reading | Understanding file layout |
+| `serena_search_for_pattern` | Regex content search | Finding code patterns |
+| `serena_read_memory` | Read project memory bank | Session start, conventions |
+| `serena_list_memories` | List available memories | Finding relevant memories |
+
+### Fallback Rule
+Only fall back to `read`, `grep`, or `glob` when Serena is unavailable or returns insufficient results. **Document why** when doing so.
+
+## Code Modification — YOU MUST USE SERENA WRITE TOOLS
+
+**NEVER** use `edit` or `write` tools for code modifications. **ALWAYS** use Serena write tools. They understand code structure and update references automatically.
+
+### Mandatory Serena Tools for Modification
+| Tool | Purpose |
+|------|---------|
+| `serena_replace_content` | Inline changes with regex precision |
+| `serena_replace_symbol_body` | Replace function/class body, preserve signature |
+| `serena_insert_after_symbol` | Insert after existing symbols |
+| `serena_insert_before_symbol` | Insert before existing symbols |
+| `serena_rename_symbol` | Rename across entire codebase |
+| `serena_safe_delete_symbol` | Delete when no references exist |
+
+### Fallback Rule
+Only fall back to `edit`/`write` tools when Serena is unavailable or for non-code files.
+
+---
+
 ## Project Overview
 
 BearUang is a monorepo containing a backend API and a frontend SPA:
@@ -26,45 +71,6 @@ BearUang is a monorepo containing a backend API and a frontend SPA:
 - **Tables**: TanStack Table
 - **Auth client**: better-auth/react + @elysiajs/eden (type-safe API client)
 - **Linting**: ESLint (@tanstack/eslint-config) + Prettier
-- **Testing**: Vitest + @testing-library/react + jsdom
-
-## Project Structure
-
-```
-bearuang/
-├── packages/
-│   ├── backend/
-│   │   ├── src/
-│   │   │   ├── generated/     # Prisma generated client (git-ignored)
-│   │   │   ├── integrations/  # External service integrations (auth, prisma)
-│   │   │   ├── libraries/     # Shared utilities and helpers
-│   │   │   ├── plugins/       # Elysia plugins and middleware
-│   │   │   └── index.ts       # Application entry point
-│   │   ├── prisma/
-│   │   │   ├── schema.prisma  # Database schema
-│   │   │   └── migrations/
-│   │   └── prisma.config.ts
-│   └── frontend/
-│       ├── src/
-│       │   ├── components/    # React components
-│       │   │   ├── ui/        # shadcn/ui primitives (button, input, label, checkbox)
-│       │   │   └── layouts/   # Page layout components (auth-layout)
-│       │   ├── routes/        # TanStack file-based routes
-│       │   │   ├── __root.tsx # Root layout
-│       │   │   ├── index.tsx  # Home page
-│       │   │   ├── signin.tsx # Sign in page
-│       │   │   └── signup.tsx # Sign up page
-│       │   ├── lib/           # Shared libraries
-│       │   │   ├── api.ts     # Eden API client (type-safe backend connection)
-│       │   │   ├── auth-client.ts  # better-auth client with org + API key plugins
-│       │   │   └── utils.ts   # cn() utility (clsx + tailwind-merge)
-│       │   ├── router.tsx     # TanStack router configuration
-│       │   ├── routeTree.gen.ts  # Auto-generated route tree (do not edit)
-│       │   └── styles.css     # Global styles + Tailwind + shadcn theme
-│       └── dist/
-├── docker-compose.yml
-└── package.json
-```
 
 ## Development Commands
 
@@ -99,10 +105,6 @@ bun run preview             # Preview production build
 bun run lint                # Run ESLint
 bun run format              # Run Prettier (check only)
 bun run check               # Run Prettier (fix) + ESLint (fix)
-bun run test                # Run all tests (vitest run, single run)
-bun vitest                  # Run tests in watch mode
-bun vitest run src/path/to/file.test.ts   # Run a single test file
-bun vitest run -t "test name pattern"     # Run tests matching name pattern
 ```
 
 ### Database Setup
@@ -235,23 +237,10 @@ bun run db:generate          # Generate Prisma client
 - After completing a feature, review your own changes as if you were a code reviewer — check for missed edge cases, unused imports, and consistency with surrounding code.
 
 ### Codebase Exploration
-- **MUST use `serena` MCP for all code exploration** — never use `read`, `grep`, or `glob` as your first approach to exploring code. Serena provides symbol-level intelligence that basic text search cannot match.
-- **MUST first activate the project** using `serena_activate_project` with `project: "bearuang"` or the absolute path `/home/hebot/bearuang` before using any serena tools.
-- Use `serena_find_symbol` for locating specific functions, classes, or variables by name path pattern.
-- Use `serena_find_referencing_symbols` to find all usages of a symbol across the codebase.
-- Use `serena_get_symbols_overview` to understand the structure of a file before diving in.
-- Use `serena_search_for_pattern` for content search when you need regex-style pattern matching.
-- **Check `serena_read_memory` at the start of each session** for project-specific patterns, conventions, and cross-module knowledge that has been previously captured. Use `serena_write_memory` to persist important findings (module patterns, dependency rules, coding conventions) at the end of a productive session.
-- Only fall back to `read`, `grep`, and `glob` when serena is unavailable or returns insufficient results — document why when doing so.
+**See the MANDATORY SERENA MCP TOOLS section at the top of this document for required exploration tools.** The rules there are non-negotiable and supersede any conflicting instructions.
 
 ### Code Modification
-- **MUST use serena write tools for all code modifications** — they understand code structure and update references automatically, unlike text-based `edit`/`write` tools.
-- Use `serena_replace_content` for inline content changes with regex precision.
-- Use `serena_replace_symbol_body` to replace a function/class body while preserving its signature and references.
-- Use `serena_insert_after_symbol` / `serena_insert_before_symbol` to add new symbols relative to existing ones.
-- Use `serena_rename_symbol` to rename a symbol across the entire codebase in one pass.
-- Use `serena_safe_delete_symbol` to delete a symbol only when it has no references.
-- Only fall back to basic `edit`/`write` tools when serena is unavailable or for non-code files.
+**See the MANDATORY SERENA MCP TOOLS section at the top of this document for required modification tools.** The rules there are non-negotiable and supersede any conflicting instructions.
 
 ### Subagent Strategy
 - Use subagents liberally to keep the main context window clean.
