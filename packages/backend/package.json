@@ -21,7 +21,7 @@
     "lint": "eslint",
     "format": "prettier --check .",
     "check": "prettier --write . && eslint --fix && tsc --noEmit",
-    "seed:stress": "bun run scripts/stress-seed.ts"
+    "load:stress": "k6 run scripts/stress-seed.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1018.0",
