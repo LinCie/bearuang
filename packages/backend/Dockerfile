@@ -1,5 +1,5 @@
 # --- Build stage: install deps, generate Prisma client, compile binary ---
-FROM oven/bun:1 AS build
+FROM docker.io/oven/bun:1 AS build
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ RUN bun build --compile \
     ./src/index.ts
 
 # --- Migrate stage: run prisma migrate deploy ---
-FROM oven/bun:1 AS migrate
+FROM docker.io/oven/bun:1 AS migrate
 
 WORKDIR /app
 
