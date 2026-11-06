@@ -2,7 +2,7 @@ name: bearuang-prod
 
 services:
   postgres:
-    image: postgres:18-alpine
+    image: docker.io/library/postgres:18-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -10,7 +10,7 @@ services:
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
     volumes:
-      - bearuang-prod-data:/var/lib/postgresql/data
+      - bearuang-prod-data:/var/lib/postgresql
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
       interval: 5s
