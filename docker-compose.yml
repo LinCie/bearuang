@@ -9,25 +9,26 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-a119259d4a6f1aa3c9f4f61658114894}
       POSTGRES_DB: ${POSTGRES_DB:-bearuang}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5435}:5432"
     volumes:
-      - bearuang-data:/var/lib/postgresql/data
+      - bearuang-data:/var/lib/postgresql
     restart: unless-stopped
 
+
   minio:
-    image: minio/minio:latest
+    image: cgr.dev/chainguard/minio:latest
     container_name: minio
     environment:
-      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-0b36760a936962694339b00777de7b0b}
-      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-8889ba14228a9f94345c8f542e39b3fb}
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:?Set S3_ACCESS_KEY in .env}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:?Set S3_SECRET_KEY in .env}
     ports:
       - "${MINIO_API_PORT:-9000}:9000"
       - "${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
       - minio-data:/data
-    command: server /data --console-address ':9001'
+    command: server /data --console-address ":9001"
     healthcheck:
-      test: ['CMD', 'mc', 'ready', 'local']
+      test: ["CMD", "mc", "ready", "local"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -35,17 +36,22 @@ services:
     restart: unless-stopped
 
   minio-init:
-    image: minio/mc:latest
+    image: cgr.dev/chainguard/minio-client:latest-dev
     depends_on:
       minio:
         condition: service_healthy
-    entrypoint: >
-      /bin/sh -c "
-        mc alias set local http://minio:9000 ${S3_ACCESS_KEY:-0b36760a936962694339b00777de7b0b} ${S3_SECRET_KEY:-8889ba14228a9f94345c8f542e39b3fb} &&
-        mc mb --ignore-existing local/bearuang &&
-        mc anonymous set download local/bearuang &&
-        exit 0
-      "
+    environment:
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:?Set S3_ACCESS_KEY in .env}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:?Set S3_SECRET_KEY in .env}
+      MC_CONFIG_DIR: /tmp/.mc
+    entrypoint:
+      - /bin/sh
+      - -ec
+      - |
+        mc alias set local http://minio:9000 "$$S3_ACCESS_KEY" "$$S3_SECRET_KEY"
+        mc mb --ignore-existing local/bearuang
+        mc anonymous set download local/bearuang
+
 
 volumes:
   bearuang-data:
